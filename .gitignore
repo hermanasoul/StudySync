@@ -1,0 +1,26 @@
+# Зависимости
+node_modules/
+npm-debug.log*
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+logs
+*.log
+
+# Build outputs
+dist/
+build/
+.client/build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
