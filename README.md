@@ -28,28 +28,30 @@
 ```bash
 git clone https://github.com/hermanasoul/StudySync.git
 cd StudySync
+```
 
 2. Установите зависимости всего проекта:
-\`\`\`bash
+```bash
 npm run install-all
-\`\`\`
+```
+
 
 3. Запустите оба приложения (бэкенд и фронтенд):
-\`\`\`bash
+```bash
 npm run dev
-\`\`\`
+```
 
 Или запускайте отдельно:
 
 **Бэкенд:**
-\`\`\`bash
+```bash
 npm run server
-\`\`\`
+```
 
 **Фронтенд:**
-\`\`\`bash
+```bash
 npm run client
-\`\`\`
+```
 
 Приложение будет доступно:
 - Фронтенд: http://localhost:3000
@@ -57,7 +59,7 @@ npm run client
 
 ## Структура проекта
 
-\`\`\`
+```
 StudySync/
 ├── client/          # React фронтенд
 ├── server/          # Node.js бэкенд
@@ -65,7 +67,7 @@ StudySync/
 ├── LICENSE
 ├── package.json
 └── README.md
-\`\`\`
+```
 
 ## Команда разработки
 
