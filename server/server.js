@@ -10,6 +10,9 @@ const app = express();
 app.use(cors()); // Разрешаем запросы с фронтенда
 app.use(express.json()); // Позволяем серверу понимать JSON
 
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/subjects', require('./routes/subjects'));
+
 // Nестовый маршрут
 app.get('/', (req, res) => {
   res.json({ 
