@@ -72,9 +72,10 @@
 }
 
 .btn-outline:hover {
-  background: white;
-  color: #667eea;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
   transform: translateY(-2px);
+  border-color: white;
 }
 
 @media (max-width: 768px) {
