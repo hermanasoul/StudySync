@@ -17,6 +17,7 @@ const Header: React.FC = () => {
         <nav className="nav">
           <Link to="/" className="nav-link">Главная</Link>
           {user && <Link to="/dashboard" className="nav-link">Личный кабинет</Link>}
+          {user && <Link to="/settings" className="nav-link">Настройки</Link>}
         </nav>
         <div className="header-buttons">
           {user ? (
