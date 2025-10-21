@@ -52,7 +52,7 @@
   min-width: 200px;
   display: inline-block;
   text-align: center;
-  border: none;
+  border: none; /* Убедимся что нет границы */
 }
 
 .btn-filled {
@@ -67,15 +67,17 @@
 }
 
 .btn-outline {
-  background: white;
-  color: #3b82f6;
+  background: white; /* Белый фон */
+  color: #3b82f6; /* Синий текст */
+  border: 2px solid white; /* Белая граница для надежности */
 }
 
 .btn-outline:hover {
-  background: #3b82f6;
-  color: white;
+  background: #3b82f6; /* Синий фон */
+  color: white; /* Белый текст */
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+  border-color: #3b82f6; /* Синяя граница при ховере */
 }
 
 @media (max-width: 768px) {
