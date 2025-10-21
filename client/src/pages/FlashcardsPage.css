@@ -1,0 +1,152 @@
+.flashcards-page {
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.flashcards-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 90px 20px 40px;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.page-header h1 {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 10px;
+}
+
+.page-header p {
+  font-size: 18px;
+  color: #6b7280;
+}
+
+.flashcard-content {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.flashcard {
+  text-align: center;
+}
+
+.card-counter {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.card-content {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.card-front h3, .card-back h3 {
+  color: #6b7280;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.card-front p, .card-back p {
+  font-size: 20px;
+  color: #1f2937;
+  line-height: 1.5;
+}
+
+.card-back {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #e5e7eb;
+}
+
+.card-actions {
+  margin-bottom: 25px;
+}
+
+.answer-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.btn-success, .btn-warning {
+  padding: 12px 24px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 120px;
+}
+
+.btn-success {
+  background: #10b981;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #059669;
+}
+
+.btn-warning {
+  background: #f59e0b;
+  color: white;
+}
+
+.btn-warning:hover {
+  background: #d97706;
+}
+
+.navigation-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.page-actions {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.btn-primary, .btn-outline {
+  padding: 12px 24px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  transition: all 0.2s;
+  display: inline-block;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #4f46e5;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #4338ca;
+}
+
+.btn-outline {
+  border: 2px solid #4f46e5;
+  color: #4f46e5;
+  background: transparent;
+}
+
+.btn-outline:hover {
+  background: #4f46e5;
+  color: white;
+}
