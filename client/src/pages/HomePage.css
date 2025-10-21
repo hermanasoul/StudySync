@@ -57,6 +57,7 @@
 .btn-filled {
   background: #fbbf24;
   color: #1f2937;
+  border: none;
 }
 
 .btn-filled:hover {
@@ -66,16 +67,17 @@
 }
 
 .btn-outline {
-  border: 2px solid white;
+  background: rgba(255, 255, 255, 0.1);
   color: white;
-  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .btn-outline:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
   transform: translateY(-2px);
-  border-color: white;
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
 }
 
 @media (max-width: 768px) {
