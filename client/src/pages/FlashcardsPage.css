@@ -150,3 +150,27 @@
   background: #4f46e5;
   color: white;
 }
+.progress-info {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.progress-bar-container {
+  background: #f3f4f6;
+  border-radius: 20px;
+  height: 20px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  background: #10b981;
+  height: 100%;
+  border-radius: 20px;
+  transition: width 0.3s ease;
+}
+
+.progress-info p {
+  color: #6b7280;
+  font-size: 14px;
+}
