@@ -20,7 +20,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Проверяем, есть ли сохраненный пользователь при загрузке
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
@@ -32,11 +31,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
-      // Используем email как имя для демо (часть до @)
+
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        const existingUser = JSON.parse(savedUser);
+        if (existingUser.email === email) {
+          setUser(existingUser);
+          return true;
+        }
+      }
+
       const userName = email.split('@')[0];
       const user: User = {
-        id: Date.now().toString(), // Уникальный ID
-        name: userName.charAt(0).toUpperCase() + userName.slice(1), // Первая буква заглавная
+        id: Date.now().toString(),
+        name: userName.charAt(0).toUpperCase() + userName.slice(1),
         email: email
       };
       
@@ -54,9 +62,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
-      // Сохраняем реальные данные пользователя
       const newUser: User = {
-        id: Date.now().toString(), // Уникальный ID
+        id: Date.now().toString(),
         name: name,
         email: email
       };
