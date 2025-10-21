@@ -4,7 +4,6 @@ import Header from '../components/Header';
 import './NotesPage.css';
 
 const NotesPage: React.FC = () => {
-  const { subjectId } = useParams<{ subjectId: string }>();
 
   return (
     <div className="notes-page">
