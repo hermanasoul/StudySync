@@ -50,6 +50,8 @@
   font-size: 18px;
   transition: all 0.3s ease;
   min-width: 200px;
+  display: inline-block;
+  text-align: center;
 }
 
 .btn-filled {
