@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
@@ -23,24 +23,24 @@ const LoginPage: React.FC = () => {
     setError('');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      const success = await login(formData.email, formData.password);
-      if (success) {
-        navigate('/dashboard');
-      } else {
-        setError('Неверный email или пароль');
-      }
-    } catch (err) {
-      setError('Произошла ошибка при входе');
-    } finally {
-      setLoading(false);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+  try {
+    const result = await login(formData.email, formData.password);
+    if (result.success) {
+      navigate('/dashboard');
+    } else {
+      setError(result.error || 'Неверный email или пароль. Проверьте данные.');
     }
-  };
+  } catch (err: any) {
+    console.error('Login error:', err);
+    setError('Ошибка сети. Проверьте подключение к серверу.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="login-page">
@@ -92,7 +92,7 @@ const LoginPage: React.FC = () => {
 
           <div className="login-footer">
             <p>
-              Нет аккаунта? <a href="/signup" className="link">Зарегистрироваться</a>
+              Нет аккаунта? <Link to="/signup" className="link">Зарегистрироваться</Link>
             </p>
           </div>
         </div>

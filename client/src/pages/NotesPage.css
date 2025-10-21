@@ -97,16 +97,14 @@
 }
 
 .btn-outline {
-  background: white !important;
-  color: #3b82f6 !important;
-  border: 2px solid #3b82f6 !important;
-  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.2) !important;
+  background: #3b82f6 !important;
+  color: white !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3) !important;
+  border: none !important;
 }
 
 .btn-outline:hover {
-  background: #3b82f6 !important;
-  color: white !important;
+  background: #2563eb !important;
   transform: translateY(-3px) !important;
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4) !important;
-  border-color: #3b82f6 !important;
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4) !important;
 }

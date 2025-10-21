@@ -61,27 +61,21 @@
 }
 
 .btn-primary {
-  background: #4f46e5;
-  color: white;
-  padding: 8px 20px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 500;
-  transition: background 0.2s;
+  background: #3b82f6 !important;
+  color: white !important;
+  padding: 8px 20px !important;
+  border-radius: 6px !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+  transition: all 0.2s !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3) !important;
 }
 
 .btn-primary:hover {
-  background: #4338ca;
-}
-
-@media (max-width: 768px) {
-  .nav {
-    display: none;
-  }
-  
-  .header-content {
-    padding: 0 15px;
-  }
+  background: #2563eb !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4) !important;
 }
 
 .user-menu {
@@ -108,4 +102,14 @@
 
 .btn-logout:hover {
   background: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .nav {
+    display: none;
+  }
+  
+  .header-content {
+    padding: 0 15px;
+  }
 }

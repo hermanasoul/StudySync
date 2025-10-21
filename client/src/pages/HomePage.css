@@ -56,22 +56,19 @@
   cursor: pointer !important;
   font-family: inherit !important;
   line-height: 1.5 !important;
+  outline: none !important;
 }
 
-/* Убираем ВСЕ обводки навсегда */
 .btn:focus,
-.btn:active,
-.btn:visited,
-.btn:link {
+.btn:active {
   outline: none !important;
   box-shadow: none !important;
-  border: none !important;
-  text-decoration: none !important;
 }
 
 .btn-filled {
   background: #fbbf24 !important;
   color: #1f2937 !important;
+  box-shadow: 0 4px 14px rgba(251, 191, 36, 0.3) !important;
 }
 
 .btn-filled:hover {
@@ -81,16 +78,15 @@
 }
 
 .btn-outline {
-  background: white !important;
-  color: #3b82f6 !important;
-  /* НИКАКИХ теней и обводок в обычном состоянии */
+  background: #3b82f6 !important;
+  color: white !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3) !important;
 }
 
 .btn-outline:hover {
-  background: #3b82f6 !important;
-  color: white !important;
+  background: #2563eb !important;
   transform: translateY(-3px) !important;
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4) !important;
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4) !important;
 }
 
 @media (max-width: 768px) {
