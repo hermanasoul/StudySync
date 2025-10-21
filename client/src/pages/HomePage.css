@@ -67,9 +67,8 @@
 }
 
 .btn-outline {
-  background: white; /* Белый фон */
-  color: #3b82f6; /* Синий текст */
-  border: 2px solid white; /* Белая граница для надежности */
+  color: #ffffff;
+  background: #4f46e5;
 }
 
 .btn-outline:hover {
@@ -77,7 +76,6 @@
   color: white; /* Белый текст */
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
-  border-color: #3b82f6; /* Синяя граница при ховере */
 }
 
 @media (max-width: 768px) {
