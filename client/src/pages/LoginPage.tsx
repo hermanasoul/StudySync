@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
+import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
 
 const LoginPage: React.FC = () => {
@@ -8,20 +9,37 @@ const LoginPage: React.FC = () => {
     email: '',
     password: ''
   });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+    setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempt:', formData);
+    setLoading(true);
+    setError('');
 
-    navigate('/dashboard');
+    try {
+      const success = await login(formData.email, formData.password);
+      if (success) {
+        navigate('/dashboard');
+      } else {
+        setError('Неверный email или пароль');
+      }
+    } catch (err) {
+      setError('Произошла ошибка при входе');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -31,6 +49,8 @@ const LoginPage: React.FC = () => {
       <div className="login-container">
         <div className="login-form">
           <h2>Вход в StudySync</h2>
+          
+          {error && <div className="error-message">{error}</div>}
           
           <form onSubmit={handleSubmit}>
             <div className="form-group">
@@ -43,6 +63,7 @@ const LoginPage: React.FC = () => {
                 onChange={handleChange}
                 placeholder="your@email.com"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -56,17 +77,22 @@ const LoginPage: React.FC = () => {
                 onChange={handleChange}
                 placeholder="Ваш пароль"
                 required
+                disabled={loading}
               />
             </div>
 
-            <button type="submit" className="login-btn">
-              Войти
+            <button 
+              type="submit" 
+              className="login-btn"
+              disabled={loading}
+            >
+              {loading ? 'Вход...' : 'Войти'}
             </button>
           </form>
 
           <div className="login-footer">
             <p>
-              Нет аккаунта? <Link to="/signup" className="link">Зарегистрироваться</Link>
+              Нет аккаунта? <a href="/signup" className="link">Зарегистрироваться</a>
             </p>
           </div>
         </div>
