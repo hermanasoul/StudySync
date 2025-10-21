@@ -1,18 +1,19 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Header.css';
 
 const Header: React.FC = () => {
   return (
     <header className="header">
       <div className="header-content">
-        <a href="/" className="logo">StudySync</a>
+        <Link to="/" className="logo">StudySync</Link>
         <nav className="nav">
-          <a href="/" className="nav-link">Главная</a>
-          <a href="/dashboard" className="nav-link">Личный кабинет</a>
+          <Link to="/" className="nav-link">Главная</Link>
+          <Link to="/dashboard" className="nav-link">Личный кабинет</Link>
         </nav>
         <div className="header-buttons">
-          <a href="/login" className="btn-login">Вход</a>
-          <a href="/signup" className="btn-primary">Регистрация</a>
+          <Link to="/login" className="btn-login">Вход</Link>
+          <Link to="/signup" className="btn-primary">Регистрация</Link>
         </div>
       </div>
     </header>
