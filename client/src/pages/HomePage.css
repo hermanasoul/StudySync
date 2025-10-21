@@ -43,39 +43,54 @@
 }
 
 .btn {
-  padding: 15px 30px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 18px;
-  transition: all 0.3s ease;
-  min-width: 200px;
-  display: inline-block;
-  text-align: center;
-  border: none; /* Убедимся что нет границы */
+  padding: 16px 32px !important;
+  border-radius: 10px !important;
+  text-decoration: none !important;
+  font-weight: 700 !important;
+  font-size: 18px !important;
+  transition: all 0.3s ease !important;
+  min-width: 220px !important;
+  display: inline-block !important;
+  text-align: center !important;
+  border: none !important;
+  cursor: pointer !important;
+  font-family: inherit !important;
+  line-height: 1.5 !important;
+}
+
+/* Убираем ВСЕ обводки навсегда */
+.btn:focus,
+.btn:active,
+.btn:visited,
+.btn:link {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  text-decoration: none !important;
 }
 
 .btn-filled {
-  background: #fbbf24;
-  color: #1f2937;
+  background: #fbbf24 !important;
+  color: #1f2937 !important;
 }
 
 .btn-filled:hover {
-  background: #f59e0b;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
+  background: #f59e0b !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 25px rgba(251, 191, 36, 0.4) !important;
 }
 
 .btn-outline {
-  color: #ffffff;
-  background: #4f46e5;
+  background: white !important;
+  color: #3b82f6 !important;
+  /* НИКАКИХ теней и обводок в обычном состоянии */
 }
 
 .btn-outline:hover {
-  background: #3b82f6; /* Синий фон */
-  color: white; /* Белый текст */
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+  background: #3b82f6 !important;
+  color: white !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4) !important;
 }
 
 @media (max-width: 768px) {
@@ -93,7 +108,9 @@
   }
   
   .btn {
-    width: 100%;
-    max-width: 300px;
+    width: 100% !important;
+    max-width: 280px !important;
+    font-size: 16px !important;
+    padding: 14px 28px !important;
   }
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import './HomePage.css';
 
@@ -6,6 +7,7 @@ const HomePage: React.FC = () => {
   return (
     <div className="home-page">
       <Header />
+      
       <div className="hero">
         <div className="hero-content">
           <h1 className="hero-title">
@@ -16,12 +18,12 @@ const HomePage: React.FC = () => {
             StudySync делает обучение социальным и продуктивным.
           </p>
           <div className="button-group">
-            <a href="/signup" className="btn btn-filled">
+            <Link to="/signup" className="btn btn-filled">
               Начать бесплатно
-            </a>
-            <a href="/login" className="btn btn-outline">
+            </Link>
+            <Link to="/login" className="btn btn-outline">
               Уже есть аккаунт
-            </a>
+            </Link>
           </div>
         </div>
       </div>
