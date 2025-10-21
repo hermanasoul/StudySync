@@ -1,19 +1,35 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import './FlashcardsPage.css';
 
+const subjectFlashcards: Record<string, Array<{id: number, question: string, answer: string}>> = {
+  '1': [
+    { id: 1, question: 'Что такое фотосинтез?', answer: 'Процесс преобразования света в химическую энергию растениями' },
+    { id: 2, question: 'Какие органеллы участвуют в фотосинтезе?', answer: 'Хлоропласты' },
+    { id: 3, question: 'Какие газы участвуют в фотосинтезе?', answer: 'CO₂ поглощается, O₂ выделяется' }
+  ],
+  '2': [
+    { id: 1, question: 'Что такое pH?', answer: 'Мера кислотности или щелочности раствора' },
+    { id: 2, question: 'Формула воды?', answer: 'H₂O' },
+    { id: 3, question: 'Что такое ион?', answer: 'Атом или молекула с электрическим зарядом' }
+  ],
+  '3': [
+    { id: 1, question: 'Формула квадратного уравнения?', answer: 'ax² + bx + c = 0' },
+    { id: 2, question: 'Что такое производная?', answer: 'Мера изменения функции относительно её аргумента' },
+    { id: 3, question: 'Чему равно π?', answer: '≈ 3.14159' }
+  ]
+};
+
 const FlashcardsPage: React.FC = () => {
+  const { subjectId } = useParams<{ subjectId: string }>();
   const [currentCard, setCurrentCard] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [knownCards, setKnownCards] = useState<number[]>([]);
 
-  // Демо-карточки
-  const flashcards = [
-    { id: 1, question: 'Что такое фотосинтез?', answer: 'Процесс преобразования света в химическую энергию растениями' },
-    { id: 2, question: 'Какие органеллы участвуют в фотосинтезе?', answer: 'Хлоропласты' },
-    { id: 3, question: 'Какие газы участвуют в фотосинтезе?', answer: 'CO₂ поглощается, O₂ выделяется' }
-  ];
+  const flashcards = subjectId && subjectFlashcards[subjectId] 
+    ? subjectFlashcards[subjectId] 
+    : subjectFlashcards['1'];
 
   const nextCard = () => {
     setCurrentCard((prev) => (prev + 1) % flashcards.length);
