@@ -4,6 +4,8 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import DashboardPage from './pages/DashboardPage';
+import NotesPage from './pages/NotesPage';
+import FlashcardsPage from './pages/FlashcardsPage';
 import './App.css';
 
 function App() {
@@ -15,6 +17,8 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/subjects/:subjectId" element={<NotesPage />} />
+          <Route path="/subjects/:subjectId/flashcards" element={<FlashcardsPage />} />
         </Routes>
       </div>
     </Router>
