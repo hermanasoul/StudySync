@@ -20,6 +20,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Проверяем, есть ли сохраненный пользователь при загрузке
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
@@ -31,14 +32,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
-      const mockUser: User = {
-        id: '1',
-        name: 'Тестовый Пользователь',
+      // Используем email как имя для демо (часть до @)
+      const userName = email.split('@')[0];
+      const user: User = {
+        id: Date.now().toString(), // Уникальный ID
+        name: userName.charAt(0).toUpperCase() + userName.slice(1), // Первая буква заглавная
         email: email
       };
       
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      setUser(user);
+      localStorage.setItem('user', JSON.stringify(user));
       return true;
     } catch (error) {
       console.error('Login error:', error);
@@ -51,14 +54,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
-      const mockUser: User = {
-        id: '1',
+      // Сохраняем реальные данные пользователя
+      const newUser: User = {
+        id: Date.now().toString(), // Уникальный ID
         name: name,
         email: email
       };
       
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      setUser(newUser);
+      localStorage.setItem('user', JSON.stringify(newUser));
       return true;
     } catch (error) {
       console.error('Registration error:', error);
