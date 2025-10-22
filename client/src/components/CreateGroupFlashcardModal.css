@@ -58,7 +58,7 @@
   color: #374151;
 }
 
-.group-form {
+.flashcard-form {
   padding: 24px;
 }
 
@@ -73,7 +73,6 @@
   color: #374151;
 }
 
-.form-group input,
 .form-group textarea,
 .form-group select {
   width: 100%;
@@ -86,7 +85,6 @@
   resize: vertical;
 }
 
-.form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
@@ -95,34 +93,6 @@
 
 .form-group textarea {
   min-height: 80px;
-}
-
-.checkbox-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 0;
-}
-
-.checkbox-label input {
-  width: auto;
-  margin: 0;
-}
-
-.checkbox-description {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 0;
-  line-height: 1.4;
 }
 
 .error-message {
@@ -199,55 +169,4 @@
     min-width: auto !important;
     width: 100%;
   }
-}
-
-.input-hint {
-  font-size: 12px;
-  color: #6b7280;
-  margin-top: 4px;
-}
-
-.error-message strong {
-  display: block;
-  margin-bottom: 4px;
-}
-
-.checkbox-group {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 15px;
-  background: #f8fafc;
-  border-radius: 8px;
-  border: 2px solid #e5e7eb;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  cursor: pointer;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 0;
-  padding: 8px 0;
-  font-size: 16px;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 22px;
-  height: 22px;
-  margin: 0;
-  cursor: pointer;
-  accent-color: #4f46e5;
-  transform: scale(1.3);
-  border-radius: 4px;
-}
-
-.checkbox-description {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 0;
-  line-height: 1.5;
-  padding-left: 37px;
 }

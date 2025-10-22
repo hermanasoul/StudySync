@@ -42,63 +42,28 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
         if (response.data.subjects.length > 0) {
           setSubjectId(response.data.subjects[0]._id);
         }
-      } else {
-        // Если API не работает, используем mock данные
-        const mockSubjects: Subject[] = [
-          {
-            _id: '1',
-            name: 'Биология',
-            description: 'Изучение живых организмов',
-            color: 'green'
-          },
-          {
-            _id: '2', 
-            name: 'Химия',
-            description: 'Изучение веществ и их свойств',
-            color: 'blue'
-          },
-          {
-            _id: '3',
-            name: 'Математика',
-            description: 'Изучение чисел и вычислений',
-            color: 'purple'
-          }
-        ];
-        setSubjects(mockSubjects);
-        setSubjectId(mockSubjects[0]._id);
       }
     } catch (error) {
       console.error('Error loading subjects:', error);
-      // Fallback на mock данные при ошибке
-      const mockSubjects: Subject[] = [
-        {
-          _id: '1',
-          name: 'Биология',
-          description: 'Изучение живых организмов',
-          color: 'green'
-        },
-        {
-          _id: '2',
-          name: 'Химия',
-          description: 'Изучение веществ и их свойств', 
-          color: 'blue'
-        },
-        {
-          _id: '3',
-          name: 'Математика',
-          description: 'Изучение чисел и вычислений',
-          color: 'purple'
-        }
-      ];
-      setSubjects(mockSubjects);
-      setSubjectId(mockSubjects[0]._id);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !subjectId) {
-      setError('Заполните название и выберите предмет');
+    
+    // Более строгая валидация
+    if (!name.trim()) {
+      setError('Введите название группы');
+      return;
+    }
+    
+    if (!subjectId) {
+      setError('Выберите предмет');
+      return;
+    }
+
+    if (name.trim().length < 2) {
+      setError('Название группы должно содержать минимум 2 символа');
       return;
     }
 
@@ -109,7 +74,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
       await groupsAPI.create({
         name: name.trim(),
         description: description.trim(),
-        subjectId: subjectId, // Теперь передаем корректный ObjectId
+        subjectId: subjectId,
         isPublic,
         settings: {
           allowMemberInvites: false,
@@ -118,6 +83,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
         }
       });
 
+      // Сброс формы
       setName('');
       setDescription('');
       setSubjectId(subjects.length > 0 ? subjects[0]._id : '');
@@ -126,7 +92,8 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
       onClose();
     } catch (err: any) {
       console.error('Create group error:', err);
-      setError(err.response?.data?.error || 'Ошибка при создании группы');
+      const errorMessage = err.response?.data?.error || 'Ошибка при создании группы';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -152,7 +119,11 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="group-form">
-          {error && <div className="error-message">{error}</div>}
+          {error && (
+            <div className="error-message">
+              <strong>Ошибка:</strong> {error}
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="name">Название группы *</label>
@@ -163,7 +134,12 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               onChange={(e) => setName(e.target.value)}
               placeholder="Введите название группы..."
               required
+              minLength={2}
+              maxLength={50}
             />
+            <div className="input-hint">
+              Минимум 2 символа, максимум 50 символов
+            </div>
           </div>
 
           <div className="form-group">
@@ -174,7 +150,11 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Опишите цель группы..."
               rows={3}
+              maxLength={200}
             />
+            <div className="input-hint">
+              {description.length}/200 символов
+            </div>
           </div>
 
           <div className="form-group">
@@ -185,6 +165,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               onChange={(e) => setSubjectId(e.target.value)}
               required
             >
+              <option value="">Выберите предмет</option>
               {subjects.map((subject) => (
                 <option key={subject._id} value={subject._id}>
                   {subject.name}
@@ -220,7 +201,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
             <button
               type="submit"
               className="btn-primary"
-              disabled={loading}
+              disabled={loading || !name.trim() || !subjectId}
             >
               {loading ? 'Создание...' : 'Создать группу'}
             </button>

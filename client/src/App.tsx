@@ -10,6 +10,7 @@ import NotesPage from './pages/NotesPage';
 import FlashcardsPage from './pages/FlashcardsPage';
 import SettingsPage from './pages/SettingsPage';
 import GroupsPage from './pages/GroupsPage';
+import GroupPage from './pages/GroupPage';
 import './App.css';
 
 function App() {
@@ -47,6 +48,11 @@ function App() {
             <Route path="/groups" element={
               <ProtectedRoute>
                 <GroupsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/groups/:groupId" element={
+              <ProtectedRoute>
+                <GroupPage />
               </ProtectedRoute>
             } />
           </Routes>
