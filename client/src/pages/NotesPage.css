@@ -265,3 +265,47 @@
     align-self: flex-end;
   }
 }
+
+.note-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-edit {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s;
+}
+
+.btn-edit:hover {
+  background: #2563eb;
+}
+
+.btn-delete {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+}

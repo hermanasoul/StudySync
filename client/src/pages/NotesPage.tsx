@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import CreateNoteModal from '../components/CreateNoteModal';
+import EditNoteModal from '../components/EditNoteModal';
+import ConfirmModal from '../components/ConfirmModal';
 import './NotesPage.css';
 
 interface Note {
@@ -23,6 +25,9 @@ const NotesPage: React.FC = () => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [error, setError] = useState('');
 
   const fetchWithAuth = async (endpoint: string, options: RequestInit = {}): Promise<Response> => {
@@ -81,18 +86,39 @@ const NotesPage: React.FC = () => {
     }
   };
 
-  const handleDeleteNote = async (noteId: string) => {
-    if (!window.confirm('Вы уверены, что хотите удалить эту заметку?')) {
-      return;
-    }
-
+  const handleEditNote = async (noteId: string, noteData: { title: string; content: string; tags: string[] }) => {
     try {
       const response = await fetchWithAuth(`/notes/${noteId}`, {
+        method: 'PUT',
+        body: JSON.stringify(noteData)
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        setShowEditModal(false);
+        setSelectedNote(null);
+        await loadNotes();
+      } else {
+        setError(data.error || 'Failed to update note');
+      }
+    } catch (error) {
+      console.error('Error updating note:', error);
+      setError('Network error while updating note');
+    }
+  };
+
+  const handleDeleteNote = async () => {
+    if (!selectedNote) return;
+
+    try {
+      const response = await fetchWithAuth(`/notes/${selectedNote._id}`, {
         method: 'DELETE'
       });
       const data = await response.json();
       
       if (data.success) {
+        setShowDeleteModal(false);
+        setSelectedNote(null);
         await loadNotes();
       } else {
         setError(data.error || 'Failed to delete note');
@@ -101,6 +127,23 @@ const NotesPage: React.FC = () => {
       console.error('Error deleting note:', error);
       setError('Network error while deleting note');
     }
+  };
+
+  const openEditModal = (note: Note) => {
+    setSelectedNote(note);
+    setShowEditModal(true);
+  };
+
+  const openDeleteModal = (note: Note) => {
+    setSelectedNote(note);
+    setShowDeleteModal(true);
+  };
+
+  const closeModals = () => {
+    setShowCreateModal(false);
+    setShowEditModal(false);
+    setShowDeleteModal(false);
+    setSelectedNote(null);
   };
 
   useEffect(() => {
@@ -173,8 +216,15 @@ const NotesPage: React.FC = () => {
                     <h3 className="note-title">{note.title}</h3>
                     <div className="note-actions">
                       <button 
+                        className="btn-edit"
+                        onClick={() => openEditModal(note)}
+                        title="Редактировать заметку"
+                      >
+                        ✎
+                      </button>
+                      <button 
                         className="btn-delete"
-                        onClick={() => handleDeleteNote(note._id)}
+                        onClick={() => openDeleteModal(note)}
                         title="Удалить заметку"
                       >
                         ×
@@ -222,9 +272,26 @@ const NotesPage: React.FC = () => {
 
       <CreateNoteModal
         isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
+        onClose={closeModals}
         onSubmit={handleCreateNote}
         subjectId={subjectId || ''}
+      />
+
+      <EditNoteModal
+        isOpen={showEditModal}
+        onClose={closeModals}
+        onSubmit={handleEditNote}
+        note={selectedNote}
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={closeModals}
+        onConfirm={handleDeleteNote}
+        title="Удаление заметки"
+        message="Вы уверены, что хотите удалить эту заметку? Это действие нельзя отменить."
+        confirmText="Удалить"
+        cancelText="Отмена"
       />
     </div>
   );
