@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
-import { subjectsAPI } from '../services/api';
 import './DashboardPage.css';
 
 interface Subject {
-  id: number;
+  id: string;
   name: string;
   description: string;
   color: string;
@@ -16,6 +15,19 @@ const DashboardPage: React.FC = () => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchWithAuth = async (endpoint: string, options: RequestInit = {}): Promise<Response> => {
+    const token = localStorage.getItem('studysync_token');
+    const config = {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...options.headers,
+      },
+    };
+    return await fetch(`http://localhost:5000/api${endpoint}`, config);
+  };
+
   useEffect(() => {
     loadSubjects();
   }, []);
@@ -23,23 +35,56 @@ const DashboardPage: React.FC = () => {
   const loadSubjects = async () => {
     try {
       setLoading(true);
+      const response = await fetchWithAuth('/subjects');
+      const data = await response.json();
+      
+      if (data.success) {
+        setSubjects(data.subjects);
+      } else {
+        const mockSubjects: Subject[] = [
+          {
+            id: '1',
+            name: 'Биология',
+            description: 'Изучение живых организмов',
+            color: 'green',
+            progress: 75
+          },
+          {
+            id: '2',
+            name: 'Химия',
+            description: 'Изучение веществ и их свойств',
+            color: 'blue',
+            progress: 40
+          },
+          {
+            id: '3',
+            name: 'Математика',
+            description: 'Изучение чисел и вычислений',
+            color: 'purple',
+            progress: 20
+          }
+        ];
+        setSubjects(mockSubjects);
+      }
+    } catch (error) {
+      console.error('Error loading subjects:', error);
       const mockSubjects: Subject[] = [
         {
-          id: 1,
+          id: '1',
           name: 'Биология',
           description: 'Изучение живых организмов',
           color: 'green',
           progress: 75
         },
         {
-          id: 2,
+          id: '2',
           name: 'Химия',
           description: 'Изучение веществ и их свойств',
           color: 'blue',
           progress: 40
         },
         {
-          id: 3,
+          id: '3',
           name: 'Математика',
           description: 'Изучение чисел и вычислений',
           color: 'purple',
@@ -47,8 +92,6 @@ const DashboardPage: React.FC = () => {
         }
       ];
       setSubjects(mockSubjects);
-    } catch (error) {
-      console.error('Error loading subjects:', error);
     } finally {
       setLoading(false);
     }
@@ -113,7 +156,7 @@ const DashboardPage: React.FC = () => {
             <div className="stat-card">
               <div className="stat-icon">📚</div>
               <div className="stat-info">
-                <div className="stat-number">3</div>
+                <div className="stat-number">{subjects.length}</div>
                 <div className="stat-label">Предмета</div>
               </div>
             </div>
@@ -121,7 +164,9 @@ const DashboardPage: React.FC = () => {
             <div className="stat-card">
               <div className="stat-icon">🎯</div>
               <div className="stat-info">
-                <div className="stat-number">45%</div>
+                <div className="stat-number">
+                  {Math.round(subjects.reduce((acc, subject) => acc + subject.progress, 0) / subjects.length)}%
+                </div>
                 <div className="stat-label">Общий прогресс</div>
               </div>
             </div>

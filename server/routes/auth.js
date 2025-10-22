@@ -1,24 +1,10 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const auth = require('../middleware/auth');
 const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
-
-const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ success: false, error: 'Access denied. No token provided.' });
-  }
-  const token = authHeader.split(' ')[1];
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    res.status(403).json({ success: false, error: 'Invalid token.' });
-  }
-};
 
 router.post('/register', async (req, res) => {
   try {
@@ -92,20 +78,16 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/me', verifyToken, async (req, res) => {
+router.get('/me', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
-    if (!user) {
-      return res.status(404).json({ success: false, error: 'User not found.' });
-    }
     res.json({
       success: true,
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatarUrl: user.avatarUrl
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role,
+        avatarUrl: req.user.avatarUrl
       }
     });
   } catch (error) {
@@ -114,20 +96,22 @@ router.get('/me', verifyToken, async (req, res) => {
   }
 });
 
-router.put('/user', verifyToken, async (req, res) => {
+router.put('/user', auth, async (req, res) => {
   try {
     const { name } = req.body;
     if (!name) {
       return res.status(400).json({ success: false, error: 'Name is required.' });
     }
     const user = await User.findByIdAndUpdate(
-      req.user.id,
+      req.user._id,
       { name },
       { new: true, runValidators: true }
     ).select('-password');
+    
     if (!user) {
       return res.status(404).json({ success: false, error: 'User not found.' });
     }
+    
     res.json({
       success: true,
       message: 'Username updated successfully.',

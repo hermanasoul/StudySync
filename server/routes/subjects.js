@@ -1,46 +1,97 @@
 const express = require('express');
+const Subject = require('../models/Subject');
+const auth = require('../middleware/auth');
 const router = express.Router();
 
-// GET /api/subjects - получить все предметы
-router.get('/', (req, res) => {
-  res.json({
-    message: 'List of all subjects',
-    subjects: [
-      {
-        id: 1,
-        name: 'Biology',
-        description: 'Study of living organisms',
-        color: 'green-500',
-        progress: 75
-      },
-      {
-        id: 2, 
-        name: 'Chemistry',
-        description: 'Study of matter and its properties',
-        color: 'blue-500',
-        progress: 40
-      },
-      {
-        id: 3,
-        name: 'Mathematics', 
-        description: 'Study of numbers and calculations',
-        color: 'purple-500',
-        progress: 20
-      }
-    ]
-  });
+router.get('/', auth, async (req, res) => {
+  try {
+    const subjects = await Subject.find({
+      $or: [
+        { createdBy: req.user._id },
+        { isPublic: true }
+      ]
+    }).sort({ name: 1 });
+
+    const formattedSubjects = subjects.map(subject => ({
+      id: subject._id,
+      name: subject.name,
+      description: subject.description,
+      color: subject.color,
+      icon: subject.icon,
+      progress: 0
+    }));
+
+    res.json({
+      success: true,
+      subjects: formattedSubjects
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
 });
 
-// GET /api/subjects/:id - получить предмет по ID
-router.get('/:id', (req, res) => {
-  res.json({
-    message: `Subject details for ID: ${req.params.id}`,
-    subject: {
-      id: req.params.id,
-      name: 'Biology',
-      description: 'Study of living organisms'
+router.get('/:id', auth, async (req, res) => {
+  try {
+    const subject = await Subject.findOne({
+      _id: req.params.id,
+      $or: [
+        { createdBy: req.user._id },
+        { isPublic: true }
+      ]
+    });
+
+    if (!subject) {
+      return res.status(404).json({
+        success: false,
+        error: 'Subject not found'
+      });
     }
-  });
+
+    res.json({
+      success: true,
+      subject: {
+        id: subject._id,
+        name: subject.name,
+        description: subject.description,
+        color: subject.color,
+        icon: subject.icon
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/', auth, async (req, res) => {
+  try {
+    const subject = new Subject({
+      ...req.body,
+      createdBy: req.user._id
+    });
+
+    await subject.save();
+    res.status(201).json({
+      success: true,
+      subject: {
+        id: subject._id,
+        name: subject.name,
+        description: subject.description,
+        color: subject.color,
+        icon: subject.icon
+      }
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
 });
 
 module.exports = router;

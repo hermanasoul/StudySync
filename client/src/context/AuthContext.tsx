@@ -33,23 +33,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     if (initialized) return;
-    const token = localStorage.getItem('studysync_token');
-    if (token) {
-      fetchMe(token).then((currentUser) => {
-        if (currentUser) {
-          setUser(currentUser);
-        } else {
+    
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('studysync_token');
+      if (token) {
+        try {
+          const currentUser = await fetchMe();
+          if (currentUser) {
+            setUser(currentUser);
+          } else {
+            localStorage.removeItem('studysync_token');
+            localStorage.removeItem('studysync_user');
+          }
+        } catch (error) {
           localStorage.removeItem('studysync_token');
           localStorage.removeItem('studysync_user');
         }
-      }).catch(() => {
-        localStorage.removeItem('studysync_token');
-        localStorage.removeItem('studysync_user');
-      });
-    }
-    setInitialized(true);
-    setLoading(false);
-  }, []);
+      }
+      setInitialized(true);
+      setLoading(false);
+    };
+
+    initializeAuth();
+  }, [initialized]);
 
   const fetchWithAuth = async (endpoint: string, options: RequestInit = {}): Promise<Response> => {
     const token = localStorage.getItem('studysync_token');
@@ -64,7 +70,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return await fetch(`${API_URL}${endpoint}`, config);
   };
 
-  const fetchMe = async (token: string): Promise<User | null> => {
+  const fetchMe = async (): Promise<User | null> => {
     try {
       const response = await fetchWithAuth('/auth/me');
       if (!response.ok) return null;
@@ -150,16 +156,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     } catch (error: any) {
       console.error('Login network error:', error);
-      return { success: false, error: error.message || 'Network error (server down?)' };
+      return { success: false, error: error.message || 'Network error' };
     }
   };
 
   const logout = async () => {
     try {
-      const token = localStorage.getItem('studysync_token');
-      if (token) {
-        await fetchWithAuth('/auth/logout', { method: 'POST' });
-      }
+      await fetchWithAuth('/auth/logout', { method: 'POST' });
     } catch (error) {
     } finally {
       setUser(null);
