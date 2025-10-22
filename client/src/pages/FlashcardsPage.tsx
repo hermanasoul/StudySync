@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import CreateFlashcardModal from '../components/CreateFlashcardModal';
 import EditFlashcardModal from '../components/EditFlashcardModal';
+import StudyCompleteModal from '../components/StudyCompleteModal';
 import { flashcardsAPI } from '../services/api';
 import './FlashcardsPage.css';
 
@@ -25,7 +26,9 @@ const FlashcardsPage: React.FC = () => {
   const [mode, setMode] = useState<'study' | 'review'>('study');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [editingFlashcard, setEditingFlashcard] = useState<Flashcard | null>(null);
+  const [studiedCards, setStudiedCards] = useState<string[]>([]);
 
   useEffect(() => {
     loadFlashcards();
@@ -40,10 +43,13 @@ const FlashcardsPage: React.FC = () => {
       
       const response = await endpoint;
       if (response.data.success) {
-        setFlashcards(response.data.flashcards);
+        const loadedFlashcards = response.data.flashcards;
+        setFlashcards(loadedFlashcards);
         setCurrentCard(0);
         setShowAnswer(false);
         setKnownCards([]);
+        setStudiedCards([]);
+        setShowCompleteModal(false);
       }
     } catch (error) {
       console.error('Error loading flashcards:', error);
@@ -53,13 +59,22 @@ const FlashcardsPage: React.FC = () => {
   };
 
   const nextCard = () => {
-    setCurrentCard((prev) => (prev + 1) % flashcards.length);
-    setShowAnswer(false);
+    const nextIndex = currentCard + 1;
+    
+    if (nextIndex >= flashcards.length) {
+      // Достигли конца - показываем модальное окно
+      setShowCompleteModal(true);
+    } else {
+      setCurrentCard(nextIndex);
+      setShowAnswer(false);
+    }
   };
 
   const prevCard = () => {
-    setCurrentCard((prev) => (prev - 1 + flashcards.length) % flashcards.length);
-    setShowAnswer(false);
+    if (currentCard > 0) {
+      setCurrentCard(currentCard - 1);
+      setShowAnswer(false);
+    }
   };
 
   const markAsKnown = async () => {
@@ -68,9 +83,17 @@ const FlashcardsPage: React.FC = () => {
     const currentFlashcard = flashcards[currentCard];
     try {
       await flashcardsAPI.markAsKnown(currentFlashcard._id);
+      
+      // Добавляем карточку в изученные
+      if (!studiedCards.includes(currentFlashcard._id)) {
+        setStudiedCards([...studiedCards, currentFlashcard._id]);
+      }
+      
+      // Добавляем в известные если еще не добавлена
       if (!knownCards.includes(currentFlashcard._id)) {
         setKnownCards([...knownCards, currentFlashcard._id]);
       }
+      
       nextCard();
     } catch (error) {
       console.error('Error marking as known:', error);
@@ -83,6 +106,12 @@ const FlashcardsPage: React.FC = () => {
     const currentFlashcard = flashcards[currentCard];
     try {
       await flashcardsAPI.markAsUnknown(currentFlashcard._id);
+      
+      // Добавляем карточку в изученные (даже если не знаем)
+      if (!studiedCards.includes(currentFlashcard._id)) {
+        setStudiedCards([...studiedCards, currentFlashcard._id]);
+      }
+      
       nextCard();
     } catch (error) {
       console.error('Error marking as unknown:', error);
@@ -95,9 +124,16 @@ const FlashcardsPage: React.FC = () => {
     setShowEditModal(true);
   };
 
+  const handleRestartStudy = () => {
+    setShowCompleteModal(false);
+    setCurrentCard(0);
+    setShowAnswer(false);
+    setStudiedCards([]);
+  };
+
   const getProgress = () => {
     if (flashcards.length === 0) return 0;
-    return Math.round((knownCards.length / flashcards.length) * 100);
+    return Math.round((studiedCards.length / flashcards.length) * 100);
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -108,6 +144,9 @@ const FlashcardsPage: React.FC = () => {
       default: return '#6b7280';
     }
   };
+
+  const isLastCard = currentCard === flashcards.length - 1;
+  const allCardsStudied = studiedCards.length === flashcards.length && flashcards.length > 0;
 
   if (loading) {
     return (
@@ -227,13 +266,26 @@ const FlashcardsPage: React.FC = () => {
                 </div>
 
                 <div className="navigation-actions">
-                  <button onClick={prevCard} className="btn-outline">
+                  <button 
+                    onClick={prevCard} 
+                    className="btn-outline"
+                    disabled={currentCard === 0}
+                  >
                     ← Назад
                   </button>
-                  <button onClick={nextCard} className="btn-outline">
-                    Вперед →
+                  <button 
+                    onClick={nextCard} 
+                    className="btn-outline"
+                  >
+                    {isLastCard ? 'Завершить' : 'Вперед →'}
                   </button>
                 </div>
+
+                {isLastCard && showAnswer && (
+                  <div className="completion-hint">
+                    🎉 Это последняя карточка! Нажмите "Вперед" чтобы завершить
+                  </div>
+                )}
               </div>
             </div>
 
@@ -244,7 +296,7 @@ const FlashcardsPage: React.FC = () => {
                   style={{ width: `${getProgress()}%` }}
                 ></div>
               </div>
-              <p>Изучено: {knownCards.length} из {flashcards.length} карточек</p>
+              <p>Изучено: {studiedCards.length} из {flashcards.length} карточек</p>
             </div>
           </>
         )}
@@ -271,6 +323,15 @@ const FlashcardsPage: React.FC = () => {
         onClose={() => setShowEditModal(false)}
         flashcard={editingFlashcard}
         onFlashcardUpdated={loadFlashcards}
+      />
+
+      <StudyCompleteModal
+        isOpen={showCompleteModal}
+        onClose={() => setShowCompleteModal(false)}
+        onRestart={handleRestartStudy}
+        mode={mode}
+        studiedCount={studiedCards.length}
+        totalCount={flashcards.length}
       />
     </div>
   );

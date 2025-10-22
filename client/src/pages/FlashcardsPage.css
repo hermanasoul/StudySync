@@ -321,3 +321,21 @@
     justify-content: center;
   }
 }
+
+.completion-hint {
+  background: #f0f9ff;
+  border: 1px solid #e0f2fe;
+  color: #0369a1;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 20px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.btn-outline:disabled {
+  background: #d1d5db !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  opacity: 0.6;
+}
