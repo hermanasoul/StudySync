@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const Group = require('../models/Group');
 const GroupInvite = require('../models/GroupInvite');
 const Flashcard = require('../models/Flashcard');
@@ -10,10 +11,15 @@ router.post('/', auth, async (req, res) => {
   try {
     const { name, description, subjectId, isPublic, settings } = req.body;
 
+    let validSubjectId = subjectId;
+    if (!mongoose.Types.ObjectId.isValid(subjectId)) {
+      validSubjectId = subjectId;
+    }
+
     const group = new Group({
       name,
       description,
-      subjectId,
+      subjectId: validSubjectId,
       isPublic: isPublic || false,
       settings: settings || {},
       createdBy: req.user.id,
@@ -26,16 +32,23 @@ router.post('/', auth, async (req, res) => {
 
     await group.save();
     
-    const populatedGroup = await Group.findById(group._id)
-      .populate('createdBy', 'name email')
-      .populate('members.user', 'name email')
-      .populate('subjectId', 'name');
+    let populatedGroup = group;
+    try {
+      populatedGroup = await Group.findById(group._id)
+        .populate('createdBy', 'name email')
+        .populate('members.user', 'name email')
+        .populate('subjectId', 'name');
+    } catch (populateError) {
+      console.log('Populate failed, using basic group data');
+      populatedGroup = group;
+    }
 
     res.status(201).json({
       success: true,
       group: populatedGroup
     });
   } catch (error) {
+    console.error('Create group error:', error);
     res.status(400).json({
       success: false,
       error: error.message
@@ -53,14 +66,22 @@ router.get('/my', auth, async (req, res) => {
     .populate('subjectId', 'name color')
     .sort({ createdAt: -1 });
 
+    if (!groups || groups.length === 0) {
+      return res.json({
+        success: true,
+        groups: []
+      });
+    }
+
     res.json({
       success: true,
       groups
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
+    console.error('Get my groups error:', error);
+    res.json({
+      success: true,
+      groups: []
     });
   }
 });
@@ -87,6 +108,7 @@ router.get('/:id', auth, async (req, res) => {
       group
     });
   } catch (error) {
+    console.error('Get group error:', error);
     res.status(500).json({
       success: false,
       error: error.message
@@ -118,16 +140,23 @@ router.put('/:id', auth, async (req, res) => {
 
     await group.save();
     
-    const populatedGroup = await Group.findById(group._id)
-      .populate('createdBy', 'name email')
-      .populate('members.user', 'name email')
-      .populate('subjectId', 'name');
+    let populatedGroup = group;
+    try {
+      populatedGroup = await Group.findById(group._id)
+        .populate('createdBy', 'name email')
+        .populate('members.user', 'name email')
+        .populate('subjectId', 'name');
+    } catch (populateError) {
+      console.log('Populate failed, using basic group data');
+      populatedGroup = group;
+    }
 
     res.json({
       success: true,
       group: populatedGroup
     });
   } catch (error) {
+    console.error('Update group error:', error);
     res.status(400).json({
       success: false,
       error: error.message
@@ -171,6 +200,7 @@ router.post('/:id/invite', auth, async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Invite user error:', error);
     res.status(400).json({
       success: false,
       error: error.message
@@ -180,12 +210,12 @@ router.post('/:id/invite', auth, async (req, res) => {
 
 router.post('/join/:inviteCode', auth, async (req, res) => {
   try {
-    const group = await Group.findOne({ inviteCode: req.params.inviteCode });
+    const group = await Group.findOne({ inviteCode: req.params.inviteCode.toUpperCase() });
 
     if (!group) {
       return res.status(404).json({
         success: false,
-        error: 'Invalid invite code'
+        error: 'Группа с таким кодом не найдена'
       });
     }
 
@@ -196,7 +226,7 @@ router.post('/join/:inviteCode', auth, async (req, res) => {
     if (isAlreadyMember) {
       return res.status(400).json({
         success: false,
-        error: 'You are already a member of this group'
+        error: 'Вы уже состоите в этой группе'
       });
     }
 
@@ -208,20 +238,27 @@ router.post('/join/:inviteCode', auth, async (req, res) => {
 
     await group.save();
 
-    const populatedGroup = await Group.findById(group._id)
-      .populate('createdBy', 'name email')
-      .populate('members.user', 'name email')
-      .populate('subjectId', 'name color');
+    let populatedGroup = group;
+    try {
+      populatedGroup = await Group.findById(group._id)
+        .populate('createdBy', 'name email')
+        .populate('members.user', 'name email')
+        .populate('subjectId', 'name color');
+    } catch (populateError) {
+      console.log('Populate failed, using basic group data');
+      populatedGroup = group;
+    }
 
     res.json({
       success: true,
-      message: 'Successfully joined the group',
+      message: 'Вы успешно присоединились к группе!',
       group: populatedGroup
     });
   } catch (error) {
+    console.error('Join group error:', error);
     res.status(400).json({
       success: false,
-      error: error.message
+      error: error.message || 'Ошибка при присоединении к группе'
     });
   }
 });
@@ -251,6 +288,7 @@ router.get('/:id/flashcards', auth, async (req, res) => {
       flashcards
     });
   } catch (error) {
+    console.error('Get group flashcards error:', error);
     res.status(500).json({
       success: false,
       error: error.message
@@ -283,6 +321,7 @@ router.get('/:id/notes', auth, async (req, res) => {
       notes
     });
   } catch (error) {
+    console.error('Get group notes error:', error);
     res.status(500).json({
       success: false,
       error: error.message

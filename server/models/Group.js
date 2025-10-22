@@ -11,19 +11,17 @@ const groupSchema = new mongoose.Schema({
     default: ''
   },
   subjectId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Subject',
+    type: mongoose.Schema.Types.Mixed,
     required: true
   },
   createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    type: mongoose.Schema.Types.Mixed,
     required: true
   },
   members: [{
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      type: mongoose.Schema.Types.Mixed,
+      required: true
     },
     role: {
       type: String,
