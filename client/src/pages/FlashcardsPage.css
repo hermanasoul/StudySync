@@ -11,7 +11,7 @@
 
 .page-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 }
 
 .page-header h1 {
@@ -55,6 +55,12 @@
   color: #4f46e5;
 }
 
+.management-actions {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
 .flashcard-content {
   background: white;
   padding: 40px;
@@ -75,12 +81,33 @@
   align-items: center;
 }
 
+.card-actions-header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
 .difficulty-badge {
   color: white;
   padding: 4px 8px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
+  text-transform: capitalize;
+}
+
+.edit-card-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.edit-card-btn:hover {
+  background: #f3f4f6;
 }
 
 .card-content {
@@ -282,5 +309,15 @@
   
   .mode-switcher {
     flex-direction: column;
+  }
+  
+  .card-counter {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .card-actions-header {
+    justify-content: center;
   }
 }

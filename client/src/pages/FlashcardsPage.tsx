@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Header from '../components/Header';
+import CreateFlashcardModal from '../components/CreateFlashcardModal';
+import EditFlashcardModal from '../components/EditFlashcardModal';
 import { flashcardsAPI } from '../services/api';
 import './FlashcardsPage.css';
 
@@ -21,10 +23,13 @@ const FlashcardsPage: React.FC = () => {
   const [knownCards, setKnownCards] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState<'study' | 'review'>('study');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingFlashcard, setEditingFlashcard] = useState<Flashcard | null>(null);
 
   useEffect(() => {
     loadFlashcards();
-  }, [subjectId]);
+  }, [subjectId, mode]);
 
   const loadFlashcards = async () => {
     try {
@@ -84,6 +89,12 @@ const FlashcardsPage: React.FC = () => {
     }
   };
 
+  const handleEditCard = () => {
+    if (flashcards.length === 0) return;
+    setEditingFlashcard(flashcards[currentCard]);
+    setShowEditModal(true);
+  };
+
   const getProgress = () => {
     if (flashcards.length === 0) return 0;
     return Math.round((knownCards.length / flashcards.length) * 100);
@@ -135,27 +146,50 @@ const FlashcardsPage: React.FC = () => {
           </div>
         </div>
 
+        <div className="management-actions">
+          <button 
+            className="btn-primary"
+            onClick={() => setShowCreateModal(true)}
+          >
+            + Создать карточку
+          </button>
+        </div>
+
         {flashcards.length === 0 ? (
           <div className="no-cards">
             <h3>Нет карточек для изучения</h3>
-            <p>Все карточки изучены или карточки еще не созданы</p>
-            <Link to="/dashboard" className="btn-primary">
-              Назад к предметам
-            </Link>
+            <p>Создайте первую карточку чтобы начать изучение</p>
+            <button 
+              className="btn-primary"
+              onClick={() => setShowCreateModal(true)}
+            >
+              Создать карточку
+            </button>
           </div>
         ) : (
           <>
             <div className="flashcard-content">
               <div className="flashcard">
                 <div className="card-counter">
-                  Карточка {currentCard + 1} из {flashcards.length}
-                  {knownCards.includes(flashcards[currentCard]._id) && ' ✓'}
-                  <span 
-                    className="difficulty-badge"
-                    style={{ backgroundColor: getDifficultyColor(flashcards[currentCard].difficulty) }}
-                  >
-                    {flashcards[currentCard].difficulty}
-                  </span>
+                  <div>
+                    Карточка {currentCard + 1} из {flashcards.length}
+                    {knownCards.includes(flashcards[currentCard]._id) && ' ✓'}
+                  </div>
+                  <div className="card-actions-header">
+                    <span 
+                      className="difficulty-badge"
+                      style={{ backgroundColor: getDifficultyColor(flashcards[currentCard].difficulty) }}
+                    >
+                      {flashcards[currentCard].difficulty}
+                    </span>
+                    <button 
+                      className="edit-card-btn"
+                      onClick={handleEditCard}
+                      title="Редактировать карточку"
+                    >
+                      ✏️
+                    </button>
+                  </div>
                 </div>
                 
                 <div className="card-content">
@@ -224,6 +258,20 @@ const FlashcardsPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      <CreateFlashcardModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        subjectId={subjectId!}
+        onFlashcardCreated={loadFlashcards}
+      />
+
+      <EditFlashcardModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        flashcard={editingFlashcard}
+        onFlashcardUpdated={loadFlashcards}
+      />
     </div>
   );
 };
