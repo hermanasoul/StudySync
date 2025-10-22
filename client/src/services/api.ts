@@ -46,6 +46,17 @@ export const flashcardsAPI = {
   delete: (id: string) => api.delete(`/flashcards/${id}`),
 };
 
+export const groupsAPI = {
+  create: (data: any) => api.post('/groups', data),
+  getMyGroups: () => api.get('/groups/my'),
+  getById: (id: string) => api.get(`/groups/${id}`),
+  update: (id: string, data: any) => api.put(`/groups/${id}`, data),
+  invite: (id: string, email: string) => api.post(`/groups/${id}/invite`, { email }),
+  join: (inviteCode: string) => api.post(`/groups/join/${inviteCode}`),
+  getFlashcards: (id: string) => api.get(`/groups/${id}/flashcards`),
+  getNotes: (id: string) => api.get(`/groups/${id}/notes`),
+};
+
 export const checkBackendConnection = async (): Promise<boolean> => {
   try {
     const response = await api.get('/health');
