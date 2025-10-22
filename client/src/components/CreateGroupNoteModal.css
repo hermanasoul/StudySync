@@ -16,7 +16,7 @@
   border-radius: 12px;
   padding: 0;
   width: 90%;
-  max-width: 500px;
+  max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -58,7 +58,7 @@
   color: #374151;
 }
 
-.group-form {
+.note-form {
   padding: 24px;
 }
 
@@ -74,8 +74,7 @@
 }
 
 .form-group input,
-.form-group textarea,
-.form-group select {
+.form-group textarea {
   width: 100%;
   padding: 12px;
   border: 2px solid #e5e7eb;
@@ -87,42 +86,13 @@
 }
 
 .form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
+.form-group textarea:focus {
   outline: none;
   border-color: #4f46e5;
 }
 
 .form-group textarea {
-  min-height: 80px;
-}
-
-.checkbox-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 0;
-}
-
-.checkbox-label input {
-  width: auto;
-  margin: 0;
-}
-
-.checkbox-description {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 0;
-  line-height: 1.4;
+  min-height: 120px;
 }
 
 .error-message {
@@ -199,54 +169,4 @@
     min-width: auto !important;
     width: 100%;
   }
-}
-
-.input-hint {
-  font-size: 12px;
-  color: #6b7280;
-  margin-top: 4px;
-}
-
-.error-message strong {
-  display: block;
-  margin-bottom: 4px;
-}
-
-.checkbox-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 20px;
-  background: #f8fafc;
-  border-radius: 8px;
-  border: 2px solid #e5e7eb;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 0;
-  padding: 0;
-  font-size: 16px;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  cursor: pointer;
-  accent-color: #4f46e5;
-  flex-shrink: 0;
-}
-
-.checkbox-description {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 8px 0 0 0;
-  line-height: 1.5;
-  padding-left: 0;
 }

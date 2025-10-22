@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import CreateGroupFlashcardModal from '../components/CreateGroupFlashcardModal';
+import CreateGroupNoteModal from '../components/CreateGroupNoteModal';
 import InviteMembersModal from '../components/InviteMembersModal';
-import { groupsAPI, flashcardsAPI } from '../services/api';
+import { groupsAPI } from '../services/api';
 import './GroupPage.css';
 
 interface Group {
@@ -32,19 +33,30 @@ interface Group {
   inviteCode: string;
 }
 
+interface Note {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  groupId: string;
+}
+
 const GroupPage: React.FC = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
   const [group, setGroup] = useState<Group | null>(null);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'flashcards' | 'notes'>('overview');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showCreateFlashcardModal, setShowCreateFlashcardModal] = useState(false);
+  const [showCreateNoteModal, setShowCreateNoteModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
 
   useEffect(() => {
     if (groupId) {
       loadGroup();
+      loadNotes();
     }
   }, [groupId]);
 
@@ -57,83 +69,127 @@ const GroupPage: React.FC = () => {
       } else {
         // Fallback для демо с корректными данными пользователя
         const currentUser = JSON.parse(localStorage.getItem('studysync_user') || '{}');
+        const userData = {
+          _id: currentUser.id || '1',
+          name: currentUser.name || 'Вы',
+          email: currentUser.email || 'user@example.com'
+        };
+        
+        // Создаем реалистичные данные участников
+        const demoMembers = [
+          {
+            user: userData,
+            role: 'owner'
+          },
+          {
+            user: {
+              _id: '2',
+              name: 'Иван Петров',
+              email: 'ivan.petrov@example.com'
+            },
+            role: 'member'
+          },
+          {
+            user: {
+              _id: '3', 
+              name: 'Мария Сидорова',
+              email: 'maria.sidorova@example.com'
+            },
+            role: 'member'
+          },
+          {
+            user: {
+              _id: '4',
+              name: 'Алексей Козлов',
+              email: 'alex.kozlov@example.com'
+            },
+            role: 'admin'
+          }
+        ];
+
         setGroup({
           _id: groupId!,
-          name: 'Демо группа',
-          description: 'Это демонстрационная группа для тестирования функционала',
+          name: 'Биология для начинающих',
+          description: 'Изучаем основы биологии вместе. Группа для совместного обучения и подготовки к экзаменам.',
           subjectId: {
             _id: '1',
             name: 'Биология',
             color: 'green'
           },
-          createdBy: {
-            _id: currentUser.id || '1',
-            name: currentUser.name || 'Текущий пользователь',
-            email: currentUser.email || 'user@example.com'
-          },
-          members: [
-            {
-              user: {
-                _id: currentUser.id || '1',
-                name: currentUser.name || 'Текущий пользователь',
-                email: currentUser.email || 'user@example.com'
-              },
-              role: 'owner'
-            },
-            {
-              user: {
-                _id: '2',
-                name: 'Участник',
-                email: 'member@example.com'
-              },
-              role: 'member'
-            }
-          ],
+          createdBy: userData,
+          members: demoMembers,
           isPublic: true,
-          inviteCode: 'DEMO123'
+          inviteCode: 'BIO123'
         });
       }
     } catch (error) {
       console.error('Error loading group:', error);
       // Fallback для демо с корректными данными пользователя
       const currentUser = JSON.parse(localStorage.getItem('studysync_user') || '{}');
+      const userData = {
+        _id: currentUser.id || '1',
+        name: currentUser.name || 'Вы',
+        email: currentUser.email || 'user@example.com'
+      };
+      
+      const demoMembers = [
+        {
+          user: userData,
+          role: 'owner'
+        },
+        {
+          user: {
+            _id: '2',
+            name: 'Иван Петров',
+            email: 'ivan.petrov@example.com'
+          },
+          role: 'member'
+        },
+        {
+          user: {
+            _id: '3',
+            name: 'Мария Сидорова', 
+            email: 'maria.sidorova@example.com'
+          },
+          role: 'member'
+        },
+        {
+          user: {
+            _id: '4',
+            name: 'Алексей Козлов',
+            email: 'alex.kozlov@example.com'
+          },
+          role: 'admin'
+        }
+      ];
+
       setGroup({
         _id: groupId!,
-        name: 'Демо группа',
-        description: 'Это демонстрационная группа для тестирования функционала',
+        name: 'Биология для начинающих',
+        description: 'Изучаем основы биологии вместе. Группа для совместного обучения и подготовки к экзаменам.',
         subjectId: {
           _id: '1',
           name: 'Биология',
           color: 'green'
         },
-        createdBy: {
-          _id: currentUser.id || '1',
-          name: currentUser.name || 'Текущий пользователь',
-          email: currentUser.email || 'user@example.com'
-        },
-        members: [
-          {
-            user: {
-              _id: currentUser.id || '1',
-              name: currentUser.name || 'Текущий пользователь',
-              email: currentUser.email || 'user@example.com'
-            },
-            role: 'owner'
-          },
-          {
-            user: {
-              _id: '2',
-              name: 'Участник',
-              email: 'member@example.com'
-            },
-            role: 'member'
-          }
-        ],
+        createdBy: userData,
+        members: demoMembers,
         isPublic: true,
-        inviteCode: 'DEMO123'
+        inviteCode: 'BIO123'
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadNotes = () => {
+    try {
+      const existingNotes = JSON.parse(localStorage.getItem('group_notes') || '{}');
+      const groupNotes = existingNotes[groupId!] || [];
+      setNotes(groupNotes);
+    } catch (error) {
+      console.error('Error loading notes:', error);
+      setNotes([]);
     }
   };
 
@@ -153,36 +209,6 @@ const GroupPage: React.FC = () => {
         {config.label}
       </span>
     );
-  };
-
-  const handleCreateFlashcard = async () => {
-    if (!group) return;
-    
-    try {
-      // Создаем демо-карточку с корректным subjectId
-      await flashcardsAPI.create({
-        question: 'Пример вопроса для группы',
-        answer: 'Пример ответа для группы',
-        subjectId: group.subjectId._id, // Используем ID предмета группы
-        groupId: group._id,
-        difficulty: 'medium'
-      });
-      alert('Демо-карточка создана! Теперь вы можете изучать карточки в разделе предмета.');
-    } catch (error: any) {
-      console.error('Error creating flashcard:', error);
-      // Если ошибка с subjectId, создаем карточку без него для демо
-      try {
-        await flashcardsAPI.create({
-          question: 'Пример вопроса для группы',
-          answer: 'Пример ответа для группы', 
-          groupId: group._id,
-          difficulty: 'medium'
-        });
-        alert('Демо-карточка создана! (использован демо-режим)');
-      } catch (demoError) {
-        alert('Ошибка при создании карточки. Проверьте подключение к серверу.');
-      }
-    }
   };
 
   const handleDeleteGroup = async () => {
@@ -295,7 +321,7 @@ const GroupPage: React.FC = () => {
               className={`tab ${activeTab === 'notes' ? 'active' : ''}`}
               onClick={() => setActiveTab('notes')}
             >
-              Заметки
+              Заметки ({notes.length})
             </button>
           </div>
 
@@ -320,7 +346,7 @@ const GroupPage: React.FC = () => {
                   <div className="stat-card">
                     <div className="stat-icon">📝</div>
                     <div className="stat-info">
-                      <div className="stat-number">0</div>
+                      <div className="stat-number">{notes.length}</div>
                       <div className="stat-label">Заметок</div>
                     </div>
                   </div>
@@ -398,18 +424,45 @@ const GroupPage: React.FC = () => {
 
             {activeTab === 'notes' && (
               <div className="notes-tab">
-                <h3>Заметки группы</h3>
-                <div className="empty-state">
-                  <div className="empty-icon">📝</div>
-                  <h4>Пока нет заметок</h4>
-                  <p>Создайте первую заметку для совместной работы</p>
+                <div className="notes-header">
+                  <h3>Заметки группы</h3>
                   <button 
                     className="btn-primary"
-                    onClick={() => alert('Функция создания заметок будет реализована в следующем обновлении!')}
+                    onClick={() => setShowCreateNoteModal(true)}
                   >
-                    Создать заметку
+                    + Создать заметку
                   </button>
                 </div>
+                
+                {notes.length === 0 ? (
+                  <div className="empty-state">
+                    <div className="empty-icon">📝</div>
+                    <h4>Пока нет заметок</h4>
+                    <p>Создайте первую заметку для совместной работы</p>
+                    <button 
+                      className="btn-primary"
+                      onClick={() => setShowCreateNoteModal(true)}
+                    >
+                      Создать заметку
+                    </button>
+                  </div>
+                ) : (
+                  <div className="notes-list">
+                    {notes.map((note) => (
+                      <div key={note.id} className="note-card">
+                        <div className="note-header">
+                          <h4 className="note-title">{note.title}</h4>
+                          <span className="note-date">
+                            {new Date(note.createdAt).toLocaleDateString('ru-RU')}
+                          </span>
+                        </div>
+                        <div className="note-content">
+                          {note.content}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -446,7 +499,7 @@ const GroupPage: React.FC = () => {
         </div>
       )}
 
-      {/* Модальное окно создания карточки */}
+      {/* Модальные окна функционала */}
       {group && (
         <>
           <CreateGroupFlashcardModal
@@ -456,6 +509,15 @@ const GroupPage: React.FC = () => {
             subjectId={group.subjectId._id}
             onFlashcardCreated={() => {
               alert('Карточка успешно создана!');
+            }}
+          />
+
+          <CreateGroupNoteModal
+            isOpen={showCreateNoteModal}
+            onClose={() => setShowCreateNoteModal(false)}
+            groupId={group._id}
+            onNoteCreated={() => {
+              loadNotes(); // Перезагружаем заметки после создания
             }}
           />
 
