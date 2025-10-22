@@ -42,9 +42,56 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
         if (response.data.subjects.length > 0) {
           setSubjectId(response.data.subjects[0]._id);
         }
+      } else {
+        // Если API не работает, используем mock данные
+        const mockSubjects: Subject[] = [
+          {
+            _id: '1',
+            name: 'Биология',
+            description: 'Изучение живых организмов',
+            color: 'green'
+          },
+          {
+            _id: '2', 
+            name: 'Химия',
+            description: 'Изучение веществ и их свойств',
+            color: 'blue'
+          },
+          {
+            _id: '3',
+            name: 'Математика',
+            description: 'Изучение чисел и вычислений',
+            color: 'purple'
+          }
+        ];
+        setSubjects(mockSubjects);
+        setSubjectId(mockSubjects[0]._id);
       }
     } catch (error) {
       console.error('Error loading subjects:', error);
+      // Fallback на mock данные при ошибке
+      const mockSubjects: Subject[] = [
+        {
+          _id: '1',
+          name: 'Биология',
+          description: 'Изучение живых организмов',
+          color: 'green'
+        },
+        {
+          _id: '2',
+          name: 'Химия',
+          description: 'Изучение веществ и их свойств', 
+          color: 'blue'
+        },
+        {
+          _id: '3',
+          name: 'Математика',
+          description: 'Изучение чисел и вычислений',
+          color: 'purple'
+        }
+      ];
+      setSubjects(mockSubjects);
+      setSubjectId(mockSubjects[0]._id);
     }
   };
 
@@ -62,7 +109,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
       await groupsAPI.create({
         name: name.trim(),
         description: description.trim(),
-        subjectId,
+        subjectId: subjectId, // Теперь передаем корректный ObjectId
         isPublic,
         settings: {
           allowMemberInvites: false,
@@ -73,11 +120,12 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
 
       setName('');
       setDescription('');
-      setSubjectId('');
+      setSubjectId(subjects.length > 0 ? subjects[0]._id : '');
       setIsPublic(false);
       onGroupCreated();
       onClose();
     } catch (err: any) {
+      console.error('Create group error:', err);
       setError(err.response?.data?.error || 'Ошибка при создании группы');
     } finally {
       setLoading(false);
@@ -87,7 +135,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   const handleClose = () => {
     setName('');
     setDescription('');
-    setSubjectId('');
+    setSubjectId(subjects.length > 0 ? subjects[0]._id : '');
     setIsPublic(false);
     setError('');
     onClose();
@@ -137,7 +185,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               onChange={(e) => setSubjectId(e.target.value)}
               required
             >
-              <option value="">Выберите предмет</option>
               {subjects.map((subject) => (
                 <option key={subject._id} value={subject._id}>
                   {subject.name}

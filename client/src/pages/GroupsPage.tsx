@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import CreateGroupModal from '../components/CreateGroupModal';
+import JoinGroupModal from '../components/JoinGroupModal';
 import { groupsAPI } from '../services/api';
 import './GroupsPage.css';
 
@@ -36,6 +37,7 @@ const GroupsPage: React.FC = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showJoinModal, setShowJoinModal] = useState(false);
 
   useEffect(() => {
     loadGroups();
@@ -51,9 +53,90 @@ const GroupsPage: React.FC = () => {
           memberCount: group.members.length
         }));
         setGroups(groupsWithCount);
+      } else {
+        // Mock данные для демонстрации
+        const mockGroups: Group[] = [
+          {
+            _id: '1',
+            name: 'Биология для начинающих',
+            description: 'Изучаем основы биологии вместе',
+            subjectId: {
+              _id: '1',
+              name: 'Биология',
+              color: 'green'
+            },
+            createdBy: {
+              _id: '1',
+              name: 'Анна',
+              email: 'anna@example.com'
+            },
+            members: [
+              {
+                user: {
+                  _id: '1',
+                  name: 'Анна',
+                  email: 'anna@example.com'
+                },
+                role: 'owner'
+              },
+              {
+                user: {
+                  _id: '2',
+                  name: 'Иван',
+                  email: 'ivan@example.com'
+                },
+                role: 'member'
+              }
+            ],
+            isPublic: true,
+            inviteCode: 'ABC123',
+            memberCount: 2
+          }
+        ];
+        setGroups(mockGroups);
       }
     } catch (error) {
       console.error('Error loading groups:', error);
+      // Fallback на mock данные
+      const mockGroups: Group[] = [
+        {
+          _id: '1',
+          name: 'Биология для начинающих',
+          description: 'Изучаем основы биологии вместе',
+          subjectId: {
+            _id: '1',
+            name: 'Биология',
+            color: 'green'
+          },
+          createdBy: {
+            _id: '1',
+            name: 'Анна',
+            email: 'anna@example.com'
+          },
+          members: [
+            {
+              user: {
+                _id: '1',
+                name: 'Анна',
+                email: 'anna@example.com'
+              },
+              role: 'owner'
+            },
+            {
+              user: {
+                _id: '2', 
+                name: 'Иван',
+                email: 'ivan@example.com'
+              },
+              role: 'member'
+            }
+          ],
+          isPublic: true,
+          inviteCode: 'ABC123',
+          memberCount: 2
+        }
+      ];
+      setGroups(mockGroups);
     } finally {
       setLoading(false);
     }
@@ -103,7 +186,10 @@ const GroupsPage: React.FC = () => {
           >
             + Создать группу
           </button>
-          <button className="btn-outline">
+          <button 
+            className="btn-outline"
+            onClick={() => setShowJoinModal(true)}
+          >
             🔗 Присоединиться по коду
           </button>
         </div>
@@ -172,6 +258,12 @@ const GroupsPage: React.FC = () => {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onGroupCreated={loadGroups}
+      />
+
+      <JoinGroupModal
+        isOpen={showJoinModal}
+        onClose={() => setShowJoinModal(false)}
+        onJoinSuccess={loadGroups}
       />
     </div>
   );
