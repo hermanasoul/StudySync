@@ -13,6 +13,7 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/subjects', require('./routes/subjects'));
 app.use('/api/notes', require('./routes/notes'));
+app.use('/api/flashcards', require('./routes/flashcards'));
 
 app.get('/', (req, res) => {
   res.json({

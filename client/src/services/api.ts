@@ -7,10 +7,17 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // таймаут
+  timeout: 10000,
 });
 
-// перехватчик
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('studysync_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -29,7 +36,16 @@ export const subjectsAPI = {
   getById: (id: string) => api.get(`/subjects/${id}`),
 };
 
-// функция для проверки подключения к бэку
+export const flashcardsAPI = {
+  create: (data: any) => api.post('/flashcards', data),
+  getBySubject: (subjectId: string) => api.get(`/flashcards/subject/${subjectId}`),
+  getForStudy: (subjectId: string) => api.get(`/flashcards/study/${subjectId}`),
+  markAsKnown: (id: string) => api.put(`/flashcards/${id}/know`),
+  markAsUnknown: (id: string) => api.put(`/flashcards/${id}/dont-know`),
+  update: (id: string, data: any) => api.put(`/flashcards/${id}`, data),
+  delete: (id: string) => api.delete(`/flashcards/${id}`),
+};
+
 export const checkBackendConnection = async (): Promise<boolean> => {
   try {
     const response = await api.get('/health');
