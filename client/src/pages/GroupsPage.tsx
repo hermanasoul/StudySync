@@ -46,7 +46,7 @@ const GroupsPage: React.FC = () => {
   const loadGroups = async () => {
     try {
       setLoading(true);
-      const response = await groupsAPI.getMyGroups();
+      const response = await groupsAPI.getMy();
       if (response.data.success) {
         const groupsWithCount = response.data.groups.map((group: any) => ({
           ...group,

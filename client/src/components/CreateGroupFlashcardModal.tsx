@@ -29,51 +29,29 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
       setError('Заполните вопрос и ответ');
       return;
     }
-
     setLoading(true);
     setError('');
-
     try {
-      // Создаем объект с данными для карточки
-      const flashcardData: any = {
+      const flashcardData = {
         question: question.trim(),
         answer: answer.trim(),
         difficulty,
-        groupId: groupId
+        subjectId,
+        groupId
       };
-
-      // Добавляем subjectId только если он есть и не undefined
-      if (subjectId && subjectId !== 'undefined') {
-        flashcardData.subjectId = subjectId;
-      }
-
-      await flashcardsAPI.create(flashcardData);
-
-      setQuestion('');
-      setAnswer('');
-      setDifficulty('medium');
-      onFlashcardCreated();
-      onClose();
-      alert('Карточка успешно создана!');
-    } catch (err: any) {
-      console.error('Create flashcard error:', err);
-      // Пробуем создать без subjectId
-      try {
-        await flashcardsAPI.create({
-          question: question.trim(),
-          answer: answer.trim(),
-          difficulty,
-          groupId: groupId
-        });
+      const response = await flashcardsAPI.create(flashcardData); // Предполагаю, API handles with token
+      if (response.data.success) {
         setQuestion('');
         setAnswer('');
         setDifficulty('medium');
         onFlashcardCreated();
         onClose();
-        alert('Карточка успешно создана! (демо-режим)');
-      } catch (demoError) {
-        setError('Ошибка при создании карточки. Проверьте подключение к серверу.');
+      } else {
+        setError(response.data.error || 'Ошибка при создании карточки');
       }
+    } catch (err: any) {
+      console.error('Create flashcard error:', err);
+      setError(err.response?.data?.error || 'Ошибка соединения с сервером. Проверьте подключение.');
     } finally {
       setLoading(false);
     }
@@ -96,10 +74,12 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
           <h2>Создать карточку для группы</h2>
           <button className="close-button" onClick={handleClose}>×</button>
         </div>
-
         <form onSubmit={handleSubmit} className="flashcard-form">
-          {error && <div className="error-message">{error}</div>}
-
+          {error && (
+            <div className="error-message">
+              <strong>Ошибка:</strong> {error}
+            </div>
+          )}
           <div className="form-group">
             <label htmlFor="question">Вопрос *</label>
             <textarea
@@ -111,7 +91,6 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
               required
             />
           </div>
-
           <div className="form-group">
             <label htmlFor="answer">Ответ *</label>
             <textarea
@@ -123,7 +102,6 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
               required
             />
           </div>
-
           <div className="form-group">
             <label htmlFor="difficulty">Сложность</label>
             <select
@@ -136,7 +114,6 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
               <option value="hard">Сложная</option>
             </select>
           </div>
-
           <div className="form-actions">
             <button
               type="button"
@@ -149,7 +126,7 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
             <button
               type="submit"
               className="btn-primary"
-              disabled={loading}
+              disabled={loading || !question.trim() || !answer.trim()}
             >
               {loading ? 'Создание...' : 'Создать карточку'}
             </button>

@@ -11,12 +11,12 @@
   z-index: 1000;
 }
 
-.modal-content {
+.note-modal {
   background: white;
   border-radius: 12px;
   padding: 0;
   width: 90%;
-  max-width: 600px;
+  max-width: 700px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -58,8 +58,17 @@
   color: #374151;
 }
 
+.note-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 20px;
+  padding: 0 24px;
+}
+
 .note-form {
-  padding: 24px;
+  padding: 0 24px 24px;
 }
 
 .form-group {
@@ -83,7 +92,6 @@
   font-family: inherit;
   transition: border-color 0.2s;
   resize: vertical;
-  box-sizing: border-box;
 }
 
 .form-group input:focus,
@@ -93,7 +101,13 @@
 }
 
 .form-group textarea {
-  min-height: 120px;
+  min-height: 150px;
+}
+
+.input-hint {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
 }
 
 .error-message {
@@ -106,21 +120,19 @@
   font-size: 14px;
 }
 
-.input-hint {
-  font-size: 12px;
-  color: #6b7280;
-  margin-top: 4px;
-}
-
 .form-actions {
   display: flex;
-  gap: 12px;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 24px;
 }
 
-.btn-primary,
-.btn-outline {
+.left-actions, .right-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-primary, .btn-outline, .btn-danger {
   padding: 12px 24px !important;
   border-radius: 6px !important;
   font-weight: 500 !important;
@@ -128,9 +140,7 @@
   cursor: pointer !important;
   transition: all 0.2s !important;
   border: none !important;
-  min-width: 120px !important;
-  white-space: nowrap;
-  box-sizing: border-box;
+  min-width: 100px !important;
 }
 
 .btn-primary {
@@ -165,48 +175,57 @@
   transform: none !important;
 }
 
-/* Фикс для кнопки в GroupPage (чтобы не наплывала) */
-.create-note-btn {
-  width: auto !important;
-  min-width: 140px !important;
-  padding: 8px 16px !important;
-  font-size: 14px !important;
-  white-space: nowrap !important;
+.btn-danger {
+  background: #ef4444 !important;
+  color: white !important;
 }
 
-.notes-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding: 20px 0;
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626 !important;
+  transform: translateY(-1px) !important;
 }
 
-.notes-header h3 {
-  margin: 0;
-  flex: 1;
-  margin-right: 15px; /* Отступ от кнопки */
+.btn-danger:disabled {
+  background: #fca5a5 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
 }
 
 @media (max-width: 768px) {
-  .modal-content {
+  .note-modal {
     width: 95%;
     margin: 20px;
   }
+  
   .form-actions {
     flex-direction: column;
+    gap: 12px;
   }
-  .btn-primary,
-  .btn-outline {
-    min-width: auto !important;
+  
+  .left-actions, .right-actions {
     width: 100%;
+    justify-content: stretch;
   }
-  .notes-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+  
+  .btn-primary, .btn-outline, .btn-danger {
+    min-width: auto !important;
+    flex: 1;
   }
-  .create-note-btn {
-    align-self: flex-end !important;
-  }
+}
+
+.btn-danger {
+  background: #ef4444 !important;
+  color: white !important;
+  border: none !important;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626 !important;
+}
+
+.form-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  margin-top: 20px !important;
 }

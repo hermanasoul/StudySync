@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import CreateGroupFlashcardModal from '../components/CreateGroupFlashcardModal';
 import CreateGroupNoteModal from '../components/CreateGroupNoteModal';
+import EditGroupNoteModal from '../components/EditGroupNoteModal';
 import InviteMembersModal from '../components/InviteMembersModal';
 import { groupsAPI } from '../services/api';
 import './GroupPage.css';
@@ -33,11 +34,16 @@ interface Group {
   inviteCode: string;
 }
 
+// Фикс TS: Note совместим с backend (response.data.notes)
 interface Note {
-  id: string;
+  _id: string; // Mongo _id вместо id
   title: string;
   content: string;
   createdAt: string;
+  authorId: {
+    _id: string;
+    name: string; // authorId.name из populate
+  };
   groupId: string;
 }
 
@@ -51,12 +57,16 @@ const GroupPage: React.FC = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showCreateFlashcardModal, setShowCreateFlashcardModal] = useState(false);
   const [showCreateNoteModal, setShowCreateNoteModal] = useState(false);
+  const [showEditNoteModal, setShowEditNoteModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [editingNote, setEditingNote] = useState<Note | null>(null); // Фикс: тип Note | null
+  const [members, setMembers] = useState<Group['members']>([]);
 
   useEffect(() => {
     if (groupId) {
       loadGroup();
       loadNotes();
+      loadMembers();
     }
   }, [groupId]);
 
@@ -67,20 +77,15 @@ const GroupPage: React.FC = () => {
       if (response.data.success) {
         setGroup(response.data.group);
       } else {
-        // Fallback для демо с корректными данными пользователя
+        console.error('API error, using fallback');
         const currentUser = JSON.parse(localStorage.getItem('studysync_user') || '{}');
         const userData = {
           _id: currentUser.id || '1',
           name: currentUser.name || 'Вы',
           email: currentUser.email || 'user@example.com'
         };
-        
-        // Создаем реалистичные данные участников
         const demoMembers = [
-          {
-            user: userData,
-            role: 'owner'
-          },
+          { user: userData, role: 'owner' },
           {
             user: {
               _id: '2',
@@ -91,7 +96,7 @@ const GroupPage: React.FC = () => {
           },
           {
             user: {
-              _id: '3', 
+              _id: '3',
               name: 'Мария Сидорова',
               email: 'maria.sidorova@example.com'
             },
@@ -106,37 +111,29 @@ const GroupPage: React.FC = () => {
             role: 'admin'
           }
         ];
-
         setGroup({
           _id: groupId!,
           name: 'Биология для начинающих',
-          description: 'Изучаем основы биологии вместе. Группа для совместного обучения и подготовки к экзаменам.',
-          subjectId: {
-            _id: '1',
-            name: 'Биология',
-            color: 'green'
-          },
+          description: 'Изучаем основы биологии вместе.',
+          subjectId: { _id: '1', name: 'Биология', color: 'green' },
           createdBy: userData,
           members: demoMembers,
           isPublic: true,
           inviteCode: 'BIO123'
         });
+        setMembers(demoMembers);
       }
     } catch (error) {
       console.error('Error loading group:', error);
-      // Fallback для демо с корректными данными пользователя
+      // Fallback для demo (если API полностью down)
       const currentUser = JSON.parse(localStorage.getItem('studysync_user') || '{}');
       const userData = {
         _id: currentUser.id || '1',
         name: currentUser.name || 'Вы',
         email: currentUser.email || 'user@example.com'
       };
-      
       const demoMembers = [
-        {
-          user: userData,
-          role: 'owner'
-        },
+        { user: userData, role: 'owner' },
         {
           user: {
             _id: '2',
@@ -148,7 +145,7 @@ const GroupPage: React.FC = () => {
         {
           user: {
             _id: '3',
-            name: 'Мария Сидорова', 
+            name: 'Мария Сидорова',
             email: 'maria.sidorova@example.com'
           },
           role: 'member'
@@ -162,31 +159,43 @@ const GroupPage: React.FC = () => {
           role: 'admin'
         }
       ];
-
       setGroup({
         _id: groupId!,
         name: 'Биология для начинающих',
-        description: 'Изучаем основы биологии вместе. Группа для совместного обучения и подготовки к экзаменам.',
-        subjectId: {
-          _id: '1',
-          name: 'Биология',
-          color: 'green'
-        },
+        description: 'Изучаем основы биологии вместе.',
+        subjectId: { _id: '1', name: 'Биология', color: 'green' },
         createdBy: userData,
         members: demoMembers,
         isPublic: true,
         inviteCode: 'BIO123'
       });
+      setMembers(demoMembers);
     } finally {
       setLoading(false);
     }
   };
 
-  const loadNotes = () => {
+  const loadMembers = async () => {
+    if (!groupId) return;
     try {
-      const existingNotes = JSON.parse(localStorage.getItem('group_notes') || '{}');
-      const groupNotes = existingNotes[groupId!] || [];
-      setNotes(groupNotes);
+      const response = await groupsAPI.getMembers(groupId);
+      if (response.data.success) {
+        setMembers(response.data.members);
+      }
+    } catch (error) {
+      console.error('Error loading members:', error);
+    }
+  };
+
+  const loadNotes = async () => {
+    if (!groupId) return;
+    try {
+      const response = await groupsAPI.getNotes(groupId);
+      if (response.data.success) {
+        setNotes(response.data.notes || []); // Фикс: типы совпадают
+      } else {
+        setNotes([]);
+      }
     } catch (error) {
       console.error('Error loading notes:', error);
       setNotes([]);
@@ -199,10 +208,9 @@ const GroupPage: React.FC = () => {
       admin: { label: 'Админ', color: '#f59e0b' },
       member: { label: 'Участник', color: '#3b82f6' }
     };
-    
     const config = roleConfig[role as keyof typeof roleConfig] || roleConfig.member;
     return (
-      <span 
+      <span
         className="role-badge"
         style={{ backgroundColor: config.color }}
       >
@@ -213,15 +221,19 @@ const GroupPage: React.FC = () => {
 
   const handleDeleteGroup = async () => {
     if (!group) return;
-    
     try {
-      // В демо-режиме просто имитируем удаление
+      // TODO: Реальный API delete: await groupsAPI.delete(group._id);
       alert('Группа успешно удалена!');
       navigate('/groups');
     } catch (error) {
       console.error('Error deleting group:', error);
       alert('Ошибка при удалении группы');
     }
+  };
+
+  const handleEditNote = (note: Note) => {
+    setEditingNote(note);
+    setShowEditNoteModal(true);
   };
 
   const isUserOwner = () => {
@@ -256,12 +268,10 @@ const GroupPage: React.FC = () => {
   return (
     <div className="group-page">
       <Header />
-      
       <div className="group-container">
         <div className="breadcrumb">
           <Link to="/groups">Группы</Link> / <span>{group.name}</span>
         </div>
-        
         <div className="group-header">
           <div className="group-title-section">
             <div className="group-info">
@@ -280,7 +290,7 @@ const GroupPage: React.FC = () => {
                 <div className="invite-code-display">{group.inviteCode}</div>
               </div>
               {isUserOwner() && (
-                <button 
+                <button
                   className="btn-danger"
                   onClick={() => setShowDeleteConfirm(true)}
                 >
@@ -289,42 +299,39 @@ const GroupPage: React.FC = () => {
               )}
             </div>
           </div>
-
           {group.description && (
             <div className="group-description-section">
               <p className="group-description">{group.description}</p>
             </div>
           )}
         </div>
-
         <div className="group-content">
           <div className="tabs">
-            <button 
+            <button
               className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
               onClick={() => setActiveTab('overview')}
             >
               Обзор
             </button>
-            <button 
+            <button
               className={`tab ${activeTab === 'members' ? 'active' : ''}`}
               onClick={() => setActiveTab('members')}
             >
-              Участники ({group.members.length})
+              Участники ({members.length})
             </button>
-            <button 
+            <button
               className={`tab ${activeTab === 'flashcards' ? 'active' : ''}`}
               onClick={() => setActiveTab('flashcards')}
             >
               Карточки
             </button>
-            <button 
+            <button
               className={`tab ${activeTab === 'notes' ? 'active' : ''}`}
               onClick={() => setActiveTab('notes')}
             >
               Заметки ({notes.length})
             </button>
           </div>
-
           <div className="tab-content">
             {activeTab === 'overview' && (
               <div className="overview-tab">
@@ -332,7 +339,7 @@ const GroupPage: React.FC = () => {
                   <div className="stat-card">
                     <div className="stat-icon">👥</div>
                     <div className="stat-info">
-                      <div className="stat-number">{group.members.length}</div>
+                      <div className="stat-number">{members.length}</div>
                       <div className="stat-label">Участников</div>
                     </div>
                   </div>
@@ -351,24 +358,23 @@ const GroupPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-
                 <div className="quick-actions">
                   <h3>Быстрые действия</h3>
                   <div className="action-buttons">
-                    <button 
+                    <button
                       className="btn-primary"
                       onClick={() => setShowCreateFlashcardModal(true)}
                     >
                       Создать карточку
                     </button>
-                    <button 
+                    <button
                       className="btn-outline"
                       onClick={() => setShowInviteModal(true)}
                     >
                       Пригласить участников
                     </button>
-                    <Link 
-                      to={`/subjects/${group.subjectId._id}/flashcards`} 
+                    <Link
+                      to={`/subjects/${group.subjectId._id}/flashcards`}
                       className="btn-outline"
                     >
                       Изучать карточки
@@ -377,20 +383,19 @@ const GroupPage: React.FC = () => {
                 </div>
               </div>
             )}
-
             {activeTab === 'members' && (
               <div className="members-tab">
                 <h3>Участники группы</h3>
                 <div className="members-list">
-                  {group.members.map((member, index) => (
+                  {members.map((member, index) => (
                     <div key={index} className="member-card">
                       <div className="member-info">
                         <div className="member-avatar">
                           {member.user.name?.charAt(0)?.toUpperCase() || 'U'}
                         </div>
                         <div className="member-details">
-                          <div className="member-name">{member.user.name || 'Неизвестный пользователь'}</div>
-                          <div className="member-email">{member.user.email || 'Email не указан'}</div>
+                          <div className="member-name">{member.user.name}</div>
+                          <div className="member-email">{member.user.email}</div>
                         </div>
                       </div>
                       <div className="member-role">
@@ -404,7 +409,6 @@ const GroupPage: React.FC = () => {
                 </div>
               </div>
             )}
-
             {activeTab === 'flashcards' && (
               <div className="flashcards-tab">
                 <h3>Карточки группы</h3>
@@ -412,7 +416,7 @@ const GroupPage: React.FC = () => {
                   <div className="empty-icon">📚</div>
                   <h4>Пока нет карточек</h4>
                   <p>Создайте первую карточку для совместного изучения</p>
-                  <button 
+                  <button
                     className="btn-primary"
                     onClick={() => setShowCreateFlashcardModal(true)}
                   >
@@ -421,25 +425,23 @@ const GroupPage: React.FC = () => {
                 </div>
               </div>
             )}
-
             {activeTab === 'notes' && (
               <div className="notes-tab">
                 <div className="notes-header">
-                  <h3>Заметки группы</h3>
-                  <button 
-                    className="btn-primary"
+                  <h3>Заметки группы ({notes.length})</h3>
+                  <button
+                    className="btn-primary create-note-btn"
                     onClick={() => setShowCreateNoteModal(true)}
                   >
                     + Создать заметку
                   </button>
                 </div>
-                
                 {notes.length === 0 ? (
                   <div className="empty-state">
                     <div className="empty-icon">📝</div>
                     <h4>Пока нет заметок</h4>
                     <p>Создайте первую заметку для совместной работы</p>
-                    <button 
+                    <button
                       className="btn-primary"
                       onClick={() => setShowCreateNoteModal(true)}
                     >
@@ -449,9 +451,21 @@ const GroupPage: React.FC = () => {
                 ) : (
                   <div className="notes-list">
                     {notes.map((note) => (
-                      <div key={note.id} className="note-card">
+                      <div key={note._id} className="note-card"> {/* Фикс: key={note._id} */}
                         <div className="note-header">
                           <h4 className="note-title">{note.title}</h4>
+                          <div className="note-actions">
+                            <button
+                              className="edit-btn"
+                              onClick={() => handleEditNote(note)}
+                              title="Редактировать"
+                            >
+                              ✏️
+                            </button>
+                          </div>
+                        </div>
+                        <div className="note-meta">
+                          <span className="note-author">Автор: {note.authorId.name}</span> {/* Фикс: note.authorId.name */}
                           <span className="note-date">
                             {new Date(note.createdAt).toLocaleDateString('ru-RU')}
                           </span>
@@ -469,7 +483,6 @@ const GroupPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Модальное окно подтверждения удаления */}
       {showDeleteConfirm && (
         <div className="modal-overlay">
           <div className="modal-content delete-modal">
@@ -482,13 +495,13 @@ const GroupPage: React.FC = () => {
               <p>Это действие нельзя отменить.</p>
             </div>
             <div className="modal-actions">
-              <button 
+              <button
                 className="btn-outline"
                 onClick={() => setShowDeleteConfirm(false)}
               >
                 Отмена
               </button>
-              <button 
+              <button
                 className="btn-danger"
                 onClick={handleDeleteGroup}
               >
@@ -499,7 +512,6 @@ const GroupPage: React.FC = () => {
         </div>
       )}
 
-      {/* Модальные окна функционала */}
       {group && (
         <>
           <CreateGroupFlashcardModal
@@ -508,19 +520,26 @@ const GroupPage: React.FC = () => {
             groupId={group._id}
             subjectId={group.subjectId._id}
             onFlashcardCreated={() => {
-              alert('Карточка успешно создана!');
+              loadGroup(); // Перезагрузка для обновления stats (если 0 карточек)
             }}
           />
-
           <CreateGroupNoteModal
             isOpen={showCreateNoteModal}
             onClose={() => setShowCreateNoteModal(false)}
             groupId={group._id}
-            onNoteCreated={() => {
-              loadNotes(); // Перезагружаем заметки после создания
-            }}
+            onNoteCreated={loadNotes} // Фикс: reload после создания
           />
-
+          <EditGroupNoteModal
+  isOpen={showEditNoteModal}
+  onClose={() => {
+    setShowEditNoteModal(false);
+    setEditingNote(null);
+  }}
+  note={editingNote}
+  groupId={group._id} // Новый пропс
+  onNoteUpdated={loadNotes}
+  onNoteDeleted={loadNotes}
+/>
           <InviteMembersModal
             isOpen={showInviteModal}
             onClose={() => setShowInviteModal(false)}

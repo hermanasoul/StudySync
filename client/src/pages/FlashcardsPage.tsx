@@ -311,12 +311,13 @@ const FlashcardsPage: React.FC = () => {
         </div>
       </div>
 
-      <CreateFlashcardModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        subjectId={subjectId!}
-        onFlashcardCreated={loadFlashcards}
-      />
+<CreateFlashcardModal
+  isOpen={showCreateModal}
+  onClose={() => setShowCreateModal(false)}
+  subjectId={subjectId!}
+  onFlashcardCreated={loadFlashcards}
+  groupId={undefined}
+/>
 
       <EditFlashcardModal
         isOpen={showEditModal}

@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
 import { flashcardsAPI } from '../services/api';
-import './CreateGroupFlashcardModal.css';
+import './CreateFlashcardModal.css';
 
-interface CreateGroupFlashcardModalProps {
+interface CreateFlashcardModalProps {
   isOpen: boolean;
   onClose: () => void;
-  groupId: string;
   subjectId: string;
+  groupId?: string;
   onFlashcardCreated: () => void;
 }
 
-const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
+const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
   isOpen,
   onClose,
-  groupId,
   subjectId,
+  groupId,
   onFlashcardCreated
 }) => {
   const [question, setQuestion] = useState('');
@@ -34,20 +34,15 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
     setError('');
 
     try {
-      // Создаем объект с данными для карточки
       const flashcardData: any = {
         question: question.trim(),
         answer: answer.trim(),
         difficulty,
-        groupId: groupId
+        subjectId: subjectId
       };
 
-      // Добавляем subjectId только если он есть
-      if (subjectId && subjectId !== 'undefined') {
-        flashcardData.subjectId = subjectId;
-      } else {
-        // Если subjectId нет, используем демо ID
-        flashcardData.subjectId = '1';
+      if (groupId) {
+        flashcardData.groupId = groupId;
       }
 
       const response = await flashcardsAPI.create(flashcardData);
@@ -63,30 +58,7 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
       }
     } catch (err: any) {
       console.error('Create flashcard error:', err);
-      // Если ошибка, пробуем создать с упрощенными данными
-      try {
-        const demoData = {
-          question: question.trim(),
-          answer: answer.trim(),
-          difficulty,
-          groupId: groupId,
-          subjectId: 'demo-subject'
-        };
-        
-        const demoResponse = await flashcardsAPI.create(demoData);
-        
-        if (demoResponse.data.success) {
-          setQuestion('');
-          setAnswer('');
-          setDifficulty('medium');
-          onFlashcardCreated();
-          onClose();
-        } else {
-          setError('Не удалось создать карточку. Проверьте данные и попробуйте снова.');
-        }
-      } catch (demoError) {
-        setError('Ошибка соединения с сервером. Проверьте подключение и попробуйте снова.');
-      }
+      setError('Ошибка соединения с сервером. Проверьте подключение и попробуйте снова.');
     } finally {
       setLoading(false);
     }
@@ -106,16 +78,12 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
     <div className="modal-overlay" onClick={handleClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Создать карточку для группы</h2>
+          <h2>Создать карточку</h2>
           <button className="close-button" onClick={handleClose}>×</button>
         </div>
 
         <form onSubmit={handleSubmit} className="flashcard-form">
-          {error && (
-            <div className="error-message">
-              <strong>Ошибка:</strong> {error}
-            </div>
-          )}
+          {error && <div className="error-message">{error}</div>}
 
           <div className="form-group">
             <label htmlFor="question">Вопрос *</label>
@@ -166,7 +134,7 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
             <button
               type="submit"
               className="btn-primary"
-              disabled={loading || !question.trim() || !answer.trim()}
+              disabled={loading}
             >
               {loading ? 'Создание...' : 'Создать карточку'}
             </button>
@@ -177,4 +145,4 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
   );
 };
 
-export default CreateGroupFlashcardModal;
+export default CreateFlashcardModal;
