@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { groupsAPI } from '../services/api'; // Используй groupsAPI для /notes
+import { groupsAPI } from '../services/api';
 import './CreateGroupNoteModal.css';
 
 interface CreateGroupNoteModalProps {
@@ -22,34 +22,31 @@ const CreateGroupNoteModal: React.FC<CreateGroupNoteModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!title.trim()) {
       setError('Введите заголовок заметки');
       return;
     }
-    if (!content.trim()) {
-      setError('Введите содержание заметки');
-      return;
-    }
+
     setLoading(true);
     setError('');
+
     try {
       const noteData = {
         title: title.trim(),
         content: content.trim(),
-        // tags: [] — если нужно
+        groupId
       };
-      const response = await groupsAPI.createNote(groupId, noteData); // Новый метод API или POST /groups/:id/notes
-      if (response.data.success) {
-        setTitle('');
-        setContent('');
-        onNoteCreated();
-        onClose();
-      } else {
-        setError(response.data.error || 'Ошибка при создании заметки');
-      }
+
+      await groupsAPI.createNote(groupId, noteData);
+      
+      setTitle('');
+      setContent('');
+      onNoteCreated();
+      onClose();
     } catch (err: any) {
       console.error('Create note error:', err);
-      setError(err.response?.data?.error || 'Ошибка соединения с сервером. Проверьте подключение.');
+      setError(err.response?.data?.error || 'Ошибка при создании заметки');
     } finally {
       setLoading(false);
     }
@@ -66,17 +63,19 @@ const CreateGroupNoteModal: React.FC<CreateGroupNoteModalProps> = ({
 
   return (
     <div className="modal-overlay" onClick={handleClose}>
-      <div className="modal-content note-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Создать заметку для группы</h2>
           <button className="close-button" onClick={handleClose}>×</button>
         </div>
+
         <form onSubmit={handleSubmit} className="note-form">
           {error && (
             <div className="error-message">
               <strong>Ошибка:</strong> {error}
             </div>
           )}
+
           <div className="form-group">
             <label htmlFor="title">Заголовок *</label>
             <input
@@ -86,24 +85,20 @@ const CreateGroupNoteModal: React.FC<CreateGroupNoteModalProps> = ({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Введите заголовок заметки..."
               required
-              maxLength={100}
             />
-            <div className="input-hint">{title.length}/100 символов</div>
           </div>
+
           <div className="form-group">
-            <label htmlFor="content">Содержание *</label>
+            <label htmlFor="content">Содержание</label>
             <textarea
               id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Введите содержание заметки..."
-              rows={8}
-              required
+              rows={6}
             />
-            <div className="input-hint">
-              Поддерживается обычный текст. Вы можете добавлять списки, определения и важные моменты.
-            </div>
           </div>
+
           <div className="form-actions">
             <button
               type="button"
@@ -116,7 +111,7 @@ const CreateGroupNoteModal: React.FC<CreateGroupNoteModalProps> = ({
             <button
               type="submit"
               className="btn-primary"
-              disabled={loading || !title.trim() || !content.trim()}
+              disabled={loading || !title.trim()}
             >
               {loading ? 'Создание...' : 'Создать заметку'}
             </button>

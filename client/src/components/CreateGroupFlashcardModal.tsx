@@ -19,7 +19,7 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
 }) => {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
-  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [hint, setHint] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -29,29 +29,28 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
       setError('Заполните вопрос и ответ');
       return;
     }
+    if (!subjectId) {
+      setError('Не указан предмет для карточки');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
-      const flashcardData = {
+      await flashcardsAPI.create({
         question: question.trim(),
         answer: answer.trim(),
-        difficulty,
-        subjectId,
-        groupId
-      };
-      const response = await flashcardsAPI.create(flashcardData); // Предполагаю, API handles with token
-      if (response.data.success) {
-        setQuestion('');
-        setAnswer('');
-        setDifficulty('medium');
-        onFlashcardCreated();
-        onClose();
-      } else {
-        setError(response.data.error || 'Ошибка при создании карточки');
-      }
+        hint: hint.trim(),
+        subjectId: subjectId,
+        groupId: groupId
+      });
+      setQuestion('');
+      setAnswer('');
+      setHint('');
+      onFlashcardCreated();
+      onClose();
     } catch (err: any) {
-      console.error('Create flashcard error:', err);
-      setError(err.response?.data?.error || 'Ошибка соединения с сервером. Проверьте подключение.');
+      console.error('Create group flashcard error:', err);
+      setError(err.response?.data?.error || 'Ошибка при создании карточки');
     } finally {
       setLoading(false);
     }
@@ -60,7 +59,7 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
   const handleClose = () => {
     setQuestion('');
     setAnswer('');
-    setDifficulty('medium');
+    setHint('');
     setError('');
     onClose();
   };
@@ -70,9 +69,10 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
   return (
     <div className="modal-overlay" onClick={handleClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        {/* Close button moved to top-right corner */}
+        <button className="close-button" onClick={handleClose}>×</button>
         <div className="modal-header">
           <h2>Создать карточку для группы</h2>
-          <button className="close-button" onClick={handleClose}>×</button>
         </div>
         <form onSubmit={handleSubmit} className="flashcard-form">
           {error && (
@@ -87,8 +87,8 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="Введите вопрос..."
-              rows={3}
               required
+              rows={3}
             />
           </div>
           <div className="form-group">
@@ -98,27 +98,25 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               placeholder="Введите ответ..."
-              rows={3}
               required
+              rows={3}
             />
           </div>
           <div className="form-group">
-            <label htmlFor="difficulty">Сложность</label>
-            <select
-              id="difficulty"
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value as 'easy' | 'medium' | 'hard')}
-            >
-              <option value="easy">Легкая</option>
-              <option value="medium">Средняя</option>
-              <option value="hard">Сложная</option>
-            </select>
+            <label htmlFor="hint">Подсказка (необязательно)</label>
+            <input
+              id="hint"
+              type="text"
+              value={hint}
+              onChange={(e) => setHint(e.target.value)}  // Fixed: Removed wrong onClick={handleClose}
+              placeholder="Введите подсказку..."
+            />
           </div>
           <div className="form-actions">
             <button
               type="button"
               onClick={handleClose}
-              className="btn-outline"
+              className="btn-secondary"
               disabled={loading}
             >
               Отмена

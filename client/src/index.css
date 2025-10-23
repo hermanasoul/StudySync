@@ -22,3 +22,8 @@ code {
 a {
   text-decoration: none;
 }
+
+.page-with-header {
+  padding-top: 140px !important;
+  min-height: 100vh;
+}

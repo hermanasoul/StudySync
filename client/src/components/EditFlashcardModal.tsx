@@ -6,9 +6,9 @@ interface Flashcard {
   _id: string;
   question: string;
   answer: string;
-  difficulty: string;
-  knowCount: number;
-  dontKnowCount: number;
+  hint?: string;
+  subjectId: string;
+  known: boolean;
 }
 
 interface EditFlashcardModalProps {
@@ -16,48 +16,47 @@ interface EditFlashcardModalProps {
   onClose: () => void;
   flashcard: Flashcard | null;
   onFlashcardUpdated: () => void;
+  onFlashcardDeleted: () => void;
 }
 
 const EditFlashcardModal: React.FC<EditFlashcardModalProps> = ({
   isOpen,
   onClose,
   flashcard,
-  onFlashcardUpdated
+  onFlashcardUpdated,
+  onFlashcardDeleted
 }) => {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
-  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [hint, setHint] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (flashcard) {
-      setQuestion(flashcard.question);
-      setAnswer(flashcard.answer);
-      setDifficulty(flashcard.difficulty as 'easy' | 'medium' | 'hard');
+      setQuestion(flashcard.question || '');
+      setAnswer(flashcard.answer || '');
+      setHint(flashcard.hint || '');
     }
   }, [flashcard]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!flashcard || !question.trim() || !answer.trim()) {
+  const handleUpdate = async () => {
+    if (!question.trim() || !answer.trim()) {
       setError('Заполните вопрос и ответ');
       return;
     }
-
     setLoading(true);
     setError('');
-
     try {
-      await flashcardsAPI.update(flashcard._id, {
+      await flashcardsAPI.update(flashcard!._id, {
         question: question.trim(),
         answer: answer.trim(),
-        difficulty
+        hint: hint.trim()
       });
-
       onFlashcardUpdated();
       onClose();
     } catch (err: any) {
+      console.error('Update flashcard error:', err);
       setError(err.response?.data?.error || 'Ошибка при обновлении карточки');
     } finally {
       setLoading(false);
@@ -65,18 +64,17 @@ const EditFlashcardModal: React.FC<EditFlashcardModalProps> = ({
   };
 
   const handleDelete = async () => {
-    if (!flashcard) return;
-
     if (!window.confirm('Вы уверены, что хотите удалить эту карточку?')) {
       return;
     }
-
     setLoading(true);
+    setError('');
     try {
-      await flashcardsAPI.delete(flashcard._id);
-      onFlashcardUpdated();
+      await flashcardsAPI.delete(flashcard!._id);
+      onFlashcardDeleted();
       onClose();
     } catch (err: any) {
+      console.error('Delete flashcard error:', err);
       setError(err.response?.data?.error || 'Ошибка при удалении карточки');
     } finally {
       setLoading(false);
@@ -86,7 +84,7 @@ const EditFlashcardModal: React.FC<EditFlashcardModalProps> = ({
   const handleClose = () => {
     setQuestion('');
     setAnswer('');
-    setDifficulty('medium');
+    setHint('');
     setError('');
     onClose();
   };
@@ -100,21 +98,12 @@ const EditFlashcardModal: React.FC<EditFlashcardModalProps> = ({
           <h2>Редактировать карточку</h2>
           <button className="close-button" onClick={handleClose}>×</button>
         </div>
-
-        <form onSubmit={handleSubmit} className="flashcard-form">
-          {error && <div className="error-message">{error}</div>}
-
-          <div className="stats-info">
-            <div className="stat-item">
-              <span className="stat-label">Знаю:</span>
-              <span className="stat-value">{flashcard.knowCount}</span>
+        <div className="flashcard-form">
+          {error && (
+            <div className="error-message">
+              <strong>Ошибка:</strong> {error}
             </div>
-            <div className="stat-item">
-              <span className="stat-label">Не знаю:</span>
-              <span className="stat-value">{flashcard.dontKnowCount}</span>
-            </div>
-          </div>
-
+          )}
           <div className="form-group">
             <label htmlFor="question">Вопрос *</label>
             <textarea
@@ -122,11 +111,10 @@ const EditFlashcardModal: React.FC<EditFlashcardModalProps> = ({
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="Введите вопрос..."
-              rows={3}
               required
+              rows={3}
             />
           </div>
-
           <div className="form-group">
             <label htmlFor="answer">Ответ *</label>
             <textarea
@@ -134,54 +122,51 @@ const EditFlashcardModal: React.FC<EditFlashcardModalProps> = ({
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               placeholder="Введите ответ..."
-              rows={3}
               required
+              rows={3}
             />
           </div>
-
           <div className="form-group">
-            <label htmlFor="difficulty">Сложность</label>
-            <select
-              id="difficulty"
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value as 'easy' | 'medium' | 'hard')}
-            >
-              <option value="easy">Легкая</option>
-              <option value="medium">Средняя</option>
-              <option value="hard">Сложная</option>
-            </select>
+            <label htmlFor="hint">Подсказка (необязательно)</label>
+            <input
+              id="hint"
+              type="text"
+              value={hint}
+              onChange={(e) => setHint(e.target.value)}
+              placeholder="Введите подсказку..."
+            />
           </div>
-
           <div className="form-actions">
-            <div className="left-actions">
+            <div className="actions-left">
               <button
                 type="button"
-                onClick={handleDelete}
                 className="btn-danger"
+                onClick={handleDelete}
                 disabled={loading}
               >
                 Удалить
               </button>
             </div>
-            <div className="right-actions">
+            <div className="actions-right">
               <button
                 type="button"
                 onClick={handleClose}
-                className="btn-outline"
+                className="btn-secondary"
                 disabled={loading}
               >
                 Отмена
               </button>
               <button
-                type="submit"
+                type="button"
                 className="btn-primary"
-                disabled={loading}
+                onClick={handleUpdate}
+                disabled={loading || !question.trim() || !answer.trim()}
               >
                 {loading ? 'Сохранение...' : 'Сохранить'}
               </button>
             </div>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

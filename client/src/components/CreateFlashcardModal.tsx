@@ -5,21 +5,19 @@ import './CreateFlashcardModal.css';
 interface CreateFlashcardModalProps {
   isOpen: boolean;
   onClose: () => void;
-  subjectId: string;
-  groupId?: string;
   onFlashcardCreated: () => void;
+  subjectId: string;
 }
 
 const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
   isOpen,
   onClose,
-  subjectId,
-  groupId,
-  onFlashcardCreated
+  onFlashcardCreated,
+  subjectId
 }) => {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
-  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [hint, setHint] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -29,36 +27,27 @@ const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
       setError('Заполните вопрос и ответ');
       return;
     }
-
+    if (!subjectId) {
+      setError('Не указан предмет для карточки');
+      return;
+    }
     setLoading(true);
     setError('');
-
     try {
-      const flashcardData: any = {
+      await flashcardsAPI.create({
         question: question.trim(),
         answer: answer.trim(),
-        difficulty,
+        hint: hint.trim(),
         subjectId: subjectId
-      };
-
-      if (groupId) {
-        flashcardData.groupId = groupId;
-      }
-
-      const response = await flashcardsAPI.create(flashcardData);
-      
-      if (response.data.success) {
-        setQuestion('');
-        setAnswer('');
-        setDifficulty('medium');
-        onFlashcardCreated();
-        onClose();
-      } else {
-        setError(response.data.error || 'Ошибка при создании карточки');
-      }
+      });
+      setQuestion('');
+      setAnswer('');
+      setHint('');
+      onFlashcardCreated();
+      onClose();
     } catch (err: any) {
       console.error('Create flashcard error:', err);
-      setError('Ошибка соединения с сервером. Проверьте подключение и попробуйте снова.');
+      setError(err.response?.data?.error || 'Ошибка при создании карточки');
     } finally {
       setLoading(false);
     }
@@ -67,7 +56,7 @@ const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
   const handleClose = () => {
     setQuestion('');
     setAnswer('');
-    setDifficulty('medium');
+    setHint('');
     setError('');
     onClose();
   };
@@ -81,10 +70,12 @@ const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
           <h2>Создать карточку</h2>
           <button className="close-button" onClick={handleClose}>×</button>
         </div>
-
         <form onSubmit={handleSubmit} className="flashcard-form">
-          {error && <div className="error-message">{error}</div>}
-
+          {error && (
+            <div className="error-message">
+              <strong>Ошибка:</strong> {error}
+            </div>
+          )}
           <div className="form-group">
             <label htmlFor="question">Вопрос *</label>
             <textarea
@@ -92,11 +83,10 @@ const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="Введите вопрос..."
-              rows={3}
               required
+              rows={3}
             />
           </div>
-
           <div className="form-group">
             <label htmlFor="answer">Ответ *</label>
             <textarea
@@ -104,29 +94,25 @@ const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               placeholder="Введите ответ..."
-              rows={3}
               required
+              rows={3}
             />
           </div>
-
           <div className="form-group">
-            <label htmlFor="difficulty">Сложность</label>
-            <select
-              id="difficulty"
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value as 'easy' | 'medium' | 'hard')}
-            >
-              <option value="easy">Легкая</option>
-              <option value="medium">Средняя</option>
-              <option value="hard">Сложная</option>
-            </select>
+            <label htmlFor="hint">Подсказка (необязательно)</label>
+            <input
+              id="hint"
+              type="text"
+              value={hint}
+              onChange={(e) => setHint(e.target.value)}
+              placeholder="Введите подсказку..."
+            />
           </div>
-
           <div className="form-actions">
             <button
               type="button"
               onClick={handleClose}
-              className="btn-outline"
+              className="btn-secondary"
               disabled={loading}
             >
               Отмена
@@ -134,7 +120,7 @@ const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
             <button
               type="submit"
               className="btn-primary"
-              disabled={loading}
+              disabled={loading || !question.trim() || !answer.trim()}
             >
               {loading ? 'Создание...' : 'Создать карточку'}
             </button>

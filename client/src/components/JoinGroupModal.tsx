@@ -16,10 +16,10 @@ const JoinGroupModal: React.FC<JoinGroupModalProps> = ({
   const [inviteCode, setInviteCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!inviteCode.trim()) {
       setError('Введите код приглашения');
       return;
@@ -27,20 +27,13 @@ const JoinGroupModal: React.FC<JoinGroupModalProps> = ({
 
     setLoading(true);
     setError('');
-    setSuccess('');
 
     try {
-      const response = await groupsAPI.join(inviteCode.trim().toUpperCase());
-      
-      if (response.data.success) {
-        setSuccess('Вы успешно присоединились к группе!');
-        setInviteCode('');
-        setTimeout(() => {
-          onJoinSuccess();
-          onClose();
-        }, 1500);
-      }
+      await groupsAPI.join(inviteCode.trim());
+      onJoinSuccess();
+      onClose();
     } catch (err: any) {
+      console.error('Join group error:', err);
       setError(err.response?.data?.error || 'Ошибка при присоединении к группе');
     } finally {
       setLoading(false);
@@ -50,7 +43,6 @@ const JoinGroupModal: React.FC<JoinGroupModalProps> = ({
   const handleClose = () => {
     setInviteCode('');
     setError('');
-    setSuccess('');
     onClose();
   };
 
@@ -58,15 +50,18 @@ const JoinGroupModal: React.FC<JoinGroupModalProps> = ({
 
   return (
     <div className="modal-overlay" onClick={handleClose}>
-      <div className="modal-content join-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Присоединиться к группе</h2>
           <button className="close-button" onClick={handleClose}>×</button>
         </div>
 
         <form onSubmit={handleSubmit} className="join-form">
-          {error && <div className="error-message">{error}</div>}
-          {success && <div className="success-message">{success}</div>}
+          {error && (
+            <div className="error-message">
+              <strong>Ошибка:</strong> {error}
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="inviteCode">Код приглашения</label>
@@ -76,13 +71,12 @@ const JoinGroupModal: React.FC<JoinGroupModalProps> = ({
               value={inviteCode}
               onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
               placeholder="Введите код приглашения..."
-              className="invite-input"
-              maxLength={6}
               required
+              style={{ textTransform: 'uppercase' }}
             />
-            <p className="input-hint">
-              Код приглашения состоит из 6 символов (буквы и цифры)
-            </p>
+            <div className="input-hint">
+              Код обычно состоит из 6-8 символов (буквы и цифры)
+            </div>
           </div>
 
           <div className="form-actions">
@@ -97,7 +91,7 @@ const JoinGroupModal: React.FC<JoinGroupModalProps> = ({
             <button
               type="submit"
               className="btn-primary"
-              disabled={loading}
+              disabled={loading || !inviteCode.trim()}
             >
               {loading ? 'Присоединение...' : 'Присоединиться'}
             </button>

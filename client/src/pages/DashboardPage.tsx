@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
+import Button from '../components/Button';
 import './DashboardPage.css';
+import '../App.css';
 
 interface Subject {
   id: string;
@@ -37,7 +39,6 @@ const DashboardPage: React.FC = () => {
       setLoading(true);
       const response = await fetchWithAuth('/subjects');
       const data = await response.json();
-      
       if (data.success) {
         setSubjects(data.subjects);
       } else {
@@ -99,7 +100,7 @@ const DashboardPage: React.FC = () => {
 
   const ProgressBar: React.FC<{ progress: number; color: string }> = ({ progress, color }) => (
     <div className="progress-container">
-      <div 
+      <div
         className={`progress-bar ${color}`}
         style={{ width: `${progress}%` }}
       ></div>
@@ -111,7 +112,9 @@ const DashboardPage: React.FC = () => {
     return (
       <div className="dashboard-page">
         <Header />
-        <div className="loading">Загрузка...</div>
+        <div className="page-with-header">
+          <div className="loading">Загрузка...</div>
+        </div>
       </div>
     );
   }
@@ -119,63 +122,57 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="dashboard-page">
       <Header />
-      
-      <div className="dashboard-container">
-        <div className="dashboard-header">
-          <h1>Личный кабинет</h1>
-          <p>Ваш прогресс по предметам</p>
-        </div>
-
-        <div className="subjects-grid">
-          {subjects.map((subject) => (
-            <div key={subject.id} className="subject-card">
-              <div className="subject-header">
-                <h3 className={`subject-title ${subject.color}`}>{subject.name}</h3>
-                <span className="progress-percent">{subject.progress}%</span>
-              </div>
-              
-              <p className="subject-description">{subject.description}</p>
-              
-              <ProgressBar progress={subject.progress} color={subject.color} />
-              
-              <div className="subject-actions">
-                <Link to={`/subjects/${subject.id}`} className="btn-outline">
-                  Заметки
-                </Link>
-                <Link to={`/subjects/${subject.id}/flashcards`} className="btn-primary">
-                  Карточки
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="quick-stats">
-          <h2>Быстрая статистика</h2>
-          <div className="stats-grid">
-            <div className="stat-card">
-              <div className="stat-icon">📚</div>
-              <div className="stat-info">
-                <div className="stat-number">{subjects.length}</div>
-                <div className="stat-label">Предмета</div>
-              </div>
-            </div>
-            
-            <div className="stat-card">
-              <div className="stat-icon">🎯</div>
-              <div className="stat-info">
-                <div className="stat-number">
-                  {Math.round(subjects.reduce((acc, subject) => acc + subject.progress, 0) / subjects.length)}%
+      <div className="page-with-header">
+        <div className="dashboard-container">
+          <div className="dashboard-header">
+            <h1>Личный кабинет</h1>
+            <p>Ваш прогресс по предметам</p>
+          </div>
+          <div className="subjects-grid">
+            {subjects.map((subject) => (
+              <div key={subject.id} className="subject-card">
+                <div className="subject-header">
+                  <h3 className={`subject-title ${subject.color}`}>{subject.name}</h3>
+                  <span className="progress-percent">{subject.progress}%</span>
                 </div>
-                <div className="stat-label">Общий прогресс</div>
+                <p className="subject-description">{subject.description}</p>
+                <ProgressBar progress={subject.progress} color={subject.color} />
+                <div className="subject-actions button-group"> {/* Добавлен button-group для унифицированного выравнивания */}
+                  <Button variant="outline" href={`/subjects/${subject.id}`}>
+                    Заметки
+                  </Button>
+                  <Button variant="primary" href={`/subjects/${subject.id}/flashcards`}>
+                    Карточки
+                  </Button>
+                </div>
               </div>
-            </div>
-            
-            <div className="stat-card">
-              <div className="stat-icon">⭐</div>
-              <div className="stat-info">
-                <div className="stat-number">12</div>
-                <div className="stat-label">Изучено тем</div>
+            ))}
+          </div>
+          <div className="quick-stats">
+            <h2>Быстрая статистика</h2>
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-icon">📚</div>
+                <div className="stat-info"> {/* Добавлен класс stat-info */}
+                  <div className="stat-number">{subjects.length}</div>
+                  <div className="stat-label">Предмета</div>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">🎯</div>
+                <div className="stat-info">
+                  <div className="stat-number">
+                    {Math.round(subjects.reduce((acc, subject) => acc + subject.progress, 0) / subjects.length || 0)}%
+                  </div>
+                  <div className="stat-label">Общий прогресс</div>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">⭐</div>
+                <div className="stat-info">
+                  <div className="stat-number">12</div>
+                  <div className="stat-label">Изучено тем</div>
+                </div>
               </div>
             </div>
           </div>

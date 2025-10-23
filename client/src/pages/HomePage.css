@@ -1,112 +1,107 @@
 .home-page {
   min-height: 100vh;
-}
-
-.hero {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 70px 20px 20px;
-}
-
-.hero-content {
-  text-align: center;
-  max-width: 800px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
   color: white;
 }
 
-.hero-title {
+.home-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.hero-section h1 {
   font-size: 48px;
-  font-weight: bold;
-  margin-bottom: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
   line-height: 1.2;
 }
 
-.highlight {
-  color: #fbbf24;
-}
-
-.hero-subtitle {
+.hero-section p {
   font-size: 20px;
   margin-bottom: 40px;
-  line-height: 1.6;
-  opacity: 0.9;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.5;
 }
 
-.button-group {
+.hero-buttons {
   display: flex;
-  gap: 20px;
+  gap: 20px; /* Локальный gap 20px для главной */
   justify-content: center;
   flex-wrap: wrap;
+  align-items: stretch; /* Фикс выравнивания по высоте */
 }
 
-.btn {
-  padding: 16px 32px !important;
-  border-radius: 10px !important;
-  text-decoration: none !important;
-  font-weight: 700 !important;
-  font-size: 18px !important;
-  transition: all 0.3s ease !important;
-  min-width: 220px !important;
-  display: inline-block !important;
-  text-align: center !important;
-  border: none !important;
-  cursor: pointer !important;
-  font-family: inherit !important;
-  line-height: 1.5 !important;
-  outline: none !important;
+/* Custom стиль для первичной кнопки на главной */
+.hero-btn-primary {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s;
+  min-width: 200px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  background: white;
+  color: #4f46e5;
+  border: none;
+  box-shadow: 0 4px 14px rgba(251, 191, 36, 0.3);
+  cursor: pointer;
 }
 
-.btn:focus,
-.btn:active {
-  outline: none !important;
-  box-shadow: none !important;
+.hero-btn-primary:hover {
+  background: #e0e7ff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(251, 191, 36, 0.4);
 }
 
-.btn-filled {
-  background: #fbbf24 !important;
-  color: #1f2937 !important;
-  box-shadow: 0 4px 14px rgba(251, 191, 36, 0.3) !important;
+/* Custom стиль для outline кнопки на главной */
+.hero-btn-outline {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s;
+  min-width: 200px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+  cursor: pointer;
 }
 
-.btn-filled:hover {
-  background: #f59e0b !important;
-  transform: translateY(-3px) !important;
-  box-shadow: 0 8px 25px rgba(251, 191, 36, 0.4) !important;
-}
-
-.btn-outline {
-  background: #3b82f6 !important;
-  color: white !important;
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3) !important;
-}
-
-.btn-outline:hover {
-  background: #2563eb !important;
-  transform: translateY(-3px) !important;
-  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4) !important;
+.hero-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
 }
 
 @media (max-width: 768px) {
-  .hero-title {
+  .hero-section h1 {
     font-size: 36px;
   }
-  
-  .hero-subtitle {
+
+  .hero-section p {
     font-size: 18px;
   }
-  
-  .button-group {
+
+  .hero-buttons {
     flex-direction: column;
-    align-items: center;
-  }
-  
-  .btn {
-    width: 100% !important;
-    max-width: 280px !important;
-    font-size: 16px !important;
-    padding: 14px 28px !important;
+    width: 100%;
   }
 }

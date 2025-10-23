@@ -1,12 +1,14 @@
+/* client/src/pages/GroupPage.css - Full updated version with all fixes: equal badge spacing by removing margin-right, uniform gaps, bold middle badge, green third badge, synced button styles with yellow third button */
 .group-page {
   min-height: 100vh;
   background: #f8fafc;
+  padding-top: 100px;
 }
 
 .group-container {
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 40px 20px;
 }
 
 .breadcrumb {
@@ -16,7 +18,7 @@
 }
 
 .breadcrumb a {
-  color: #3b82f6;
+  color: #4f46e5;
   text-decoration: none;
 }
 
@@ -27,9 +29,9 @@
 .group-header {
   background: white;
   border-radius: 12px;
-  padding: 32px;
-  margin-bottom: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: 30px;
+  margin-bottom: 30px;
 }
 
 .group-title-section {
@@ -37,116 +39,135 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 20px;
-  gap: 20px;
 }
 
 .group-info h1 {
-  margin: 0 0 12px 0;
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
   color: #1f2937;
+  margin-bottom: 10px;
 }
 
 .group-meta {
+  margin-top: 20px;
   display: flex;
+  gap: 15px !important; /* Equal uniform gaps for consistent spacing between badges */
   align-items: center;
-  gap: 12px;
   flex-wrap: wrap;
 }
 
 .subject-tag {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-  color: white;
+  display: inline-block;
+  padding: 6px 12px !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: white !important;
+  min-height: 28px !important;
+  box-sizing: border-box !important;
+  white-space: nowrap;
+  flex-shrink: 0;
+  /* margin-right removed for equal spacing */
 }
 
-.subject-tag.green { background: #10b981; } /* green */
-.subject-tag.blue { background: #3b82f6; } /* blue */
-.subject-tag.purple { background: #8b5cf6; } /* purple */
-.subject-tag.orange { background: #f59e0b; } /* для других предметов, если нужно */
-.subject-tag.red { background: #ef4444; } /* fallback */
+.subject-tag.green {
+  background: #10b981;
+}
+
+.subject-tag.blue {
+  background: #3b82f6;
+}
+
+.subject-tag.red {
+  background: #ef4444;
+}
 
 .public-badge {
-  padding: 6px 12px;
-  background: #d1fae5;
-  color: #065f46;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
+  display: inline-block;
+  background: #fbbf24;
+  color: #92400e;
+  padding: 6px 12px !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important; /* Added bold for consistency */
+  min-height: 24px !important;
+  box-sizing: border-box !important;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .member-count {
-  background: #e0e7ff;
-  color: #3730a3;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
+  display: inline-block;
+  padding: 6px 12px !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  min-height: 28px !important;
+  box-sizing: border-box !important;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: #10b981 !important; /* Green for third distinct color */
+  color: white !important;
 }
 
 .group-actions-header {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 12px;
+  gap: 10px;
 }
 
 .invite-section {
-  text-align: right;
+  font-size: 16px;
+  color: #6b7280;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .invite-label {
-  font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 4px;
+  font-weight: 500;
+  color: #1f2937;
 }
 
 .invite-code-display {
   font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
-  background: #f3f4f6;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: #4f46e5;
 }
 
 .btn-danger {
-  background: #ef4444 !important;
-  color: white !important;
-  padding: 10px 20px !important;
-  border-radius: 6px !important;
-  border: none !important;
-  font-weight: 500 !important;
-  cursor: pointer !important;
-  transition: background 0.2s !important;
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  height: 40px;
+  font-size: 14px;
 }
 
 .btn-danger:hover {
-  background: #dc2626 !important;
+  background: #dc2626;
 }
 
 .group-description-section {
-  margin-top: 20px;
   padding-top: 20px;
   border-top: 1px solid #e5e7eb;
 }
 
 .group-description {
-  margin: 0;
-  font-size: 16px;
+  color: #4a5568;
   line-height: 1.6;
-  color: #4b5563;
 }
 
 .group-content {
   background: white;
   border-radius: 12px;
-  padding: 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .tabs {
@@ -156,79 +177,56 @@
 
 .tab {
   flex: 1;
-  padding: 16px 24px;
+  padding: 15px;
   background: none;
   border: none;
-  font-size: 16px;
   font-weight: 500;
   color: #6b7280;
   cursor: pointer;
   transition: color 0.2s, background 0.2s;
-  white-space: nowrap;
+}
+
+.tab:hover {
+  background: #f9fafb;
 }
 
 .tab.active {
   color: #4f46e5;
-  border-bottom: 3px solid #4f46e5;
+  border-bottom: 2px solid #4f46e5;
   background: #f9fafb;
 }
 
-.tab:hover:not(.active) {
-  background: #f3f4f6;
-}
-
 .tab-content {
-  padding: 32px;
-  min-height: 400px;
+  padding: 30px;
 }
 
-.overview-tab,
-.members-tab,
-.flashcards-tab,
-.notes-tab {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+.overview-tab {
+  text-align: center;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 20px;
-  margin-bottom: 24px;
+  margin-bottom: 30px;
 }
 
 .stat-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  background: #f9fafb;
   padding: 20px;
-  background: #f8fafc;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
 }
 
 .stat-icon {
   font-size: 24px;
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
 }
 
-.stat-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat-number {
+.stat-info .stat-number {
   font-size: 28px;
   font-weight: 700;
-  color: #1f2937;
+  color: #4f46e5;
+  margin-bottom: 5px;
 }
 
 .stat-label {
@@ -237,102 +235,101 @@
 }
 
 .quick-actions h3 {
-  margin: 0 0 16px 0;
-  font-size: 18px;
+  font-size: 24px;
   color: #1f2937;
+  margin-bottom: 20px;
 }
 
 .action-buttons {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  display: flex !important;
+  gap: 15px !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
 }
 
-.btn-primary,
-.btn-outline {
-  padding: 12px 24px !important;
-  border-radius: 6px !important;
-  font-weight: 500 !important;
+.action-buttons .btn {
+  border-radius: 10px !important;
+  font-weight: 700 !important;
   font-size: 14px !important;
-  cursor: pointer !important;
-  transition: all 0.2s !important;
-  text-decoration: none !important;
-  display: inline-block !important;
+  height: 44px !important;
+  padding: 12px 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  flex: 0 0 auto !important;
+  background: transparent;
+  color: white !important;
   border: none !important;
-  white-space: nowrap !important;
+  white-space: nowrap;
+  transition: all 0.3s ease !important;
+  width: auto !important;
+  min-width: auto !important;
 }
 
-.btn-primary {
+.action-buttons .btn-primary {
   background: #4f46e5 !important;
-  color: white !important;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3) !important;
 }
 
-.btn-primary:hover:not(:disabled) {
+.action-buttons .btn-success {
+  background: #10b981 !important;
+}
+
+.action-buttons .btn-outline {
+  background: #fbbf24 !important; /* Yellow synced */
+  color: #92400e !important;
+  box-shadow: 0 4px 14px rgba(252, 211, 77, 0.3) !important;
+}
+
+.action-buttons .btn:hover {
+  transform: translateY(-1px);
+}
+
+.action-buttons .btn-primary:hover {
   background: #4338ca !important;
-  transform: translateY(-1px) !important;
 }
 
-.btn-outline {
-  background: transparent !important;
-  color: #4f46e5 !important;
-  border: 2px solid #4f46e5 !important;
+.action-buttons .btn-success:hover {
+  background: #059669 !important;
 }
 
-.btn-outline:hover:not(:disabled) {
-  background: #4f46e5 !important;
-  color: white !important;
-  transform: translateY(-1px) !important;
-}
-
-.members-tab h3,
-.flashcards-tab h3,
-.notes-tab h3 {
-  margin: 0 0 20px 0;
-  font-size: 20px;
-  color: #1f2937;
-  font-weight: 600;
+.action-buttons .btn-outline:hover {
+  background: #d97706 !important; /* Darker yellow */
 }
 
 .members-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  gap: 15px;
 }
 
 .member-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  background: #f8fafc;
+  padding: 15px;
+  background: #f9fafb;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
 }
 
 .member-info {
   display: flex;
+  gap: 15px;
   align-items: center;
-  gap: 12px;
-  flex: 1;
 }
 
 .member-avatar {
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
   background: linear-gradient(135deg, #4f46e5, #7c3aed);
   color: white;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
   font-size: 18px;
-}
-
-.member-details {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  font-weight: 700;
 }
 
 .member-name {
@@ -341,208 +338,130 @@
 }
 
 .member-email {
-  font-size: 14px;
   color: #6b7280;
+  font-size: 14px;
 }
 
 .member-role {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
+  text-align: right;
 }
 
 .role-badge {
-  padding: 4px 8px;
-  border-radius: 12px;
-  color: white;
-  font-size: 12px;
-  font-weight: 500;
-  text-align: center;
-  min-width: 80px;
+  padding: 6px 12px !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  min-height: 28px !important;
+  color: white !important;
+  box-sizing: border-box !important;
+  white-space: nowrap;
 }
 
 .join-date {
+  display: block;
   font-size: 12px;
   color: #6b7280;
+  margin-top: 5px;
 }
 
-.flashcards-tab .empty-state,
-.notes-tab .empty-state {
+.empty-state {
   text-align: center;
-  padding: 60px 20px;
-  background: #f8fafc;
-  border-radius: 12px;
-  border: 2px dashed #d1d5db;
-  color: #6b7280;
+  padding: 40px;
 }
 
 .empty-icon {
   font-size: 48px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
-.empty-state h4 {
-  margin: 0 0 8px 0;
-  font-size: 18px;
-  color: #374151;
-}
-
-.empty-state p {
-  margin: 0 0 24px 0;
-  font-size: 16px;
-}
-
-/* Фикс для заметок: кнопка не наплывает на h3 */
 .notes-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  padding: 20px 0;
-  border-bottom: 1px solid #e5e7eb;
 }
 
-.notes-header h3 {
-  margin: 0;
-  flex: 1;
-  font-size: 20px;
-  color: #1f2937;
-  font-weight: 600;
-  margin-right: 15px; /* Отступ от кнопки */
-}
-
-.create-note-btn {
-  width: auto !important;
-  min-width: 140px !important;
-  padding: 8px 16px !important;
-  font-size: 14px !important;
-  margin-left: auto !important; /* Справа */
-  white-space: nowrap !important;
-  background: #4f46e5 !important;
-  color: white !important;
-  border: none !important;
-  border-radius: 6px !important;
-  cursor: pointer !important;
-  transition: background 0.2s !important;
-}
-
-.create-note-btn:hover {
-  background: #4338ca !important;
+.create-note-btn, .btn-primary {
+  height: 44px !important;
 }
 
 .notes-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  gap: 15px;
 }
 
 .note-card {
   padding: 20px;
-  background: #f8fafc;
+  background: #f9fafb;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
 }
 
 .note-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .note-title {
-  margin: 0;
   font-size: 18px;
-  color: #1f2937;
   font-weight: 600;
-  flex: 1;
-  margin-right: 12px;
-}
-
-.note-actions {
-  display: flex;
-  gap: 8px;
+  color: #1f2937;
 }
 
 .edit-btn {
   background: none;
   border: none;
-  font-size: 16px;
+  font-size: 18px;
   cursor: pointer;
   color: #6b7280;
-  padding: 4px;
-  border-radius: 4px;
-  transition: background 0.2s;
+  transition: color 0.2s;
 }
 
 .edit-btn:hover {
-  background: #f3f4f6;
-  color: #374151;
+  color: #4f46e5;
 }
 
 .note-meta {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
   font-size: 14px;
   color: #6b7280;
-}
-
-.note-author {
-  font-weight: 500;
-}
-
-.note-date {
-  opacity: 0.8;
+  margin-bottom: 10px;
 }
 
 .note-content {
+  color: #4a5568;
   line-height: 1.6;
-  color: #4b5563;
-  white-space: pre-wrap;
 }
 
-/* Модалы (shared стили) */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1000;
+  justify-content: center;
+  z-index: 2000;
 }
 
 .modal-content {
   background: white;
+  padding: 30px;
   border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   max-width: 500px;
   width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.delete-modal {
-  max-width: 400px;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: 20px;
-  color: #1f2937;
+  margin-bottom: 20px;
 }
 
 .close-button {
@@ -550,112 +469,84 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #6b7280;
-  padding: 0;
 }
 
-.modal-body {
-  padding: 24px;
-  color: #4b5563;
+.delete-modal .modal-body {
+  margin-bottom: 20px;
 }
 
 .modal-actions {
   display: flex;
-  gap: 12px;
   justify-content: flex-end;
-  padding: 0 24px 24px 24px;
+  gap: 10px;
 }
 
-.loading {
-  text-align: center;
-  padding: 60px 20px;
-  color: #6b7280;
-  font-size: 18px;
+.btn-outline {
+  background: #e5e7eb;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
-.error-page {
-  text-align: center;
-  padding: 60px 20px;
-  color: #dc2626;
-}
-
-.error-page h2 {
-  margin: 0 0 12px 0;
-  color: #1f2937;
+.btn-outline:hover {
+  background: #d1d5db;
 }
 
 @media (max-width: 768px) {
+  .group-page {
+    padding-top: 120px;
+  }
+  .group-container {
+    padding: 30px 15px;
+  }
+  .group-header {
+    padding: 20px;
+  }
   .group-title-section {
     flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
+    align-items: flex-start;
+    gap: 15px;
   }
-
-  .group-actions-header {
-    align-items: stretch;
-  }
-
   .invite-section {
-    text-align: left;
+    align-items: flex-start;
   }
-
   .tabs {
-    flex-direction: column;
+    flex-direction: row;
+    overflow-x: auto;
   }
-
-  .tab {
-    border-bottom: 2px solid #e5e7eb;
+  .tab-content {
+    padding: 20px;
   }
-
   .action-buttons {
     flex-direction: column;
   }
-
-  .btn-primary,
-  .btn-outline {
-    width: 100% !important;
-    text-align: center !important;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
   .member-card {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    gap: 10px;
+    text-align: center;
   }
-
-  .member-role {
-    align-items: flex-start;
-  }
-
-  .notes-header {
+  .note-header {
     flex-direction: column;
-    align-items: stretch;
     gap: 10px;
   }
-
-  .notes-header h3 {
-    margin-right: 0;
+  .group-meta {
+    flex-wrap: wrap;
+    gap: 8px;
   }
-
-  .create-note-btn {
-    align-self: flex-end !important;
-    width: 100% !important;
+  .subject-tag,
+  .public-badge,
+  .member-count {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+    min-height: 24px !important;
   }
-
-  .modal-content {
-    width: 95%;
-    margin: 10px;
-  }
-
-  .modal-actions {
-    flex-direction: column;
-  }
-
-  .form-actions {
-    flex-direction: column;
+  .role-badge {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+    min-height: 24px !important;
   }
 }

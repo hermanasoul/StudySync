@@ -1,115 +1,149 @@
+/* src/components/Header.css */
 .header {
   background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-bottom: 1px solid #e1e5e9;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
+  height: 120px; /* Фиксированная высота */
 }
-
 .header-content {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.header-top {
+  display: flex;
+  justify-content: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #e1e5e9;
+  height: 60px;
+}
+.header-bottom {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 70px;
-  padding: 0 20px;
+  height: 60px;
+  flex: 1;
 }
-
+/* Логотип */
 .logo {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: bold;
   color: #4f46e5;
   text-decoration: none;
+  line-height: 1.2; /* Нормализация для центрирования */
 }
-
+/* Навигация (фикс съезда текста вниз) */
 .nav {
   display: flex;
   gap: 30px;
 }
-
 .nav-link {
   color: #6b7280;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s;
+  padding: 8px 0;
+  line-height: 1.4; /* Фикс вертикального выравнивания текста */
+  vertical-align: middle; /* Дополнительный фикс для ссылок */
+  display: inline-flex;
+  align-items: center;
 }
-
 .nav-link:hover {
   color: #4f46e5;
 }
-
+/* Кнопки в header (используем глобальные .btn стили из buttons.css) */
 .header-buttons {
   display: flex;
-  gap: 15px;
-  align-items: center;
+  gap: 16px; /* Унифицировано с button-group */
+  align-items: center; /* Центрирование по вертикали кнопок и текста */
+  vertical-align: middle; /* Фикс для inline элементов */
 }
 
-.btn-login {
-  color: #6b7280;
-  text-decoration: none;
-  padding: 8px 16px;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.btn-login:hover {
-  color: #4f46e5;
-}
-
-.btn-primary {
-  background: #3b82f6 !important;
+/* Новые fixes для кнопок: центрирование текста, унификация font/size/веса, округлые углы */
+.header-buttons .btn {
+  display: flex !important;
+  align-items: center !important; /* Центрируем текст вертикально */
+  justify-content: center !important; /* Центрируем текст горизонтально */
+  vertical-align: middle !important;
+  height: 32px !important; /* Унифицированная высота для small */
+  padding: 8px 16px !important; /* Tighter padding для fit текста без выхода за границы */
+  border-radius: 10px !important; /* Округлые углы как у "Профиль" */
+  font-size: 16px !important; /* Одинаковый размер для равной заметности */
+  font-weight: 600 !important; /* Одинаковый вес для равной заметности */
+  min-width: 100px !important; /* Унифицированная min-width для consistency */
+  white-space: nowrap;
   color: white !important;
-  padding: 8px 20px !important;
-  border-radius: 6px !important;
   text-decoration: none !important;
-  font-weight: 500 !important;
-  transition: all 0.2s !important;
   border: none !important;
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3) !important;
+  outline: none !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
 }
 
-.btn-primary:hover {
-  background: #2563eb !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4) !important;
+/* Specific for btn-success (Профиль) - унификация shadow */
+.header-buttons .btn-success {
+  background: #10b981 !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important;
 }
 
-.user-menu {
-  display: flex;
-  align-items: center;
-  gap: 15px;
+/* Specific for btn-danger (Выйти) - унификация shadow */
+.header-buttons .btn-danger {
+  background: #ef4444 !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3) !important;
 }
 
 .user-name {
+  font-weight: 500;
   color: #374151;
-  font-weight: 500;
+  line-height: 1.4; /* Фикс съезда текста вниз относительно кнопок small (32px) */
+  white-space: nowrap; /* Предотвращает перенос */
+  display: flex;
+  align-items: center;
 }
-
-.btn-logout {
-  background: #ef4444;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 6px;
-  border: none;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-logout:hover {
-  background: #dc2626;
-}
-
+/* Локальные стили кнопок удалены — используем глобальные .btn-success small, .btn-danger small и т.д. */
 @media (max-width: 768px) {
-  .nav {
-    display: none;
+  .header {
+    height: auto;
+    min-height: 120px;
   }
-  
   .header-content {
     padding: 0 15px;
+  }
+  .header-top {
+    padding: 10px 0;
+    height: 50px;
+  }
+  .header-bottom {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 10px 0;
+    gap: 10px;
+  }
+  .nav {
+    flex-wrap: wrap;
+    gap: 15px;
+    min-width: 100%;
+    justify-content: center; /* Центрирование nav на мобильном */
+  }
+  .header-buttons {
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    width: 100%; /* Full-width на мобильном */
+  }
+  .user-name {
+    display: none; /* Скрываем имя на мобильном для места */
+  }
+  .nav-link {
+    font-size: 14px; /* Уменьшаем текст */
+    padding: 6px 0;
   }
 }

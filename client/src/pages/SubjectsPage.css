@@ -1,36 +1,35 @@
-.dashboard-page {
+.subjects-page {
   min-height: 100vh;
   background: #f8fafc;
 }
 
-.dashboard-container {
+.subjects-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 90px 20px 40px;
+  padding: 60px 20px 40px;
 }
 
-.dashboard-header {
+.page-header {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 40px;
 }
 
-.dashboard-header h1 {
-  font-size: 42px;
+.page-header h1 {
+  font-size: 36px;
   font-weight: 700;
   color: #1f2937;
   margin-bottom: 10px;
 }
 
-.dashboard-header p {
+.page-header p {
   font-size: 18px;
   color: #6b7280;
 }
 
 .subjects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 25px;
-  margin-bottom: 50px;
 }
 
 .subject-card {
@@ -60,17 +59,11 @@
   color: #1f2937;
 }
 
-.subject-title.green {
-  color: #10b981;
-}
-
-.subject-title.blue {
-  color: #3b82f6;
-}
-
-.subject-title.purple {
-  color: #8b5cf6;
-}
+.subject-title.green { color: #10b981; }
+.subject-title.blue { color: #3b82f6; }
+.subject-title.purple { color: #8b5cf6; }
+.subject-title.red { color: #ef4444; }
+.subject-title.yellow { color: #f59e0b; }
 
 .progress-percent {
   font-size: 18px;
@@ -99,17 +92,11 @@
   transition: width 0.3s ease;
 }
 
-.progress-bar.green {
-  background: #10b981;
-}
-
-.progress-bar.blue {
-  background: #3b82f6;
-}
-
-.progress-bar.purple {
-  background: #8b5cf6;
-}
+.progress-bar.green { background: #10b981; }
+.progress-bar.blue { background: #3b82f6; }
+.progress-bar.purple { background: #8b5cf6; }
+.progress-bar.red { background: #ef4444; }
+.progress-bar.yellow { background: #f59e0b; }
 
 .progress-text {
   position: absolute;
@@ -125,7 +112,7 @@
   display: flex;
   gap: 16px; /* Унифицировано с button-group */
   align-items: stretch; /* Равная высота кнопок */
-  margin-top: 20px;
+  margin-top: 20px; /* Дополнительный отступ для лучшего вида */
 }
 
 /* Override для outline кнопки в actions — фикс синего цвета и border (перебиваем Tailwind) */
@@ -143,68 +130,70 @@
 }
 
 /* Стили кнопок перенесены в buttons.css — больше нет локальных переопределений */
-.quick-stats {
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
   background: white;
-  padding: 30px;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  margin: 20px auto;
+  max-width: 400px;
 }
 
-.quick-stats h2 {
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.empty-state h3 {
   font-size: 24px;
-  font-weight: 600;
   color: #1f2937;
-  margin-bottom: 25px;
-  text-align: center;
+  margin-bottom: 10px;
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-}
-
-.stat-card {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 20px;
-  background: #f8fafc;
-  border-radius: 8px;
-  border-left: 4px solid #4f46e5;
-}
-
-.stat-icon {
-  font-size: 32px;
-}
-
-.stat-info {
-  flex: 1;
-}
-
-.stat-number {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-.stat-label {
-  font-size: 14px;
+.empty-state p {
+  font-size: 16px;
   color: #6b7280;
+  margin-bottom: 20px;
+}
+
+/* Стиль для кнопки в empty-state (унифицировано с primary) */
+.empty-state .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  background: #4f46e5;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s;
+  min-width: 200px;
+  height: 44px;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+}
+
+.empty-state .btn-primary:hover {
+  background: #4338ca;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(67, 56, 202, 0.4);
 }
 
 .loading {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: calc(100vh - 70px);
+  height: calc(100vh - 120px);
   font-size: 18px;
   color: #6b7280;
 }
 
 @media (max-width: 768px) {
-  .dashboard-container {
-    padding: 80px 15px 30px;
+  .subjects-container {
+    padding: 50px 15px 30px;
   }
 
   .subjects-grid {
@@ -216,7 +205,7 @@
     gap: 12px;
   }
 
-  .stats-grid {
-    grid-template-columns: 1fr;
+  .empty-state {
+    margin: 20px 15px;
   }
 }

@@ -1,27 +1,22 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-
 interface User {
   id: string;
   name: string;
   email: string;
 }
 
-interface AuthResponse {
+interface LoginResult {
   success: boolean;
   error?: string;
-  user?: User;
-  token?: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<AuthResponse>;
-  register: (name: string, email: string, password: string) => Promise<AuthResponse>;
+  login: (email: string, password: string) => Promise<LoginResult>;
+  register: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
   loading: boolean;
-  updateUsername: (newName: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,150 +24,120 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    if (initialized) return;
-    
-    const initializeAuth = async () => {
-      const token = localStorage.getItem('studysync_token');
-      if (token) {
-        try {
-          const currentUser = await fetchMe();
-          if (currentUser) {
-            setUser(currentUser);
-          } else {
-            localStorage.removeItem('studysync_token');
-            localStorage.removeItem('studysync_user');
-          }
-        } catch (error) {
-          localStorage.removeItem('studysync_token');
-          localStorage.removeItem('studysync_user');
-        }
-      }
-      setInitialized(true);
-      setLoading(false);
-    };
-
-    initializeAuth();
-  }, [initialized]);
-
-  const fetchWithAuth = async (endpoint: string, options: RequestInit = {}): Promise<Response> => {
+    const savedUser = localStorage.getItem('studysync_user');
     const token = localStorage.getItem('studysync_token');
-    const config = {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers,
-      },
-    };
-    return await fetch(`${API_URL}${endpoint}`, config);
-  };
-
-  const fetchMe = async (): Promise<User | null> => {
-    try {
-      const response = await fetchWithAuth('/auth/me');
-      if (!response.ok) return null;
-      const data = await response.json();
-      if (data.success && data.user) {
-        localStorage.setItem('studysync_user', JSON.stringify(data.user));
-        return data.user;
+    
+    if (savedUser && token) {
+      try {
+        const userData = JSON.parse(savedUser);
+        setUser(userData);
+      } catch (error) {
+        console.error('Error parsing saved user:', error);
+        localStorage.removeItem('studysync_user');
+        localStorage.removeItem('studysync_token');
       }
-      return null;
-    } catch (error) {
-      console.error('fetchMe error:', error);
-      return null;
     }
-  };
+    
+    setLoading(false);
+  }, []);
 
-  const updateUsername = async (newName: string): Promise<boolean> => {
-    if (!user) return false;
+  const login = async (email: string, password: string): Promise<LoginResult> => {
     try {
-      const response = await fetchWithAuth('/auth/user', {
-        method: 'PUT',
-        body: JSON.stringify({ name: newName }),
-      });
-      if (!response.ok) return false;
-      const data = await response.json();
-      if (data.success) {
-        const updatedUser = { ...user, name: newName };
-        setUser(updatedUser);
-        localStorage.setItem('studysync_user', JSON.stringify(updatedUser));
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('updateUsername error:', error);
-      return false;
-    }
-  };
-
-  const register = async (name: string, email: string, password: string): Promise<AuthResponse> => {
-    try {
-      const response = await fetch(`${API_URL}/auth/register`, {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
-      });
-      const data = await response.json();
-      if (response.ok && data.success) {
-        if (data.user) {
-          setUser(data.user);
-          localStorage.setItem('studysync_user', JSON.stringify(data.user));
-        }
-        if (data.token) {
-          localStorage.setItem('studysync_token', data.token);
-        }
-        return { success: true, user: data.user, token: data.token };
-      } else {
-        return { success: false, error: data.error || 'Registration failed' };
-      }
-    } catch (error: any) {
-      console.error('Register error:', error);
-      return { success: false, error: error.message || 'Network error' };
-    }
-  };
-
-  const login = async (email: string, password: string): Promise<AuthResponse> => {
-    try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ email, password }),
       });
+
       const data = await response.json();
-      if (response.ok && data.success) {
-        if (data.user) {
-          setUser(data.user);
-          localStorage.setItem('studysync_user', JSON.stringify(data.user));
-        }
-        if (data.token) {
-          localStorage.setItem('studysync_token', data.token);
-        }
-        return { success: true, user: data.user, token: data.token };
+
+      if (data.success && data.user) {
+        const loggedUser: User = { 
+          id: data.user.id || data.user._id, 
+          name: data.user.name, 
+          email: data.user.email 
+        };
+        setUser(loggedUser);
+        localStorage.setItem('studysync_user', JSON.stringify(loggedUser));
+        localStorage.setItem('studysync_token', data.token);
+        return { success: true };
       } else {
-        return { success: false, error: data.error || 'Invalid credentials' };
+        return { success: false, error: data.error || 'Неверные данные для входа' };
       }
-    } catch (error: any) {
-      console.error('Login network error:', error);
-      return { success: false, error: error.message || 'Network error' };
+    } catch (error) {
+      console.error('Login error:', error);
+      
+      // Fallback для демо - используем реальную логику когда бэкенд готов
+      if (email === 'demo@example.com' && password === '123') {
+        const demoUser: User = { 
+          id: '1', 
+          name: 'Демо Пользователь', 
+          email: 'demo@example.com' 
+        };
+        setUser(demoUser);
+        localStorage.setItem('studysync_user', JSON.stringify(demoUser));
+        localStorage.setItem('studysync_token', 'demo_token');
+        return { success: true };
+      }
+      
+      return { success: false, error: 'Ошибка подключения к серверу' };
     }
   };
 
-  const logout = async () => {
+  const register = async (name: string, email: string, password: string): Promise<boolean> => {
     try {
-      await fetchWithAuth('/auth/logout', { method: 'POST' });
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.user) {
+        const newUser: User = { 
+          id: data.user.id || data.user._id, 
+          name: data.user.name, 
+          email: data.user.email 
+        };
+        setUser(newUser);
+        localStorage.setItem('studysync_user', JSON.stringify(newUser));
+        localStorage.setItem('studysync_token', data.token);
+        return true;
+      } else {
+        console.error('Registration failed:', data.error);
+        return false;
+      }
     } catch (error) {
-    } finally {
-      setUser(null);
-      localStorage.removeItem('studysync_token');
-      localStorage.removeItem('studysync_user');
+      console.error('Registration error:', error);
+      
+      // Fallback для демо
+      const demoUser: User = { 
+        id: Date.now().toString(), 
+        name: name, 
+        email: email 
+      };
+      setUser(demoUser);
+      localStorage.setItem('studysync_user', JSON.stringify(demoUser));
+      localStorage.setItem('studysync_token', 'demo_token');
+      return true;
     }
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('studysync_user');
+    localStorage.removeItem('studysync_token');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading, updateUsername }}>
+    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

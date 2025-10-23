@@ -4,72 +4,69 @@ import './StudyCompleteModal.css';
 interface StudyCompleteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onRestart: () => void;
-  mode: 'study' | 'review';
   studiedCount: number;
   totalCount: number;
+  onRestart: () => void;
+  mode: 'flashcards' | 'notes';
 }
 
 const StudyCompleteModal: React.FC<StudyCompleteModalProps> = ({
   isOpen,
   onClose,
-  onRestart,
-  mode,
   studiedCount,
-  totalCount
+  totalCount,
+  onRestart,
+  mode
 }) => {
   if (!isOpen) return null;
 
-  const getTitle = () => {
-    return mode === 'study' 
-      ? '🎉 Отличная работа!' 
-      : '📚 Повторение завершено!';
-  };
-
-  const getDescription = () => {
-    return mode === 'study'
-      ? `Вы изучили все новые карточки. Рекомендуем повторить их через некоторое время для лучшего запоминания.`
-      : `Вы повторили все карточки по этому предмету. Регулярное повторение поможет закрепить знания.`;
-  };
+  const successRate = Math.round((studiedCount / totalCount) * 100);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content complete-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="complete-header">
-          <div className="complete-icon">
-            {mode === 'study' ? '🎉' : '📚'}
-          </div>
-          <h2>{getTitle()}</h2>
+    <div className="modal-overlay">
+      <div className="modal-content study-complete-modal">
+        <div className="study-complete-header">
+          <div className="study-complete-icon">🎉</div>
+          <h2>Изучение завершено!</h2>
         </div>
-
-        <div className="complete-body">
-          <p>{getDescription()}</p>
-          
-          <div className="stats-grid">
-            <div className="stat-item">
-              <div className="stat-number">{studiedCount}</div>
-              <div className="stat-label">Изучено карточек</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-number">{totalCount}</div>
-              <div className="stat-label">Всего карточек</div>
-            </div>
+        
+        <div className="study-complete-stats">
+          <div className="stat-item">
+            <span className="stat-number">{studiedCount}</span>
+            <span className="stat-label">изучено</span>
           </div>
-
-          <div className="progress-tip">
-            {mode === 'study' 
-              ? '💡 Совет: Повторите карточки через 24 часа для лучшего запоминания'
-              : '💡 Совет: Возвращайтесь к повторению регулярно'
-            }
+          <div className="stat-item">
+            <span className="stat-number">{totalCount}</span>
+            <span className="stat-label">всего</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-number">{successRate}%</span>
+            <span className="stat-label">успех</span>
           </div>
         </div>
 
-        <div className="complete-actions">
-          <button onClick={onClose} className="btn-outline">
-            Вернуться позже
+        <div className="study-complete-message">
+          {successRate >= 80 ? (
+            <p>Отличный результат! Вы хорошо освоили материал.</p>
+          ) : successRate >= 60 ? (
+            <p>Хороший результат! Продолжайте практиковаться.</p>
+          ) : (
+            <p>Нужно еще немного попрактиковаться. Попробуйте снова!</p>
+          )}
+        </div>
+
+        <div className="study-complete-actions">
+          <button
+            className="btn btn-primary"
+            onClick={onRestart}
+          >
+            Начать заново
           </button>
-          <button onClick={onRestart} className="btn-primary">
-            Повторить еще раз
+          <button
+            className="btn btn-outline"
+            onClick={onClose}
+          >
+            Завершить
           </button>
         </div>
       </div>

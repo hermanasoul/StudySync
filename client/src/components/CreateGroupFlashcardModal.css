@@ -1,10 +1,11 @@
+/* client/src/components/CreateGroupFlashcardModal.css (updated for unified button heights/styles and left-aligned labels) */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent dark background for focus */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -13,44 +14,35 @@
 
 .modal-content {
   background: white;
-  border-radius: 12px;
+  border-radius: 12px; /* Unified soft border radius matching group page */
   padding: 0;
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.modal-header {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Matching shadow from group page modal */
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 600;
-  color: #1f2937;
+  flex-direction: column;
+  position: relative; /* For absolute positioning of close button */
 }
 
 .close-button {
+  position: absolute;
+  top: 16px; /* Closer to top corner */
+  right: 16px; /* Closer to right corner */
   background: none;
   border: none;
   font-size: 24px;
   cursor: pointer;
   color: #6b7280;
-  padding: 0;
   width: 30px;
   height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, color 0.2s;
+  z-index: 10; /* Above other content */
 }
 
 .close-button:hover {
@@ -58,12 +50,32 @@
   color: #374151;
 }
 
+.modal-header {
+  padding: 24px;
+  padding-top: 48px; /* Extra space for close button */
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
 .flashcard-form {
   padding: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-group {
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-group label {
@@ -71,10 +83,13 @@
   margin-bottom: 8px;
   font-weight: 500;
   color: #374151;
+  line-height: 1.4;
+  text-align: left; /* Aligned to left edge relative to form */
 }
 
 .form-group textarea,
-.form-group select {
+.form-group select,
+.form-group input {
   width: 100%;
   padding: 12px;
   border: 2px solid #e5e7eb;
@@ -82,11 +97,14 @@
   font-size: 16px;
   font-family: inherit;
   transition: border-color 0.2s;
+  box-sizing: border-box;
+  line-height: 1.4;
   resize: vertical;
 }
 
 .form-group textarea:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group input:focus {
   outline: none;
   border-color: #4f46e5;
 }
@@ -103,56 +121,58 @@
   border-radius: 6px;
   margin-bottom: 20px;
   font-size: 14px;
+  line-height: 1.4;
 }
 
 .form-actions {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   justify-content: flex-end;
+  align-items: center;
   margin-top: 24px;
+  padding: 0 0 0; /* Removed bottom padding to align with group page */
+  flex-shrink: 0;
 }
 
-.btn-primary, .btn-outline {
-  padding: 12px 24px !important;
-  border-radius: 6px !important;
-  font-weight: 500 !important;
-  font-size: 14px !important;
-  cursor: pointer !important;
-  transition: all 0.2s !important;
-  border: none !important;
-  min-width: 120px !important;
+.form-actions .btn-secondary,
+.form-actions .btn-primary {
+  height: 44px !important; /* Exact unified height */
+  padding: 12px 18px !important; /* Unified padding without wide edges */
+  border-radius: 8px !important; /* Unified radius */
+  font-weight: 600 !important; /* Unified bold font */
+  font-size: 14px !important; /* Unified size */
+  cursor: pointer !important; /* Unified cursor */
+  border: none !important; /* Unified no borders */
+  text-decoration: none !important; /* Unified no decor */
+  transition: all 0.3s ease !important; /* Unified transitions */
+  margin: 0 !important; /* No margins for alignment */
+  box-shadow: none !important; /* Unified no shadow offset */
+  transform: none !important; /* No transform offset */
 }
 
-.btn-primary {
-  background: #4f46e5 !important;
+.form-actions .btn-secondary {
+  background: #6b7280 !important; /* Matching site secondary grey */
   color: white !important;
+  box-shadow: 0 4px 14px rgba(107, 114, 128, 0.3) !important; /* Unified shadow for secondary */
 }
 
-.btn-primary:hover:not(:disabled) {
-  background: #4338ca !important;
-  transform: translateY(-1px) !important;
-}
-
-.btn-primary:disabled {
-  background: #9ca3af !important;
-  cursor: not-allowed !important;
-  transform: none !important;
-}
-
-.btn-outline {
-  background: #6b7280 !important;
+.form-actions .btn-primary {
+  background: #4f46e5 !important; /* Matching site primary blue */
   color: white !important;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3) !important; /* Unified shadow for primary */
 }
 
-.btn-outline:hover:not(:disabled) {
+/* Hover effects matching site */
+.form-actions .btn-secondary:hover:not(:disabled) {
   background: #4b5563 !important;
+  box-shadow: 0 8px 25px rgba(75, 85, 99, 0.4) !important;
   transform: translateY(-1px) !important;
 }
 
-.btn-outline:disabled {
-  background: #d1d5db !important;
-  cursor: not-allowed !important;
-  transform: none !important;
+.form-actions .btn-primary:hover:not(:disabled) {
+  background: #4338ca !important;
+  box-shadow: 0 8px 25px rgba(67, 56, 202, 0.4) !important;
+  transform: translateY(-1px) !important;
 }
 
 @media (max-width: 768px) {
@@ -160,13 +180,20 @@
     width: 95%;
     margin: 20px;
   }
-  
   .form-actions {
     flex-direction: column;
+    gap: 12px;
   }
-  
-  .btn-primary, .btn-outline {
+  .btn-primary,
+  .btn-secondary {
+    width: 100% !important;
     min-width: auto !important;
-    width: 100%;
+  }
+  .flashcard-form {
+    padding: 16px;
+  }
+  .modal-header {
+    padding: 16px;
+    padding-top: 32px;
   }
 }

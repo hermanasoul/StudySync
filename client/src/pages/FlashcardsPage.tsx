@@ -1,33 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import CreateFlashcardModal from '../components/CreateFlashcardModal';
 import EditFlashcardModal from '../components/EditFlashcardModal';
 import StudyCompleteModal from '../components/StudyCompleteModal';
 import { flashcardsAPI } from '../services/api';
 import './FlashcardsPage.css';
+import '../App.css';
 
 interface Flashcard {
   _id: string;
   question: string;
   answer: string;
-  difficulty: string;
-  knowCount: number;
-  dontKnowCount: number;
+  hint?: string;
+  subjectId: string;
+  known: boolean;
 }
 
 const FlashcardsPage: React.FC = () => {
   const { subjectId } = useParams<{ subjectId: string }>();
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
-  const [currentCard, setCurrentCard] = useState(0);
-  const [showAnswer, setShowAnswer] = useState(false);
-  const [knownCards, setKnownCards] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [mode, setMode] = useState<'study' | 'review'>('study');
+  const [mode, setMode] = useState<'view' | 'study'>('view');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [showStudyComplete, setShowStudyComplete] = useState(false);
   const [editingFlashcard, setEditingFlashcard] = useState<Flashcard | null>(null);
+  const [currentCard, setCurrentCard] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
   const [studiedCards, setStudiedCards] = useState<string[]>([]);
 
   useEffect(() => {
@@ -37,122 +37,100 @@ const FlashcardsPage: React.FC = () => {
   const loadFlashcards = async () => {
     try {
       setLoading(true);
-      const endpoint = mode === 'study' 
-        ? flashcardsAPI.getForStudy(subjectId!)
-        : flashcardsAPI.getBySubject(subjectId!);
+      let response;
       
-      const response = await endpoint;
+      if (mode === 'study') {
+        response = await flashcardsAPI.getForStudy(subjectId!);
+      } else {
+        response = await flashcardsAPI.getBySubject(subjectId!);
+      }
+      
       if (response.data.success) {
-        const loadedFlashcards = response.data.flashcards;
-        setFlashcards(loadedFlashcards);
+        setFlashcards(response.data.flashcards || []);
         setCurrentCard(0);
         setShowAnswer(false);
-        setKnownCards([]);
         setStudiedCards([]);
-        setShowCompleteModal(false);
       }
     } catch (error) {
       console.error('Error loading flashcards:', error);
+      setFlashcards([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const nextCard = () => {
-    const nextIndex = currentCard + 1;
-    
-    if (nextIndex >= flashcards.length) {
-      // Достигли конца - показываем модальное окно
-      setShowCompleteModal(true);
-    } else {
-      setCurrentCard(nextIndex);
-      setShowAnswer(false);
-    }
+  const handleCreateFlashcard = async () => {
+    loadFlashcards();
   };
 
-  const prevCard = () => {
-    if (currentCard > 0) {
-      setCurrentCard(currentCard - 1);
-      setShowAnswer(false);
-    }
+  const handleEditFlashcard = async () => {
+    loadFlashcards();
   };
 
-  const markAsKnown = async () => {
-    if (flashcards.length === 0) return;
-    
+  const handleDeleteFlashcard = async () => {
+    loadFlashcards();
+  };
+
+  const handleKnow = async () => {
     const currentFlashcard = flashcards[currentCard];
     try {
       await flashcardsAPI.markAsKnown(currentFlashcard._id);
-      
-      // Добавляем карточку в изученные
       if (!studiedCards.includes(currentFlashcard._id)) {
         setStudiedCards([...studiedCards, currentFlashcard._id]);
       }
-      
-      // Добавляем в известные если еще не добавлена
-      if (!knownCards.includes(currentFlashcard._id)) {
-        setKnownCards([...knownCards, currentFlashcard._id]);
-      }
-      
       nextCard();
     } catch (error) {
       console.error('Error marking as known:', error);
+      nextCard();
     }
   };
 
-  const markAsUnknown = async () => {
-    if (flashcards.length === 0) return;
-    
+  const handleDontKnow = async () => {
     const currentFlashcard = flashcards[currentCard];
     try {
       await flashcardsAPI.markAsUnknown(currentFlashcard._id);
-      
-      // Добавляем карточку в изученные (даже если не знаем)
       if (!studiedCards.includes(currentFlashcard._id)) {
         setStudiedCards([...studiedCards, currentFlashcard._id]);
       }
-      
       nextCard();
     } catch (error) {
       console.error('Error marking as unknown:', error);
+      nextCard();
     }
   };
 
-  const handleEditCard = () => {
-    if (flashcards.length === 0) return;
-    setEditingFlashcard(flashcards[currentCard]);
-    setShowEditModal(true);
+  const nextCard = () => {
+    if (currentCard < flashcards.length - 1) {
+      setCurrentCard(currentCard + 1);
+      setShowAnswer(false);
+    } else {
+      setShowStudyComplete(true);
+    }
   };
 
-  const handleRestartStudy = () => {
-    setShowCompleteModal(false);
+  const startStudy = () => {
+    setMode('study');
+  };
+
+  const exitStudy = () => {
+    setMode('view');
+    setShowStudyComplete(false);
+  };
+
+  const restartStudy = () => {
     setCurrentCard(0);
     setShowAnswer(false);
     setStudiedCards([]);
+    setShowStudyComplete(false);
   };
-
-  const getProgress = () => {
-    if (flashcards.length === 0) return 0;
-    return Math.round((studiedCards.length / flashcards.length) * 100);
-  };
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'easy': return '#10b981';
-      case 'medium': return '#f59e0b';
-      case 'hard': return '#ef4444';
-      default: return '#6b7280';
-    }
-  };
-
-  const isLastCard = currentCard === flashcards.length - 1;
-  const allCardsStudied = studiedCards.length === flashcards.length && flashcards.length > 0;
 
   if (loading) {
     return (
       <div className="flashcards-page">
         <Header />
-        <div className="loading">Загрузка карточек...</div>
+        <div className="page-with-header">
+          <div className="loading">Загрузка карточек...</div>
+        </div>
       </div>
     );
   }
@@ -160,179 +138,170 @@ const FlashcardsPage: React.FC = () => {
   return (
     <div className="flashcards-page">
       <Header />
-      
-      <div className="flashcards-container">
-        <div className="page-header">
-          <h1>Карточки для запоминания</h1>
-          <p>
-            {mode === 'study' ? 'Режим изучения' : 'Режим повторения'} • 
-            Прогресс: {getProgress()}%
-          </p>
-          
-          <div className="mode-switcher">
-            <button 
-              className={`mode-btn ${mode === 'study' ? 'active' : ''}`}
-              onClick={() => setMode('study')}
-            >
-              Изучение
-            </button>
-            <button 
-              className={`mode-btn ${mode === 'review' ? 'active' : ''}`}
-              onClick={() => setMode('review')}
-            >
-              Все карточки
-            </button>
-          </div>
-        </div>
-
-        <div className="management-actions">
-          <button 
-            className="btn-primary"
-            onClick={() => setShowCreateModal(true)}
-          >
-            + Создать карточку
-          </button>
-        </div>
-
-        {flashcards.length === 0 ? (
-          <div className="no-cards">
-            <h3>Нет карточек для изучения</h3>
-            <p>Создайте первую карточку чтобы начать изучение</p>
-            <button 
-              className="btn-primary"
-              onClick={() => setShowCreateModal(true)}
-            >
-              Создать карточку
-            </button>
-          </div>
-        ) : (
-          <>
-            <div className="flashcard-content">
-              <div className="flashcard">
-                <div className="card-counter">
-                  <div>
-                    Карточка {currentCard + 1} из {flashcards.length}
-                    {knownCards.includes(flashcards[currentCard]._id) && ' ✓'}
-                  </div>
-                  <div className="card-actions-header">
-                    <span 
-                      className="difficulty-badge"
-                      style={{ backgroundColor: getDifficultyColor(flashcards[currentCard].difficulty) }}
-                    >
-                      {flashcards[currentCard].difficulty}
-                    </span>
-                    <button 
-                      className="edit-card-btn"
-                      onClick={handleEditCard}
-                      title="Редактировать карточку"
-                    >
-                      ✏️
+      <div className="page-with-header">
+        <div className="flashcards-container">
+          <div className="flashcards-header">
+            <h1>Карточки</h1>
+            <div className="flashcards-actions">
+              {mode === 'view' && (
+                <>
+                  <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+                    + Создать карточку
+                  </button>
+                  {flashcards.length > 0 && (
+                    <button className="btn btn-success" onClick={startStudy}>
+                      🎯 Начать изучение
                     </button>
-                  </div>
+                  )}
+                </>
+              )}
+              {mode === 'study' && (
+                <button className="btn btn-outline" onClick={exitStudy}>
+                  ← Вернуться к просмотру
+                </button>
+              )}
+            </div>
+          </div>
+
+          {mode === 'view' && (
+            <>
+              {flashcards.length === 0 ? (
+                <div className="empty-state">
+                  <div className="empty-icon">📚</div>
+                  <h3>Пока нет карточек</h3>
+                  <p>Создайте первую карточку для изучения</p>
+                  <button 
+                    className="btn btn-primary" 
+                    onClick={() => setShowCreateModal(true)}
+                  >
+                    Создать карточку
+                  </button>
                 </div>
-                
-                <div className="card-content">
-                  <div className="card-front">
-                    <h3>Вопрос:</h3>
-                    <p>{flashcards[currentCard].question}</p>
+              ) : (
+                <div className="flashcards-grid">
+                  {flashcards.map((flashcard) => (
+                    <div key={flashcard._id} className="flashcard-card">
+                      <div className="flashcard-content">
+                        <div className="flashcard-question">
+                          <h3>{flashcard.question}</h3>
+                          {flashcard.hint && (
+                            <div className="flashcard-hint">
+                              💡 {flashcard.hint}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flashcard-answer">
+                          <p>{flashcard.answer}</p>
+                        </div>
+                      </div>
+                      <div className="flashcard-actions">
+                        <button
+                          className="btn btn-outline"
+                          onClick={() => {
+                            setEditingFlashcard(flashcard);
+                            setShowEditModal(true);
+                          }}
+                        >
+                          Редактировать
+                        </button>
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => {
+                            setEditingFlashcard(flashcard);
+                            handleDeleteFlashcard();
+                          }}
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {mode === 'study' && flashcards.length > 0 && (
+            <div className="study-mode">
+              <div className="study-progress">
+                Прогресс: {currentCard + 1} / {flashcards.length}
+              </div>
+              
+              <div className="flashcard-study">
+                <div className="study-card">
+                  <div className="card-question">
+                    <h2>{flashcards[currentCard].question}</h2>
+                    {flashcards[currentCard].hint && (
+                      <div className="card-hint">
+                        💡 Подсказка: {flashcards[currentCard].hint}
+                      </div>
+                    )}
                   </div>
-                  
+
                   {showAnswer && (
-                    <div className="card-back">
+                    <div className="card-answer">
                       <h3>Ответ:</h3>
                       <p>{flashcards[currentCard].answer}</p>
                     </div>
                   )}
-                </div>
 
-                <div className="card-actions">
-                  {!showAnswer ? (
-                    <button 
-                      className="btn-primary"
-                      onClick={() => setShowAnswer(true)}
-                    >
-                      Показать ответ
-                    </button>
-                  ) : (
-                    <div className="answer-actions">
-                      <button className="btn-success" onClick={markAsKnown}>
-                        Знаю ✓
+                  <div className="study-actions">
+                    {!showAnswer ? (
+                      <button 
+                        className="btn btn-primary"
+                        onClick={() => setShowAnswer(true)}
+                      >
+                        Показать ответ
                       </button>
-                      <button className="btn-warning" onClick={markAsUnknown}>
-                        Не знаю ✗
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="navigation-actions">
-                  <button 
-                    onClick={prevCard} 
-                    className="btn-outline"
-                    disabled={currentCard === 0}
-                  >
-                    ← Назад
-                  </button>
-                  <button 
-                    onClick={nextCard} 
-                    className="btn-outline"
-                  >
-                    {isLastCard ? 'Завершить' : 'Вперед →'}
-                  </button>
-                </div>
-
-                {isLastCard && showAnswer && (
-                  <div className="completion-hint">
-                    🎉 Это последняя карточка! Нажмите "Вперед" чтобы завершить
+                    ) : (
+                      <div className="knowledge-actions">
+                        <button 
+                          className="btn btn-success"
+                          onClick={handleKnow}
+                        >
+                          Знаю ✅
+                        </button>
+                        <button 
+                          className="btn btn-danger"
+                          onClick={handleDontKnow}
+                        >
+                          Не знаю ❌
+                        </button>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
-
-            <div className="progress-info">
-              <div className="progress-bar-container">
-                <div 
-                  className="progress-bar-fill"
-                  style={{ width: `${getProgress()}%` }}
-                ></div>
-              </div>
-              <p>Изучено: {studiedCards.length} из {flashcards.length} карточек</p>
-            </div>
-          </>
-        )}
-
-        <div className="page-actions">
-          <Link to="/dashboard" className="btn-outline">
-            ← Назад к предметам
-          </Link>
-          <button onClick={loadFlashcards} className="btn-outline">
-            Обновить карточки
-          </button>
+          )}
         </div>
       </div>
 
-<CreateFlashcardModal
-  isOpen={showCreateModal}
-  onClose={() => setShowCreateModal(false)}
-  subjectId={subjectId!}
-  onFlashcardCreated={loadFlashcards}
-  groupId={undefined}
-/>
+      <CreateFlashcardModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onFlashcardCreated={handleCreateFlashcard}
+        subjectId={subjectId!}
+      />
 
       <EditFlashcardModal
         isOpen={showEditModal}
-        onClose={() => setShowEditModal(false)}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingFlashcard(null);
+        }}
         flashcard={editingFlashcard}
-        onFlashcardUpdated={loadFlashcards}
+        onFlashcardUpdated={handleEditFlashcard}
+        onFlashcardDeleted={handleDeleteFlashcard}
       />
 
       <StudyCompleteModal
-        isOpen={showCompleteModal}
-        onClose={() => setShowCompleteModal(false)}
-        onRestart={handleRestartStudy}
-        mode={mode}
+        isOpen={showStudyComplete}
+        onClose={exitStudy}
         studiedCount={studiedCards.length}
         totalCount={flashcards.length}
+        onRestart={restartStudy}
+        mode="flashcards"
       />
     </div>
   );

@@ -1,39 +1,53 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Button from './Button';
 import './Header.css';
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
-
+  const navigate = useNavigate();
   const handleLogout = () => {
     logout();
+    navigate('/');
   };
 
   return (
     <header className="header">
       <div className="header-content">
-        <Link to="/" className="logo">StudySync</Link>
-        <nav className="nav">
-          <Link to="/" className="nav-link">Главная</Link>
-          {user && <Link to="/dashboard" className="nav-link">Личный кабинет</Link>}
-          {user && <Link to="/groups" className="nav-link">Группы</Link>}
-          {user && <Link to="/settings" className="nav-link">Настройки</Link>}
-        </nav>
-        <div className="header-buttons">
-          {user ? (
-            <div className="user-menu">
-              <span className="user-name">Привет, {user.name}!</span>
-              <button onClick={handleLogout} className="btn-logout">
-                Выйти
-              </button>
-            </div>
-          ) : (
-            <>
-              <Link to="/login" className="btn-login">Вход</Link>
-              <Link to="/signup" className="btn-primary">Регистрация</Link>
-            </>
-          )}
+        <div className="header-top">
+          <Link to="/" className="logo">StudySync</Link>
+        </div>
+        <div className="header-bottom">
+          <nav className="nav">
+            <Link to="/dashboard" className="nav-link">Главная</Link>
+            <Link to="/subjects" className="nav-link">Предметы</Link>
+            <Link to="/groups" className="nav-link">Группы</Link>
+            <Link to="/feedback" className="nav-link">Отзывы</Link>
+            <Link to="/help" className="nav-link">Помощь</Link>
+          </nav>
+          <div className="header-buttons button-group"> {/* Добавлен button-group для унифицированного выравнивания */}
+            {user ? (
+              <>
+                <span className="user-name">Привет, {user.name}!</span>
+                <Button variant="success" size="small" href="/profile">
+                  Профиль
+                </Button>
+                <Button variant="danger" size="small" onClick={handleLogout}>
+                  Выйти
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" size="small" href="/login">
+                  Войти
+                </Button>
+                <Button variant="primary" size="small" href="/signup">
+                  Регистрация
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </header>

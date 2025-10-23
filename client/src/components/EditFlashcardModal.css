@@ -137,89 +137,36 @@
   justify-content: space-between;
   align-items: center;
   margin-top: 24px;
+  padding: 0 24px 24px; /* Добавлен padding для consistency */
 }
 
-.left-actions, .right-actions {
+.actions-left,
+.actions-right {
   display: flex;
-  gap: 12px;
+  gap: 16px; /* Унифицировано */
 }
 
-.btn-primary, .btn-outline, .btn-danger {
-  padding: 12px 24px !important;
-  border-radius: 6px !important;
-  font-weight: 500 !important;
-  font-size: 14px !important;
-  cursor: pointer !important;
-  transition: all 0.2s !important;
-  border: none !important;
-  min-width: 100px !important;
-}
-
-.btn-primary {
-  background: #4f46e5 !important;
-  color: white !important;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: #4338ca !important;
-  transform: translateY(-1px) !important;
-}
-
-.btn-primary:disabled {
-  background: #9ca3af !important;
-  cursor: not-allowed !important;
-  transform: none !important;
-}
-
-.btn-outline {
-  background: #6b7280 !important;
-  color: white !important;
-}
-
-.btn-outline:hover:not(:disabled) {
-  background: #4b5563 !important;
-  transform: translateY(-1px) !important;
-}
-
-.btn-outline:disabled {
-  background: #d1d5db !important;
-  cursor: not-allowed !important;
-  transform: none !important;
-}
-
-.btn-danger {
-  background: #dc2626 !important;
-  color: white !important;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background: #b91c1c !important;
-  transform: translateY(-1px) !important;
-}
-
-.btn-danger:disabled {
-  background: #fca5a5 !important;
-  cursor: not-allowed !important;
-  transform: none !important;
-}
+/* Стили кнопок перенесены в buttons.css — используйте className="btn-primary", "btn-secondary", "btn-danger" */
 
 @media (max-width: 768px) {
   .modal-content {
     width: 95%;
     margin: 20px;
   }
-  
+
   .form-actions {
     flex-direction: column;
     gap: 12px;
   }
-  
-  .left-actions, .right-actions {
+
+  .actions-left,
+  .actions-right {
     width: 100%;
     justify-content: stretch;
   }
-  
-  .btn-primary, .btn-outline, .btn-danger {
+
+  .actions-left .btn,
+  .actions-right .btn {
     min-width: auto !important;
     flex: 1;
   }

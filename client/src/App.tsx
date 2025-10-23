@@ -11,7 +11,11 @@ import FlashcardsPage from './pages/FlashcardsPage';
 import SettingsPage from './pages/SettingsPage';
 import GroupsPage from './pages/GroupsPage';
 import GroupPage from './pages/GroupPage';
+import ProfilePage from './pages/ProfilePage';
+import PublicGroupsPage from './pages/PublicGroupsPage'; // Добавлен импорт
+import SubjectsPage from './pages/SubjectsPage'; // Добавлен импорт
 import './App.css';
+import './styles/buttons.css'; // Глобальный импорт стилей кнопок
 
 function App() {
   return (
@@ -23,11 +27,30 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
-            
             {/* Защищенные маршруты */}
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/public-groups" element={
+              <ProtectedRoute>
+                <PublicGroupsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/subjects" element={
+              <ProtectedRoute>
+                <SubjectsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/flashcards" element={
+              <ProtectedRoute>
+                <FlashcardsPage />
               </ProtectedRoute>
             } />
             <Route path="/subjects/:subjectId" element={

@@ -11,7 +11,6 @@ const LoginPage: React.FC = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -23,35 +22,32 @@ const LoginPage: React.FC = () => {
     setError('');
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
-  setError('');
-  try {
-    const result = await login(formData.email, formData.password);
-    if (result.success) {
-      navigate('/dashboard');
-    } else {
-      setError(result.error || 'Неверный email или пароль. Проверьте данные.');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const result = await login(formData.email, formData.password); // Теперь возвращает object
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setError(result.error || 'Неверный email или пароль. Проверьте данные.');
+      }
+    } catch (err: any) {
+      setError('Произошла ошибка при входе');
+      console.error('Login error:', err);
+    } finally {
+      setLoading(false);
     }
-  } catch (err: any) {
-    console.error('Login error:', err);
-    setError('Ошибка сети. Проверьте подключение к серверу.');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="login-page">
       <Header />
-      
       <div className="login-container">
         <div className="login-form">
           <h2>Вход в StudySync</h2>
-          
           {error && <div className="error-message">{error}</div>}
-          
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="email">Email</label>
@@ -66,7 +62,6 @@ const handleSubmit = async (e: React.FormEvent) => {
                 disabled={loading}
               />
             </div>
-
             <div className="form-group">
               <label htmlFor="password">Пароль</label>
               <input
@@ -80,16 +75,14 @@ const handleSubmit = async (e: React.FormEvent) => {
                 disabled={loading}
               />
             </div>
-
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="login-btn"
               disabled={loading}
             >
               {loading ? 'Вход...' : 'Войти'}
             </button>
           </form>
-
           <div className="login-footer">
             <p>
               Нет аккаунта? <Link to="/signup" className="link">Зарегистрироваться</Link>
