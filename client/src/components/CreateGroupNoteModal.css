@@ -165,7 +165,6 @@
   transform: none !important;
 }
 
-/* Фикс для кнопки в GroupPage (чтобы не наплывала) */
 .create-note-btn {
   width: auto !important;
   min-width: 140px !important;
@@ -185,7 +184,7 @@
 .notes-header h3 {
   margin: 0;
   flex: 1;
-  margin-right: 15px; /* Отступ от кнопки */
+  margin-right: 15px;
 }
 
 @media (max-width: 768px) {

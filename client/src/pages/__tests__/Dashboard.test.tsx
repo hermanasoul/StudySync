@@ -14,14 +14,14 @@ import Dashboard from '../DashboardPage'; // Путь к странице
 
 // Типы data
 const mockGroups: { _id: string; name: string }[] = [{ _id: 'g1', name: 'Test Group' }];
-const mockEmpty: any[] = []; // Typed as any[] for empty array
+const mockEmpty: any[] = [];
 
 const mockAxiosSuccess = (data: any): AxiosResponse<any> => ({
   data,
   status: 200,
   statusText: 'OK',
   headers: {},
-  config: { headers: {} } as any // Fix TS for AxiosRequestHeaders
+  config: { headers: {} } as any
 });
 
 describe('Dashboard Page Integration Test', () => {

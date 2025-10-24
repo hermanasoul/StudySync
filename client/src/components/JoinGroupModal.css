@@ -1,4 +1,3 @@
-/* client/src/components/JoinGroupModal.css - Полностью обновлено с большими вертикальными расстояниями между текстами и элементами */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -14,7 +13,7 @@
 
 .modal-content {
   background: white;
-  padding: 40px; /* Увеличено с 30px для большего пространства */
+  padding: 40px;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   max-width: 400px;
@@ -26,7 +25,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px; /* Увеличено с 20px */
+  margin-bottom: 30px;
 }
 
 .close-button {
@@ -37,31 +36,31 @@
 }
 
 .modal-body p {
-  margin-bottom: 25px; /* Увеличено с 15px */
+  margin-bottom: 25px;
   color: #6b7280;
 }
 
 .code-input {
   width: 100%;
-  padding: 15px; /* Увеличено с 12px */
+  padding: 15px;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   font-size: 16px;
-  margin-bottom: 25px; /* Увеличено с 15px */
+  margin-bottom: 25px;
 }
 
 .btn-primary {
   width: 100%;
   background: #4f46e5;
   color: white;
-  padding: 15px; /* Увеличено с 12px */
+  padding: 15px;
   border: none;
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
-  margin-top: 20px; /* Увеличено с 10px */
-  justify-content: center; /* Гарантирует центровку текста */
-  text-align: center; /* Явно центрирует текст */
+  margin-top: 20px;
+  justify-content: center;
+  text-align: center;
 }
 
 .btn-primary:hover {
@@ -71,22 +70,21 @@
 .error-message {
   color: #ef4444;
   font-size: 14px;
-  margin-top: 15px; /* Добавлен маргин для лучшего пространства */
+  margin-top: 15px;
 }
 
-/* Дополнительные формы для большего вертикального зазора */
 .join-form .form-group {
-  margin-bottom: 25px; /* Увеличено для групп форм */
+  margin-bottom: 25px;
 }
 
 .join-form .input-hint {
   margin-top: 10px;
   font-size: 14px;
   color: #6b7280;
-  margin-bottom: 10px; /* Добавлен для подсказки */
+  margin-bottom: 10px;
 }
 
 .join-form .form-actions {
-  margin-top: 30px; /* Увеличено для действий */
-  gap: 15px; /* Зазор между кнопками */
+  margin-top: 30px;
+  gap: 15px;
 }

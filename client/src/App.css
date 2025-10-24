@@ -1,12 +1,8 @@
-/* src/App.css */
 .App {
   min-height: 100vh;
 }
 
-/* Добавляем отступ для всех страниц с фиксированным header */
 .page-with-header {
-  padding-top: 120px; /* Высота header (60px) + дополнительные отступы */
+  padding-top: 120px;
   min-height: 100vh;
 }
-
-/* Другие глобальные стили, если есть (кнопки перенесены в buttons.css) */

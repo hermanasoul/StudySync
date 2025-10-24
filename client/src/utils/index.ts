@@ -6,8 +6,8 @@ export const validateInviteCode = (code: string): { isValid: boolean; message?: 
 
 export const normalizeSubject = (subject: string): string => subject.trim().toLowerCase();
 
-export type Role = 'owner' | 'member' | 'admin' | 'guest'; // Union for known roles (use for typing props/vars, not param)
+export type Role = 'owner' | 'member' | 'admin' | 'guest';
 
-const validRoles: Role[] = ['owner', 'member', 'admin', 'guest']; // Array of known roles
+const validRoles: Role[] = ['owner', 'member', 'admin', 'guest'];
 
-export const isValidRole = (role: string): boolean => validRoles.includes(role as Role); // Param string (accepts any), cast inside for includes (if needed, but since Role[] = string[], no cast required; remove if error)
+export const isValidRole = (role: string): boolean => validRoles.includes(role as Role);

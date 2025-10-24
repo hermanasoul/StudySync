@@ -137,16 +137,16 @@
   justify-content: space-between;
   align-items: center;
   margin-top: 24px;
-  padding: 0 24px 24px; /* Добавлен padding для consistency */
+  padding: 0 24px 24px;
 }
 
 .actions-left,
 .actions-right {
   display: flex;
-  gap: 16px; /* Унифицировано */
+  gap: 16px;
 }
 
-/* Стили кнопок перенесены в buttons.css — используйте className="btn-primary", "btn-secondary", "btn-danger" */
+/* Стили кнопок перенесены в buttons.css */
 
 @media (max-width: 768px) {
   .modal-content {

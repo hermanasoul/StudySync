@@ -81,13 +81,12 @@ const GroupPage: React.FC = () => {
       } else {
         console.error('API error, using fallback');
         const currentUser = JSON.parse(localStorage.getItem('studysync_user') || '{}');
-        // Fixed: Removed email from userData to match type {_id, name}
         const userData = {
           _id: currentUser.id || '1',
           name: currentUser.name || 'Вы'
         };
         const demoMembers = [
-          { user: { _id: '1', name: userData.name, email: 'user@example.com' }, role: 'owner' },  // email ok in members.user
+          { user: { _id: '1', name: userData.name, email: 'user@example.com' }, role: 'owner' },
           {
             user: { _id: '2', name: 'Иван Петров', email: 'ivan.petrov@example.com' },
             role: 'member'
@@ -98,7 +97,7 @@ const GroupPage: React.FC = () => {
           name: 'Демо группа',
           description: 'Описание демо группы для изучения биологии.',
           subjectId: { _id: '1', name: 'Биология', color: 'green' },
-          createdBy: userData,  // now matches type
+          createdBy: userData,
           members: demoMembers,
           isPublic: true,
           inviteCode: 'DEMO123'
@@ -113,7 +112,7 @@ const GroupPage: React.FC = () => {
         name: 'Демо группа',
         description: 'Описание демо группы для изучения биологии.',
         subjectId: { _id: '1', name: 'Биология', color: 'green' },
-        createdBy: { _id: currentUser.id || '1', name: currentUser.name || 'Вы' },  // Fixed: no email in type
+        createdBy: { _id: currentUser.id || '1', name: currentUser.name || 'Вы' },
         members: [],
         isPublic: true,
         inviteCode: 'DEMO123'

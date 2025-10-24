@@ -22,7 +22,7 @@ const mockAxiosSuccess = (data: any): AxiosResponse<any> => ({
   status: 200,
   statusText: 'OK',
   headers: {},
-  config: { headers: {} } as any // Assertion для AxiosRequestHeaders (fix TS error)
+  config: { headers: {} } as any
 });
 
 describe('JoinGroupModal Integration Test', () => {

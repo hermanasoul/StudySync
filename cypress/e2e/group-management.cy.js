@@ -10,8 +10,8 @@ describe('Управление группами', () => {
   });
 
   it('Загружает главную страницу (smoke test)', () => {
-    cy.title().should('include', 'StudySync'); // Или твой название страницы
-    cy.contains('Войти').should('be.visible'); // Кнопка логина на главной (настрой текст)
+    cy.title().should('include', 'StudySync');
+    cy.contains('Войти').should('be.visible'); // Кнопка логина на главной
   });
 
   it('Успешный логин', () => {
@@ -19,7 +19,7 @@ describe('Управление группами', () => {
     cy.get('input[type="email"]').type(validUser.email);
     cy.get('input[type="password"]').type(validUser.password);
     cy.get('button[type="submit"]').click(); // Или .contains('Войти').click()
-    cy.wait(1000); // Подожди редирект
+    cy.wait(1000);
     cy.url().should('include', '/dashboard');
   });
 
@@ -29,7 +29,7 @@ describe('Управление группами', () => {
     cy.get('input[type="password"]').type('123');
     cy.get('button[type="submit"]').click();
     cy.wait(500);
-    cy.contains('Ошибка').should('be.visible'); // Текст ошибки (настрой под UI)
+    cy.contains('Ошибка').should('be.visible'); // Текст ошибки
   });
 
   it('Создание группы (valid)', () => {
@@ -42,10 +42,10 @@ describe('Управление группами', () => {
     cy.visit('/groups');
     cy.contains('Создать группу').click();
     cy.get('input[type="text"]').first().type('Test Group'); // Первое текстовое поле
-    cy.get('select').first().select('Биология'); // Поле для предмета (если есть)
+    cy.get('select').first().select('Биология'); // Поле для предмета
     cy.contains('Создать').click();
     cy.wait(1000);
-    cy.contains('Создана').should('be.visible'); // Успех (настрой)
+    cy.contains('Создана').should('be.visible'); // Успех
   });
 
   it('Присоединение с valid кодом', () => {
@@ -85,7 +85,7 @@ describe('Управление группами', () => {
     cy.get('button[type="submit"]').click();
     cy.wait(1000);
 
-    cy.visit('/groups/g1'); // g1 — пример ID, смени на реальный
+    cy.visit('/groups/g1'); // g1
     cy.contains('Группа').should('be.visible'); // Заголовок
     cy.contains('участник').should('be.visible'); // Число
   });

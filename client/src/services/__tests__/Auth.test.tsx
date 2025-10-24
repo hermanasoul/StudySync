@@ -1,7 +1,6 @@
 import axios from 'axios'; // Импорт для mock
 import { AxiosResponse } from 'axios';
 
-// Mock axios directly
 jest.mock('axios', () => ({
   default: jest.fn()
 }));
@@ -16,7 +15,7 @@ const mockSuccess: AxiosResponse<any> = {
   status: 200,
   statusText: 'OK',
   headers: {},
-  config: { headers: {} } as any // Fix TS for AxiosRequestHeaders
+  config: { headers: {} } as any
 };
 const mockError = {
   response: {

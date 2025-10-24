@@ -10,21 +10,21 @@ jest.mock('../../services/api', () => ({
 }));
 
 import { flashcardsAPI } from '../../services/api';
-import CreateFlashcardModal from '../CreateFlashcardModal'; // Путь к модалу
+import CreateFlashcardModal from '../CreateFlashcardModal';
 
 interface CreateFlashcardModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onFlashcardCreated: () => void; // Fixed: required callback
-  subjectId: string; // Fixed: required prop
-  groupId?: string; // Optional if group
+  onFlashcardCreated: () => void;
+  subjectId: string;
+  groupId?: string;
 }
 
 const validProps: CreateFlashcardModalProps = {
   isOpen: true,
   onClose: jest.fn(),
-  onFlashcardCreated: jest.fn(), // Added for props
-  subjectId: 'biology' // Added for props (fixed error)
+  onFlashcardCreated: jest.fn(),
+  subjectId: 'biology'
 };
 
 const emptyData = { front: '', back: 'Answer', subjectId: '' };
@@ -78,13 +78,12 @@ describe('CreateFlashcardModal Integration Test', () => {
 
     fireEvent.change(screen.getByPlaceholderText('Вопрос'), { target: { value: validData.front } });
     fireEvent.change(screen.getByPlaceholderText('Ответ'), { target: { value: validData.back } });
-    // Assume select for subject pre-filled or change if needed
     fireEvent.click(screen.getByText('Создать'));
 
     await waitFor(() => {
       expect(flashcardsAPI.create).toHaveBeenCalledWith({ ...validData, subjectId: validProps.subjectId });
       expect(validProps.onFlashcardCreated).toHaveBeenCalled();
-      expect(validProps.onClose).toHaveBeenCalled(); // Close on success
+      expect(validProps.onClose).toHaveBeenCalled();
     });
   });
 

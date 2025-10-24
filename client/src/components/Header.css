@@ -1,4 +1,3 @@
-/* src/components/Header.css */
 .header {
   background: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -8,7 +7,7 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  height: 120px; /* Фиксированная высота */
+  height: 120px;
 }
 .header-content {
   max-width: 1200px;
@@ -38,9 +37,9 @@
   font-weight: bold;
   color: #4f46e5;
   text-decoration: none;
-  line-height: 1.2; /* Нормализация для центрирования */
+  line-height: 1.2;
 }
-/* Навигация (фикс съезда текста вниз) */
+
 .nav {
   display: flex;
   gap: 30px;
@@ -51,34 +50,33 @@
   font-weight: 500;
   transition: color 0.2s;
   padding: 8px 0;
-  line-height: 1.4; /* Фикс вертикального выравнивания текста */
-  vertical-align: middle; /* Дополнительный фикс для ссылок */
+  line-height: 1.4;
+  vertical-align: middle;
   display: inline-flex;
   align-items: center;
 }
 .nav-link:hover {
   color: #4f46e5;
 }
-/* Кнопки в header (используем глобальные .btn стили из buttons.css) */
+
 .header-buttons {
   display: flex;
-  gap: 16px; /* Унифицировано с button-group */
-  align-items: center; /* Центрирование по вертикали кнопок и текста */
-  vertical-align: middle; /* Фикс для inline элементов */
+  gap: 16px;
+  align-items: center;
+  vertical-align: middle;
 }
 
-/* Новые fixes для кнопок: центрирование текста, унификация font/size/веса, округлые углы */
 .header-buttons .btn {
   display: flex !important;
-  align-items: center !important; /* Центрируем текст вертикально */
-  justify-content: center !important; /* Центрируем текст горизонтально */
+  align-items: center !important;
+  justify-content: center !important;
   vertical-align: middle !important;
-  height: 32px !important; /* Унифицированная высота для small */
-  padding: 8px 16px !important; /* Tighter padding для fit текста без выхода за границы */
-  border-radius: 10px !important; /* Округлые углы как у "Профиль" */
-  font-size: 16px !important; /* Одинаковый размер для равной заметности */
-  font-weight: 600 !important; /* Одинаковый вес для равной заметности */
-  min-width: 100px !important; /* Унифицированная min-width для consistency */
+  height: 32px !important;
+  padding: 8px 16px !important;
+  border-radius: 10px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  min-width: 100px !important;
   white-space: nowrap;
   color: white !important;
   text-decoration: none !important;
@@ -88,13 +86,11 @@
   transition: all 0.3s ease !important;
 }
 
-/* Specific for btn-success (Профиль) - унификация shadow */
 .header-buttons .btn-success {
   background: #10b981 !important;
   box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important;
 }
 
-/* Specific for btn-danger (Выйти) - унификация shadow */
 .header-buttons .btn-danger {
   background: #ef4444 !important;
   box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3) !important;
@@ -103,12 +99,12 @@
 .user-name {
   font-weight: 500;
   color: #374151;
-  line-height: 1.4; /* Фикс съезда текста вниз относительно кнопок small (32px) */
-  white-space: nowrap; /* Предотвращает перенос */
+  line-height: 1.4;
+  white-space: nowrap;
   display: flex;
   align-items: center;
 }
-/* Локальные стили кнопок удалены — используем глобальные .btn-success small, .btn-danger small и т.д. */
+
 @media (max-width: 768px) {
   .header {
     height: auto;
@@ -131,19 +127,19 @@
     flex-wrap: wrap;
     gap: 15px;
     min-width: 100%;
-    justify-content: center; /* Центрирование nav на мобильном */
+    justify-content: center;
   }
   .header-buttons {
     flex-wrap: wrap;
     gap: 12px;
     justify-content: center;
-    width: 100%; /* Full-width на мобильном */
+    width: 100%;
   }
   .user-name {
-    display: none; /* Скрываем имя на мобильном для места */
+    display: none;
   }
   .nav-link {
-    font-size: 14px; /* Уменьшаем текст */
+    font-size: 14px;
     padding: 6px 0;
   }
 }

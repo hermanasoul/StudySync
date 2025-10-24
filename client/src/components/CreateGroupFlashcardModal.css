@@ -1,11 +1,10 @@
-/* client/src/components/CreateGroupFlashcardModal.css (updated for unified button heights/styles and left-aligned labels) */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5); /* Semi-transparent dark background for focus */
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,22 +13,22 @@
 
 .modal-content {
   background: white;
-  border-radius: 12px; /* Unified soft border radius matching group page */
+  border-radius: 12px;
   padding: 0;
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Matching shadow from group page modal */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
-  position: relative; /* For absolute positioning of close button */
+  position: relative;
 }
 
 .close-button {
   position: absolute;
-  top: 16px; /* Closer to top corner */
-  right: 16px; /* Closer to right corner */
+  top: 16px;
+  right: 16px;
   background: none;
   border: none;
   font-size: 24px;
@@ -42,7 +41,7 @@
   justify-content: center;
   border-radius: 6px;
   transition: background-color 0.2s, color 0.2s;
-  z-index: 10; /* Above other content */
+  z-index: 10;
 }
 
 .close-button:hover {
@@ -52,7 +51,7 @@
 
 .modal-header {
   padding: 24px;
-  padding-top: 48px; /* Extra space for close button */
+  padding-top: 48px;
   border-bottom: 1px solid #e5e7eb;
   text-align: center;
 }
@@ -84,7 +83,7 @@
   font-weight: 500;
   color: #374151;
   line-height: 1.4;
-  text-align: left; /* Aligned to left edge relative to form */
+  text-align: left;
 }
 
 .form-group textarea,
@@ -130,36 +129,36 @@
   justify-content: flex-end;
   align-items: center;
   margin-top: 24px;
-  padding: 0 0 0; /* Removed bottom padding to align with group page */
+  padding: 0 0 0;
   flex-shrink: 0;
 }
 
 .form-actions .btn-secondary,
 .form-actions .btn-primary {
-  height: 44px !important; /* Exact unified height */
-  padding: 12px 18px !important; /* Unified padding without wide edges */
-  border-radius: 8px !important; /* Unified radius */
-  font-weight: 600 !important; /* Unified bold font */
-  font-size: 14px !important; /* Unified size */
-  cursor: pointer !important; /* Unified cursor */
-  border: none !important; /* Unified no borders */
-  text-decoration: none !important; /* Unified no decor */
-  transition: all 0.3s ease !important; /* Unified transitions */
-  margin: 0 !important; /* No margins for alignment */
-  box-shadow: none !important; /* Unified no shadow offset */
-  transform: none !important; /* No transform offset */
+  height: 44px !important;
+  padding: 12px 18px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  border: none !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 .form-actions .btn-secondary {
-  background: #6b7280 !important; /* Matching site secondary grey */
+  background: #6b7280 !important;
   color: white !important;
-  box-shadow: 0 4px 14px rgba(107, 114, 128, 0.3) !important; /* Unified shadow for secondary */
+  box-shadow: 0 4px 14px rgba(107, 114, 128, 0.3) !important;
 }
 
 .form-actions .btn-primary {
-  background: #4f46e5 !important; /* Matching site primary blue */
+  background: #4f46e5 !important;
   color: white !important;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3) !important; /* Unified shadow for primary */
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3) !important;
 }
 
 /* Hover effects matching site */

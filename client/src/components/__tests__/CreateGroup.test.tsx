@@ -10,12 +10,12 @@ jest.mock('../../services/api', () => ({
 }));
 
 import { groupsAPI } from '../../services/api';
-import CreateGroupModal from '../CreateGroupModal'; // Путь к модалу (импорт как у тебя)
+import CreateGroupModal from '../CreateGroupModal'; // Путь к модалу
 
 interface CreateGroupModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onGroupCreated: () => void; // Callback for success
+  onGroupCreated: () => void;
   onCancel?: () => void;
 }
 
@@ -76,13 +76,13 @@ describe('CreateGroupModal Integration Test', () => {
     );
 
     fireEvent.change(screen.getByLabelText('Название группы'), { target: { value: validData.name } });
-    fireEvent.select(screen.getByLabelText('Предмет'), { target: { value: validData.subject } }); // For select
+    fireEvent.select(screen.getByLabelText('Предмет'), { target: { value: validData.subject } });
     fireEvent.click(screen.getByText('Создать'));
 
     await waitFor(() => {
       expect(groupsAPI.create).toHaveBeenCalledWith(validData);
       expect(validProps.onGroupCreated).toHaveBeenCalled();
-      expect(validProps.onClose).toHaveBeenCalled(); // Close on success
+      expect(validProps.onClose).toHaveBeenCalled();
     });
   });
 

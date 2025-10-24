@@ -1,6 +1,5 @@
-import { validateInviteCode, normalizeSubject, isValidRole } from '../index'; // Путь к utils/index.ts
+import { validateInviteCode, normalizeSubject, isValidRole } from '../index';
 
-// Наборы данных (: string widens literals)
 const validCode: string = 'ABC123';
 const invalidCode: string = 'ABC';
 const validSubject: string = 'Биология';
@@ -26,11 +25,11 @@ describe('Utils Functions Unit Tests', () => {
   });
 
   it('checks valid role', () => {
-    expect(isValidRole(validRole)).toBe(true); // string to string param — OK
+    expect(isValidRole(validRole)).toBe(true);
   });
 
   it('rejects invalid role', () => {
-    expect(isValidRole(invalidRole)).toBe(false); // string to string param — OK, includes false
+    expect(isValidRole(invalidRole)).toBe(false);
   });
 
   it('handles empty input for code validation', () => {

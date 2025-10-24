@@ -1,7 +1,7 @@
 .profile-page {
   min-height: 100vh;
   background: #f8fafc;
-  padding-top: 120px; /* Account for header */
+  padding-top: 120px;
 }
 .profile-container {
   max-width: 800px;
@@ -89,13 +89,12 @@
   flex-wrap: wrap;
 }
 
-/* Unified styling for both buttons */
 .profile-actions .btn-primary,
 .profile-actions .btn-outline {
   padding: 12px 24px !important;
-  border-radius: 8px !important; /* Unified radius */
-  font-weight: 600 !important; /* Unified weight */
-  font-size: 14px !important; /* Unified size */
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
   cursor: pointer !important;
   transition: all 0.3s ease !important;
   border: none !important;
@@ -104,12 +103,12 @@
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  height: 44px !important; /* Unified height */
+  height: 44px !important;
   min-width: 140px !important;
   white-space: nowrap;
-  background: #4f46e5 !important; /* Primary bg */
-  color: white !important; /* Primary text */
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1) !important; /* Unified shadow */
+  background: #4f46e5 !important;
+  color: white !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1) !important;
 }
 
 .profile-actions .btn-outline {
@@ -161,7 +160,7 @@
 }
 @media (max-width: 768px) {
   .profile-page {
-    padding-top: 150px; /* More space for mobile header */
+    padding-top: 150px;
   }
   .profile-container {
     padding: 30px 15px 30px;
@@ -175,11 +174,11 @@
   }
   .profile-actions {
     flex-direction: column;
-    gap: 12px; /* Better gap on mobile */
+    gap: 12px;
   }
   .profile-actions .btn-primary,
   .profile-actions .btn-outline {
-    width: 100% !important; /* Full-width on mobile */
+    width: 100% !important;
     min-width: auto !important;
   }
 }

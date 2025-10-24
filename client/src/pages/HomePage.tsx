@@ -16,13 +16,13 @@ const HomePage: React.FC = () => {
           <div className="hero-buttons">
             <Link
               to={user ? '/dashboard' : '/login'}
-              className="hero-btn-primary"  // Заменили с btn btn-primary на custom class
+              className="hero-btn-primary"
             >
               {user ? 'Перейти в личный кабинет' : 'Начать учиться'}
             </Link>
             <Link
               to="/groups"
-              className="hero-btn-outline"  // Заменили с btn zv btn-outline на custom class
+              className="hero-btn-outline"
             >
               Присоединиться к группе
             </Link>

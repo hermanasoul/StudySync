@@ -110,12 +110,11 @@
 
 .subject-actions {
   display: flex;
-  gap: 16px; /* Унифицировано с button-group */
-  align-items: stretch; /* Равная высота кнопок */
-  margin-top: 20px; /* Дополнительный отступ для лучшего вида */
+  gap: 16px;
+  align-items: stretch;
+  margin-top: 20px;
 }
 
-/* Override для outline кнопки в actions — фикс синего цвета и border (перебиваем Tailwind) */
 .subject-actions .btn-outline {
   background: transparent !important;
   color: #4f46e5 !important;
@@ -126,10 +125,10 @@
 
 .subject-actions .btn {
   flex: 1;
-  min-width: 0; /* Позволяет сжиматься */
+  min-width: 0;
 }
 
-/* Стили кнопок перенесены в buttons.css — больше нет локальных переопределений */
+/* Стили кнопок перенесены в buttons.css */
 
 .empty-state {
   text-align: center;
@@ -158,7 +157,6 @@
   margin-bottom: 20px;
 }
 
-/* Стиль для кнопки в empty-state (унифицировано с primary) */
 .empty-state .btn-primary {
   display: inline-flex;
   align-items: center;

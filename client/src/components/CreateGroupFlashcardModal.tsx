@@ -108,7 +108,7 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
               id="hint"
               type="text"
               value={hint}
-              onChange={(e) => setHint(e.target.value)}  // Fixed: Removed wrong onClick={handleClose}
+              onChange={(e) => setHint(e.target.value)}
               placeholder="Введите подсказку..."
             />
           </div>

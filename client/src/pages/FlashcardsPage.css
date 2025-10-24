@@ -1,7 +1,7 @@
 .flashcards-page {
   min-height: 100vh;
   background: #f8fafc;
-  padding-top: 120px; /* Account for header */
+  padding-top: 120px;
 }
 
 .flashcards-container {
@@ -281,7 +281,7 @@
 
 @media (max-width: 768px) {
   .flashcards-page {
-    padding-top: 150px; /* More for mobile */
+    padding-top: 150px;
   }
   
   .flashcards-container {

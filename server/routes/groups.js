@@ -390,7 +390,6 @@ router.post('/:id/notes', auth, async (req, res) => {
   }
 });
 
-// Новый: PUT /:groupId/notes/:noteId (update заметки)
 router.put('/:groupId/notes/:noteId', auth, async (req, res) => {
   try {
     const { title, content, tags } = req.body;
@@ -428,7 +427,6 @@ router.put('/:groupId/notes/:noteId', auth, async (req, res) => {
   }
 });
 
-// Новый: DELETE /:groupId/notes/:noteId (удаление заметки)
 router.delete('/:groupId/notes/:noteId', auth, async (req, res) => {
   try {
     const note = await Note.findOne({

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Button from '../Button'; // Предполагаем путь; скорректируй если нужно
+import Button from '../Button';
 
 // Наборы данных
 const validProps = { children: 'Тест', variant: 'primary' as const, onClick: jest.fn() };
