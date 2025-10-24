@@ -1,0 +1,5 @@
+[
+  {"_id": "ObjectId(...)","name": "Test User","email": "test@example.com","password": "$2a$12$hash","role": "student","createdAt": "2023-01-01T00:00:00.000Z"},
+  {"_id": "ObjectId(...)","name": "Biology","createdAt": "2023-01-01T00:00:00.000Z"},
+  {"_id": "ObjectId(...)","front": "Вода H2O","back": "Гидроксид водорода","subjectId": "ObjectId(subject)","userId": "ObjectId(user)","createdAt": "2023-01-01T00:00:00.000Z"}
+]
