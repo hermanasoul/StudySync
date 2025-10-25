@@ -5,15 +5,15 @@ import { AxiosResponse } from 'axios';
 
 jest.mock('../../services/api', () => ({
   flashcardsAPI: {
-    getBySubject: jest.fn(), // Existing method for load by subject
-    delete: jest.fn(), // Assume from "4 more" for delete
+    getBySubject: jest.fn(),
+    delete: jest.fn(),
   }
 }));
 
 import { flashcardsAPI } from '../../services/api';
 import FlashcardsPage from '../FlashcardsPage'; // Путь к странице
 
-const subjectId = 'biology'; // Fixed for test (from URL/param/context)
+const subjectId = 'biology';
 
 const mockAxiosSuccess = (data: any): AxiosResponse<any> => ({
   data,
@@ -23,7 +23,6 @@ const mockAxiosSuccess = (data: any): AxiosResponse<any> => ({
   config: { headers: {} } as any
 });
 
-// Mock data with { flashcards: [...] } — adjust if response structure different
 const mockCards = { flashcards: [{ _id: 'c1', front: 'Question', back: 'Answer', subjectId }] };
 const emptyData = { flashcards: [] };
 
@@ -42,9 +41,9 @@ describe('FlashcardsPage Integration Test', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Question')).toBeInTheDocument(); // Card rendered
+      expect(screen.getByText('Question')).toBeInTheDocument();
     });
-    expect(flashcardsAPI.getBySubject).toHaveBeenCalledWith(subjectId); // Called with 'biology'
+    expect(flashcardsAPI.getBySubject).toHaveBeenCalledWith(subjectId);
   });
 
   it('shows empty state with no flashcards', async () => {
@@ -57,7 +56,7 @@ describe('FlashcardsPage Integration Test', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Нет карточек')).toBeInTheDocument(); // Single expect, no || — RU text (adjust if English)
+      expect(screen.getByText('Нет карточек')).toBeInTheDocument();
     });
   });
 
@@ -72,15 +71,15 @@ describe('FlashcardsPage Integration Test', () => {
     );
 
     await waitFor(() => {
-      screen.getByText('Question'); // Ensure loaded
+      screen.getByText('Question');
     });
 
-    fireEvent.click(screen.getByTestId('delete-c1')); // Assume data-testid="delete-{id}" in component; add if not
+    fireEvent.click(screen.getByTestId('delete-c1'));
 
     await waitFor(() => {
       expect(flashcardsAPI.delete).toHaveBeenCalledWith('c1');
     });
-    expect(screen.queryByText('Question')).not.toBeInTheDocument(); // Card removed from list
+    expect(screen.queryByText('Question')).not.toBeInTheDocument();
   });
 
   it('opens create modal on button click', async () => {
@@ -93,20 +92,19 @@ describe('FlashcardsPage Integration Test', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Создать карточку')).toBeInTheDocument(); // Button visible after load
+      expect(screen.getByText('Создать карточку')).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByText('Создать карточку'));
 
-    // Check modal opens (wait for modal-specific text or role)
     await waitFor(() => {
-      expect(screen.getByText('Создать карточку')).toBeInTheDocument(); // Modal title, or use getByRole('dialog') if portal
+      expect(screen.getByText('Создать карточку')).toBeInTheDocument();
     }, { timeout: 1000 });
   });
 
   it('shows loading and error states', async () => {
     (flashcardsAPI.getBySubject as jest.MockedFunction<typeof flashcardsAPI.getBySubject>).mockRejectedValue({
-      response: { ...mockAxiosSuccess({}), data: { error: 'Load error' } } // Simulate API error
+      response: { ...mockAxiosSuccess({}), data: { error: 'Load error' } }
     });
 
     render(
@@ -115,11 +113,10 @@ describe('FlashcardsPage Integration Test', () => {
       </MemoryRouter>
     );
 
-    // Assume loading shows initially
-    expect(screen.getByText('Загрузка...')).toBeInTheDocument(); // If no, remove this expect
+    expect(screen.getByText('Загрузка...')).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.getByText('Ошибка загрузки карточек')).toBeInTheDocument(); // Error message after reject
+      expect(screen.getByText('Ошибка загрузки карточек')).toBeInTheDocument();
     }, { timeout: 2000 });
   });
 });
