@@ -1,5 +1,8 @@
+// client/src/components/CreateGroupNoteModal.tsx
+
 import React, { useState } from 'react';
 import { groupsAPI } from '../services/api';
+import webSocketService from '../services/websocket';
 import './CreateGroupNoteModal.css';
 
 interface CreateGroupNoteModalProps {
@@ -38,7 +41,20 @@ const CreateGroupNoteModal: React.FC<CreateGroupNoteModalProps> = ({
         groupId
       };
 
-      await groupsAPI.createNote(groupId, noteData);
+      const response = await groupsAPI.createNote(groupId, noteData);
+      
+      // Отправляем WebSocket событие
+      if (response.data.note) {
+        webSocketService.sendNoteCreated(groupId, {
+          id: response.data.note._id,
+          title: response.data.note.title,
+          content: response.data.note.content,
+          authorId: {
+            id: response.data.note.authorId?._id || '',
+            name: response.data.note.authorId?.name || 'Пользователь'
+          }
+        });
+      }
       
       setTitle('');
       setContent('');

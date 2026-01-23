@@ -1,3 +1,5 @@
+// client/src/pages/PublicGroupsPage.tsx
+
 import React from 'react';
 import Header from '../components/Header';
 import './PublicGroupsPage.css';

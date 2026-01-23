@@ -1,7 +1,10 @@
+// client/src/App.tsx
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import WebSocketStatus from './components/WebSocketStatus';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -12,10 +15,11 @@ import SettingsPage from './pages/SettingsPage';
 import GroupsPage from './pages/GroupsPage';
 import GroupPage from './pages/GroupPage';
 import ProfilePage from './pages/ProfilePage';
-import PublicGroupsPage from './pages/PublicGroupsPage'; // Добавлен импорт
-import SubjectsPage from './pages/SubjectsPage'; // Добавлен импорт
+import PublicGroupsPage from './pages/PublicGroupsPage';
+import SubjectsPage from './pages/SubjectsPage';
+import NotificationsPage from './pages/NotificationsPage'; // Импортируем страницу уведомлений
 import './App.css';
-import './styles/buttons.css'; // Глобальный импорт стилей кнопок
+import './styles/buttons.css';
 
 function App() {
   return (
@@ -27,6 +31,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            
             {/* Защищенные маршруты */}
             <Route path="/dashboard" element={
               <ProtectedRoute>
@@ -51,6 +56,11 @@ function App() {
             <Route path="/flashcards" element={
               <ProtectedRoute>
                 <FlashcardsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/notifications" element={
+              <ProtectedRoute>
+                <NotificationsPage />
               </ProtectedRoute>
             } />
             <Route path="/subjects/:subjectId" element={
@@ -79,6 +89,9 @@ function App() {
               </ProtectedRoute>
             } />
           </Routes>
+          
+          {/* Компонент статуса WebSocket */}
+          <WebSocketStatus />
         </div>
       </Router>
     </AuthProvider>

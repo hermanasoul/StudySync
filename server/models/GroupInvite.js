@@ -1,3 +1,5 @@
+// server/models/GroupInvite.js
+
 const mongoose = require('mongoose');
 
 const groupInviteSchema = new mongoose.Schema({

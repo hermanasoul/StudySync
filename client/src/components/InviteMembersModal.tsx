@@ -1,3 +1,5 @@
+// client/src/components/InviteMembersModal.tsx
+
 import React, { useState } from 'react';
 import { groupsAPI } from '../services/api';
 import './InviteMembersModal.css';

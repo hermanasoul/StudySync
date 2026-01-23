@@ -1,12 +1,16 @@
+// client/src/components/Header.tsx
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Button from './Button';
+import Notifications from './Notifications'; // Импортируем компонент уведомлений
 import './Header.css';
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -23,13 +27,14 @@ const Header: React.FC = () => {
             <Link to="/dashboard" className="nav-link">Главная</Link>
             <Link to="/subjects" className="nav-link">Предметы</Link>
             <Link to="/groups" className="nav-link">Группы</Link>
-            <Link to="/feedback" className="nav-link">Отзывы</Link>
+            <Link to="/notifications" className="nav-link">Уведомления</Link>
             <Link to="/help" className="nav-link">Помощь</Link>
           </nav>
-          <div className="header-buttons button-group"> {/* Добавлен button-group для унифицированного выравнивания */}
+          <div className="header-buttons button-group">
             {user ? (
               <>
                 <span className="user-name">Привет, {user.name}!</span>
+                <Notifications /> {/* Добавляем компонент уведомлений */}
                 <Button variant="success" size="small" href="/profile">
                   Профиль
                 </Button>

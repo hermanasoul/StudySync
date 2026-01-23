@@ -1,3 +1,5 @@
+// client/src/pages/GroupPage.tsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -6,6 +8,7 @@ import CreateGroupNoteModal from '../components/CreateGroupNoteModal';
 import EditGroupNoteModal from '../components/EditGroupNoteModal';
 import InviteMembersModal from '../components/InviteMembersModal';
 import Button from '../components/Button';
+import webSocketService from '../services/websocket';
 import { groupsAPI } from '../services/api';
 import './GroupPage.css';
 import '../App.css';
@@ -172,6 +175,48 @@ const GroupPage: React.FC = () => {
       loadFlashcards();
     }
   }, [groupId, loadGroup, loadMembers, loadNotes, loadFlashcards]);
+
+  // WebSocket эффекты
+  useEffect(() => {
+    if (group) {
+      // Присоединяемся к комнате группы
+      webSocketService.joinGroup(group._id);
+      
+      // Подписываемся на события группы
+      const handleNewFlashcard = (data: any) => {
+        if (data.groupId === group._id) {
+          loadFlashcards();
+        }
+      };
+      
+      const handleNewNote = (data: any) => {
+        if (data.groupId === group._id) {
+          loadNotes();
+        }
+      };
+      
+      const handleMemberJoined = (data: any) => {
+        if (data.groupId === group._id) {
+          loadMembers();
+        }
+      };
+      
+      webSocketService.on('new-flashcard', handleNewFlashcard);
+      webSocketService.on('new-note', handleNewNote);
+      webSocketService.on('member-joined', handleMemberJoined);
+      
+      // Отправляем событие активности
+      webSocketService.sendUserActivity(null, group._id, 'viewing_group');
+      
+      // Очистка при размонтировании
+      return () => {
+        webSocketService.leaveGroup(group._id);
+        webSocketService.off('new-flashcard', handleNewFlashcard);
+        webSocketService.off('new-note', handleNewNote);
+        webSocketService.off('member-joined', handleMemberJoined);
+      };
+    }
+  }, [group, loadFlashcards, loadNotes, loadMembers]);
 
   const getRoleBadge = (role: string) => {
     const roleConfig = {

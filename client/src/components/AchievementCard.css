@@ -1,0 +1,215 @@
+/* client/src/components/AchievementCard.css */
+.achievement-card {
+  display: flex;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s ease;
+  gap: 16px;
+}
+
+.achievement-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.achievement-card.unlocked {
+  border-color: #10b981;
+  background: linear-gradient(135deg, #f9fafb 0%, #f0fdf4 100%);
+}
+
+.achievement-card.locked {
+  opacity: 0.9;
+}
+
+.achievement-card.locked:hover {
+  opacity: 1;
+}
+
+.achievement-icon-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.achievement-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  border: 3px solid;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.achievement-unlocked-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  background: #10b981;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.achievement-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.achievement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.achievement-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.achievement-difficulty {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.05);
+  white-space: nowrap;
+}
+
+.achievement-description {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+}
+
+.achievement-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+.achievement-category {
+  background: #f3f4f6;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.achievement-points {
+  font-weight: 600;
+  color: #8b5cf6;
+}
+
+.achievement-progress {
+  margin-top: 12px;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  text-align: right;
+  display: block;
+}
+
+.achievement-unlocked-date {
+  font-size: 12px;
+  color: #10b981;
+  font-weight: 500;
+  text-align: right;
+  margin-top: 4px;
+}
+
+/* Стили для разных уровней сложности */
+.achievement-bronze .achievement-icon {
+  border-color: #cd7f32;
+}
+
+.achievement-silver .achievement-icon {
+  border-color: #c0c0c0;
+}
+
+.achievement-gold .achievement-icon {
+  border-color: #ffd700;
+}
+
+.achievement-platinum .achievement-icon {
+  border-color: #e5e4e2;
+}
+
+.achievement-bronze:hover {
+  border-color: #cd7f32;
+  box-shadow: 0 4px 16px rgba(205, 127, 50, 0.15);
+}
+
+.achievement-silver:hover {
+  border-color: #c0c0c0;
+  box-shadow: 0 4px 16px rgba(192, 192, 192, 0.15);
+}
+
+.achievement-gold:hover {
+  border-color: #ffd700;
+  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.15);
+}
+
+.achievement-platinum:hover {
+  border-color: #e5e4e2;
+  box-shadow: 0 4px 16px rgba(229, 228, 226, 0.15);
+}
+
+@media (max-width: 640px) {
+  .achievement-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 16px;
+  }
+  
+  .achievement-icon {
+    margin: 0 auto;
+  }
+  
+  .achievement-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

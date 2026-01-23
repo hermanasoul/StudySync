@@ -1,3 +1,5 @@
+// client/src/services/api.ts
+
 import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api';
@@ -13,6 +15,90 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Интерфейсы для достижений
+export interface Achievement {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: 'study' | 'group' | 'flashcard' | 'note' | 'social' | 'system';
+  difficulty: 'bronze' | 'silver' | 'gold' | 'platinum';
+  difficultyClass: string;
+  difficultyColor: string;
+  points: number;
+  requirements: any;
+  secret: boolean;
+  progress?: number;
+  isUnlocked?: boolean;
+  unlockedAt?: string;
+  createdAt?: string;
+}
+
+export interface UserAchievement {
+  id: string;
+  achievement: Achievement;
+  progress: number;
+  isUnlocked: boolean;
+  unlockedAt: string;
+  notified: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AchievementProgress {
+  unlocked: number;
+  total: number;
+  totalPoints: number;
+  byCategory: {
+    [key: string]: {
+      unlocked: number;
+      total: number;
+    };
+  };
+  byDifficulty: {
+    [key: string]: {
+      unlocked: number;
+      total: number;
+    };
+  };
+}
+
+export interface LeaderboardUser {
+  rank: number;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  totalPoints: number;
+  unlockedCount: number;
+  lastUnlock: string;
+}
+
+export interface LeaderboardPosition {
+  position: number;
+  totalUsers: number;
+  userStats: {
+    totalPoints: number;
+    unlockedCount: number;
+    lastUnlock: string;
+  };
+}
+
+export interface AchievementRecommendation {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: string;
+  difficulty: string;
+  difficultyClass: string;
+  difficultyColor: string;
+  points: number;
+  requirements: any;
+  priority: number;
+}
 
 export const groupsAPI = {
   getMy: () => api.get('/groups/my'),
@@ -50,6 +136,70 @@ export const notesAPI = {
   create: (data: any) => api.post('/notes', data),
   update: (id: string, data: any) => api.put(`/notes/${id}`, data),
   delete: (id: string) => api.delete(`/notes/${id}`),
+};
+
+export const notificationsAPI = {
+  getAll: (params?: {
+    page?: number;
+    limit?: number;
+    type?: string;
+    read?: string;
+  }) => api.get('/notifications', { params }),
+  getUnreadCount: () => api.get('/notifications/unread-count'),
+  getById: (id: string) => api.get(`/notifications/${id}`),
+  markAsRead: (id: string) => api.put(`/notifications/${id}/read`),
+  markAllAsRead: () => api.put('/notifications/read-all'),
+  archive: (id: string) => api.put(`/notifications/${id}/archive`),
+  delete: (id: string) => api.delete(`/notifications/${id}`),
+  cleanupRead: () => api.delete('/notifications/cleanup/read'),
+  createTest: (data: {
+    type: string;
+    title: string;
+    message: string;
+    data?: any;
+  }) => api.post('/notifications/test', data),
+  getStats: () => api.get('/notifications/stats/overview'),
+};
+
+// Методы для работы с достижениями
+export const achievementsAPI = {
+  // Получение всех достижений с фильтрацией
+  getAll: (params?: {
+    category?: string;
+    difficulty?: string;
+    unlocked?: string;
+    page?: number;
+    limit?: number;
+  }) => api.get('/achievements', { params }),
+  
+  // Получение достижений текущего пользователя
+  getMy: () => api.get('/achievements/my'),
+  
+  // Получение прогресса пользователя
+  getProgress: () => api.get('/achievements/progress'),
+  
+  // Получение конкретного достижения по ID
+  getById: (id: string) => api.get(`/achievements/${id}`),
+  
+  // Проверка и обновление прогресса достижения
+  check: (achievementCode: string, progress?: number) => 
+    api.post(`/achievements/check/${achievementCode}`, { progress }),
+  
+  // Получение рейтинга пользователей
+  getLeaderboard: (params?: {
+    limit?: number;
+    category?: string;
+  }) => api.get('/achievements/leaderboard/top', { params }),
+  
+  // Получение позиции текущего пользователя в рейтинге
+  getMyPosition: () => api.get('/achievements/leaderboard/my-position'),
+  
+  // Получение рекомендаций по достижениям
+  getRecommendations: () => api.get('/achievements/recommendations/next'),
+  
+  // Сброс прогресса достижения (для тестирования)
+  reset: (achievementCode: string) => 
+    api.delete(`/achievements/reset/${achievementCode}`),
 };
 
 export default api;

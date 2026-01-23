@@ -1,3 +1,5 @@
+// server/seedSubjects.js
+
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Subject = require('./models/Subject');

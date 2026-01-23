@@ -1,3 +1,5 @@
+// client/src/components/CreateGroupFlashcardModal.tsx
+
 import React, { useState } from 'react';
 import { flashcardsAPI } from '../services/api';
 import './CreateGroupFlashcardModal.css';

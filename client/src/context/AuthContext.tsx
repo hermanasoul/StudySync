@@ -1,4 +1,7 @@
+// client/src/context/AuthContext.tsx
+
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import webSocketService from '../services/websocket';
 
 interface User {
   id: string;
@@ -17,6 +20,7 @@ interface AuthContextType {
   register: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
   loading: boolean;
+  webSocketConnected: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,6 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [webSocketConnected, setWebSocketConnected] = useState(false);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('studysync_user');
@@ -33,6 +38,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       try {
         const userData = JSON.parse(savedUser);
         setUser(userData);
+        
+        // Подключаем WebSocket после загрузки пользователя
+        connectWebSocket(token);
       } catch (error) {
         console.error('Error parsing saved user:', error);
         localStorage.removeItem('studysync_user');
@@ -41,7 +49,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     
     setLoading(false);
+
+    // Настройка обработчиков событий WebSocket
+    webSocketService.on('connected', () => {
+      console.log('WebSocket connected in context');
+      setWebSocketConnected(true);
+    });
+
+    webSocketService.on('disconnected', () => {
+      console.log('WebSocket disconnected in context');
+      setWebSocketConnected(false);
+    });
+
+    // Очистка при размонтировании
+    return () => {
+      webSocketService.disconnect();
+    };
   }, []);
+
+  const connectWebSocket = (token: string) => {
+    webSocketService.connect(token);
+  };
 
   const login = async (email: string, password: string): Promise<LoginResult> => {
     try {
@@ -64,6 +92,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser(loggedUser);
         localStorage.setItem('studysync_user', JSON.stringify(loggedUser));
         localStorage.setItem('studysync_token', data.token);
+        
+        // Подключаем WebSocket после успешного входа
+        connectWebSocket(data.token);
+        
         return { success: true };
       } else {
         return { success: false, error: data.error || 'Неверные данные для входа' };
@@ -71,7 +103,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       console.error('Login error:', error);
       
-      // Fallback для демо - используем реальную логику когда бэкенд готов
+      // Fallback для демо
       if (email === 'demo@example.com' && password === '123') {
         const demoUser: User = { 
           id: '1', 
@@ -81,6 +113,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser(demoUser);
         localStorage.setItem('studysync_user', JSON.stringify(demoUser));
         localStorage.setItem('studysync_token', 'demo_token');
+        
+        // Подключаем WebSocket для демо
+        connectWebSocket('demo_token');
+        
         return { success: true };
       }
       
@@ -109,6 +145,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser(newUser);
         localStorage.setItem('studysync_user', JSON.stringify(newUser));
         localStorage.setItem('studysync_token', data.token);
+        
+        // Подключаем WebSocket после успешной регистрации
+        connectWebSocket(data.token);
+        
         return true;
       } else {
         console.error('Registration failed:', data.error);
@@ -126,18 +166,33 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(demoUser);
       localStorage.setItem('studysync_user', JSON.stringify(demoUser));
       localStorage.setItem('studysync_token', 'demo_token');
+      
+      // Подключаем WebSocket для демо
+      connectWebSocket('demo_token');
+      
       return true;
     }
   };
 
   const logout = () => {
     setUser(null);
+    setWebSocketConnected(false);
     localStorage.removeItem('studysync_user');
     localStorage.removeItem('studysync_token');
+    
+    // Отключаем WebSocket
+    webSocketService.disconnect();
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      register, 
+      logout, 
+      loading,
+      webSocketConnected 
+    }}>
       {children}
     </AuthContext.Provider>
   );

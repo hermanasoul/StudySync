@@ -143,3 +143,15 @@
     padding: 6px 0;
   }
 }
+
+/* Стили для кнопки уведомлений в хедере */
+.header-buttons .notifications-container {
+  margin-right: 8px;
+}
+
+/* Если в хедере много элементов, можно добавить адаптивность */
+@media (max-width: 768px) {
+  .header-buttons .notifications-container {
+    margin-right: 4px;
+  }
+}

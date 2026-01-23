@@ -1,3 +1,5 @@
+// client/src/components/EditGroupNoteModal.tsx
+
 import React, { useState, useEffect } from 'react';
 import { notesAPI } from '../services/api';
 import './EditGroupNoteModal.css';

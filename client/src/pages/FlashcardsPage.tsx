@@ -1,9 +1,12 @@
+// client/src/pages/FlashcardsPage.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import CreateFlashcardModal from '../components/CreateFlashcardModal';
 import EditFlashcardModal from '../components/EditFlashcardModal';
 import StudyCompleteModal from '../components/StudyCompleteModal';
+import webSocketService from '../services/websocket';
 import { flashcardsAPI } from '../services/api';
 import './FlashcardsPage.css';
 import '../App.css';
@@ -59,6 +62,28 @@ const FlashcardsPage: React.FC = () => {
     }
   };
 
+  // WebSocket эффекты
+  useEffect(() => {
+    if (subjectId && mode === 'study') {
+      // Отправляем событие активности
+      webSocketService.sendUserActivity(subjectId, null, 'studying_flashcards');
+      
+      // Подписываемся на обновления карточек
+      const handleFlashcardUpdated = (data: any) => {
+        if (data.subjectId === subjectId) {
+          // Можно обновить UI или показать уведомление
+          console.log(`Карточка ${data.flashcardId} обновлена пользователем ${data.studiedBy.name}`);
+        }
+      };
+      
+      webSocketService.on('flashcard-updated', handleFlashcardUpdated);
+      
+      return () => {
+        webSocketService.off('flashcard-updated', handleFlashcardUpdated);
+      };
+    }
+  }, [subjectId, mode]);
+
   const handleCreateFlashcard = async () => {
     loadFlashcards();
   };
@@ -75,6 +100,14 @@ const FlashcardsPage: React.FC = () => {
     const currentFlashcard = flashcards[currentCard];
     try {
       await flashcardsAPI.markAsKnown(currentFlashcard._id);
+      
+      // Отправляем WebSocket событие
+      webSocketService.sendFlashcardStudied(
+        currentFlashcard._id,
+        subjectId!,
+        true
+      );
+      
       if (!studiedCards.includes(currentFlashcard._id)) {
         setStudiedCards([...studiedCards, currentFlashcard._id]);
       }
@@ -89,6 +122,14 @@ const FlashcardsPage: React.FC = () => {
     const currentFlashcard = flashcards[currentCard];
     try {
       await flashcardsAPI.markAsUnknown(currentFlashcard._id);
+      
+      // Отправляем WebSocket событие
+      webSocketService.sendFlashcardStudied(
+        currentFlashcard._id,
+        subjectId!,
+        false
+      );
+      
       if (!studiedCards.includes(currentFlashcard._id)) {
         setStudiedCards([...studiedCards, currentFlashcard._id]);
       }

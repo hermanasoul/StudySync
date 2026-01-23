@@ -1,3 +1,5 @@
+// client/src/components/EditFlashcardModal.tsx
+
 import React, { useState, useEffect } from 'react';
 import { flashcardsAPI } from '../services/api';
 import './EditFlashcardModal.css';

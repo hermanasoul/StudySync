@@ -1,3 +1,5 @@
+// client/src/components/EditNoteModal.tsx
+
 import React, { useState, useEffect } from 'react';
 import './EditNoteModal.css';
 

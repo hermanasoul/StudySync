@@ -1,3 +1,5 @@
+// client/src/components/CreateNoteModal.tsx
+
 import React, { useState } from 'react';
 import './CreateNoteModal.css';
 

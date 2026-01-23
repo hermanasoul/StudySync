@@ -1,3 +1,5 @@
+// client/src/components/CreateGroupModal.tsx
+
 import React, { useState, useEffect } from 'react';
 import { groupsAPI, subjectsAPI } from '../services/api';
 import './CreateGroupModal.css';

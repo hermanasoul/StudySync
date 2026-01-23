@@ -1,3 +1,5 @@
+// client/src/pages/ProfilePage.tsx
+
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';

@@ -1,5 +1,8 @@
+// client/src/components/CreateFlashcardModal.tsx
+
 import React, { useState } from 'react';
 import { flashcardsAPI } from '../services/api';
+import webSocketService from '../services/websocket';
 import './CreateFlashcardModal.css';
 
 interface CreateFlashcardModalProps {
@@ -7,13 +10,15 @@ interface CreateFlashcardModalProps {
   onClose: () => void;
   onFlashcardCreated: () => void;
   subjectId: string;
+  groupId?: string; // Добавлен groupId для WebSocket
 }
 
 const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
   isOpen,
   onClose,
   onFlashcardCreated,
-  subjectId
+  subjectId,
+  groupId
 }) => {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
@@ -34,12 +39,28 @@ const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
     setLoading(true);
     setError('');
     try {
-      await flashcardsAPI.create({
+      const response = await flashcardsAPI.create({
         question: question.trim(),
         answer: answer.trim(),
         hint: hint.trim(),
-        subjectId: subjectId
+        subjectId: subjectId,
+        groupId: groupId
       });
+
+      // Отправляем WebSocket событие если карточка создана в группе
+      if (groupId && response.data.flashcard) {
+        webSocketService.sendFlashcardCreated(groupId, {
+          id: response.data.flashcard._id,
+          question: response.data.flashcard.question,
+          answer: response.data.flashcard.answer,
+          hint: response.data.flashcard.hint,
+          authorId: {
+            id: response.data.flashcard.authorId?._id || '',
+            name: response.data.flashcard.authorId?.name || 'Пользователь'
+          }
+        });
+      }
+
       setQuestion('');
       setAnswer('');
       setHint('');
