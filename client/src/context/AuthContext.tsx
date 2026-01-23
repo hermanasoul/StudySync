@@ -2,6 +2,7 @@
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import webSocketService from '../services/websocket';
+import { achievementsAPI } from '../services/api';
 
 interface User {
   id: string;
@@ -41,6 +42,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         // Подключаем WebSocket после загрузки пользователя
         connectWebSocket(token);
+        
+        // Проверяем достижение ежедневного входа
+        checkDailyLoginAchievement(userData.id);
       } catch (error) {
         console.error('Error parsing saved user:', error);
         localStorage.removeItem('studysync_user');
@@ -71,6 +75,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     webSocketService.connect(token);
   };
 
+  const checkDailyLoginAchievement = async (userId: string) => {
+    try {
+      // Проверяем достижение для ежедневного входа
+      // В реальном приложении нужно проверять серию входов
+      // Для демонстрации просто проверяем достижение
+      await achievementsAPI.check('DAILY_LOGIN_3');
+    } catch (error) {
+      console.error('Error checking daily login achievement:', error);
+    }
+  };
+
   const login = async (email: string, password: string): Promise<LoginResult> => {
     try {
       const response = await fetch('http://localhost:5000/api/auth/login', {
@@ -95,6 +110,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         // Подключаем WebSocket после успешного входа
         connectWebSocket(data.token);
+        
+        // Проверяем достижения при входе
+        try {
+          await achievementsAPI.check('DAILY_LOGIN_3');
+        } catch (achievementError) {
+          console.error('Error checking achievements on login:', achievementError);
+        }
         
         return { success: true };
       } else {

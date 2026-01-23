@@ -1,0 +1,383 @@
+/* client/src/components/LevelProgress.css */
+.level-progress {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.level-progress-compact {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.level-progress-loading,
+.level-progress-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 8px;
+  color: #6b7280;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f4f6;
+  border-top: 2px solid #8b5cf6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.level-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.level-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.level-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  border: 3px solid;
+  background: white;
+  flex-shrink: 0;
+}
+
+.level-details {
+  flex: 1;
+}
+
+.level-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+}
+
+.level-title {
+  font-weight: 600;
+  color: #6b7280;
+  margin-left: 4px;
+}
+
+.level-description {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.level-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.stat-item {
+  text-align: center;
+  min-width: 80px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.progress-section {
+  margin-bottom: 24px;
+}
+
+.progress-info {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.current-level,
+.next-level {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.progress-percentage {
+  font-size: 18px;
+  font-weight: 700;
+  color: #8b5cf6;
+}
+
+.progress-bar {
+  height: 16px;
+  background: #e5e7eb;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.5s ease;
+}
+
+.progress-marker {
+  position: absolute;
+  top: -2px;
+  width: 4px;
+  height: 20px;
+  background: white;
+  border: 2px solid #1f2937;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  transition: left 0.5s ease;
+}
+
+.progress-numbers {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.current-points {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.points-to-next {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.next-level-info {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.next-level-info h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 12px 0;
+}
+
+.next-level-details {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.next-level-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  border: 2px solid;
+  background: white;
+  flex-shrink: 0;
+}
+
+.next-level-content {
+  flex: 1;
+}
+
+.next-level-content h5 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+}
+
+.next-level-content p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.required-points {
+  font-size: 12px;
+  font-weight: 600;
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.1);
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.recent-level-ups {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.recent-level-ups h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 12px 0;
+}
+
+.level-up-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.level-up-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.level-up-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  border: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.level-up-details {
+  flex: 1;
+}
+
+.level-up-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+
+.level-up-date {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Стили для компактного вида */
+.level-info-compact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.level-icon-compact {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.level-details-compact {
+  flex: 1;
+}
+
+.level-name-compact {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+
+.level-title-compact {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.level-exp-compact {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.progress-bar-compact {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill-compact {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .level-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .level-stats {
+    width: 100%;
+    justify-content: space-around;
+  }
+  
+  .stat-item {
+    min-width: auto;
+  }
+  
+  .next-level-details {
+    flex-direction: column;
+    text-align: center;
+  }
+}

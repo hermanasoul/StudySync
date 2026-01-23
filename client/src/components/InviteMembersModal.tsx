@@ -1,7 +1,7 @@
 // client/src/components/InviteMembersModal.tsx
 
 import React, { useState } from 'react';
-import { groupsAPI } from '../services/api';
+import { groupsAPI, achievementsAPI } from '../services/api';
 import './InviteMembersModal.css';
 
 interface InviteMembersModalProps {
@@ -38,6 +38,20 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
 
     try {
       await groupsAPI.createInvite(groupId, email.trim());
+      
+      // Проверяем достижения
+      try {
+        // Первое приглашение
+        await achievementsAPI.check('FIRST_INVITE');
+        
+        // Достижение за несколько приглашений
+        // В реальном приложении нужно отслеживать количество принятых приглашений
+        await achievementsAPI.check('MENTOR_5', 20); // 20% прогресса (1 из 5)
+      } catch (achievementError) {
+        console.error('Error checking achievements:', achievementError);
+        // Не прерываем отправку приглашения из-за ошибки достижений
+      }
+
       setSuccess(`Приглашение отправлено на ${email}`);
       setEmail('');
     } catch (err: any) {

@@ -1,109 +1,171 @@
-// client/src/components/CreateNoteModal.tsx
+// client/src/components/CreateFlashcardModal.tsx
 
-import React, { useState } from 'react';
-import './CreateNoteModal.css';
+import React, { useState, useEffect } from 'react';
+import { flashcardsAPI, achievementsAPI } from '../services/api';
+import webSocketService from '../services/websocket';
+import './CreateFlashcardModal.css';
 
-interface CreateNoteModalProps {
+interface CreateFlashcardModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (noteData: { title: string; content: string; tags: string[] }) => void;
+  onFlashcardCreated: () => void;
   subjectId: string;
+  groupId?: string;
 }
 
-const CreateNoteModal: React.FC<CreateNoteModalProps> = ({
+const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
   isOpen,
   onClose,
-  onSubmit,
-  subjectId
+  onFlashcardCreated,
+  subjectId,
+  groupId
 }) => {
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    tags: ''
-  });
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState('');
+  const [hint, setHint] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!question.trim() || !answer.trim()) {
+      setError('Заполните вопрос и ответ');
+      return;
+    }
+    if (!subjectId) {
+      setError('Не указан предмет для карточки');
+      return;
+    }
+    
     setLoading(true);
+    setError('');
 
-    const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+    try {
+      const response = await flashcardsAPI.create({
+        question: question.trim(),
+        answer: answer.trim(),
+        hint: hint.trim(),
+        subjectId: subjectId,
+        groupId: groupId
+      });
 
-    await onSubmit({
-      title: formData.title,
-      content: formData.content,
-      tags: tagsArray
-    });
+      // Отправляем WebSocket событие если карточка создана в группе
+      if (groupId && response.data.flashcard) {
+        webSocketService.sendFlashcardCreated(groupId, {
+          id: response.data.flashcard._id,
+          question: response.data.flashcard.question,
+          answer: response.data.flashcard.answer,
+          hint: response.data.flashcard.hint,
+          authorId: {
+            id: response.data.flashcard.authorId?._id || '',
+            name: response.data.flashcard.authorId?.name || 'Пользователь'
+          }
+        });
+      }
 
-    setLoading(false);
-    setFormData({ title: '', content: '', tags: '' });
+      // Проверяем достижения
+      try {
+        // Первая карточка
+        await achievementsAPI.check('FIRST_FLASHCARD');
+        
+        // Получаем общее количество карточек для прогрессивных достижений
+        if (subjectId) {
+          const countResponse = await flashcardsAPI.getBySubject(subjectId);
+          const totalFlashcards = countResponse.data?.flashcards?.length || 0;
+          
+          // Прогрессивные достижения
+          await achievementsAPI.check('FLASHCARD_CREATOR_5', Math.min(totalFlashcards / 5 * 100, 100));
+          await achievementsAPI.check('FLASHCARD_MASTER_20', Math.min(totalFlashcards / 20 * 100, 100));
+        }
+      } catch (achievementError) {
+        console.error('Error checking achievements:', achievementError);
+        // Не прерываем создание карточки из-за ошибки достижений
+      }
+
+      // Сброс формы
+      setQuestion('');
+      setAnswer('');
+      setHint('');
+      onFlashcardCreated();
+      onClose();
+    } catch (err: any) {
+      console.error('Create flashcard error:', err);
+      setError(err.response?.data?.error || 'Ошибка при создании карточки');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+  const handleClose = () => {
+    setQuestion('');
+    setAnswer('');
+    setHint('');
+    setError('');
+    onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
+    <div className="modal-overlay" onClick={handleClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Создать заметку</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <h2>Создать карточку</h2>
+          <button className="close-button" onClick={handleClose}>×</button>
         </div>
-
-        <form onSubmit={handleSubmit} className="note-form">
+        <form onSubmit={handleSubmit} className="flashcard-form">
+          {error && (
+            <div className="error-message">
+              <strong>Ошибка:</strong> {error}
+            </div>
+          )}
           <div className="form-group">
-            <label htmlFor="title">Заголовок</label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Введите заголовок заметки"
-              required
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="content">Содержание</label>
+            <label htmlFor="question">Вопрос *</label>
             <textarea
-              id="content"
-              name="content"
-              value={formData.content}
-              onChange={handleChange}
-              placeholder="Введите содержание заметки..."
-              rows={8}
+              id="question"
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              placeholder="Введите вопрос..."
               required
-              disabled={loading}
+              rows={3}
             />
           </div>
-
           <div className="form-group">
-            <label htmlFor="tags">Теги (через запятую)</label>
-            <input
-              type="text"
-              id="tags"
-              name="tags"
-              value={formData.tags}
-              onChange={handleChange}
-              placeholder="биология, клетки, ДНК"
-              disabled={loading}
+            <label htmlFor="answer">Ответ *</label>
+            <textarea
+              id="answer"
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              placeholder="Введите ответ..."
+              required
+              rows={3}
             />
           </div>
-
-          <div className="modal-actions">
-            <button type="button" className="btn-outline" onClick={onClose}>
+          <div className="form-group">
+            <label htmlFor="hint">Подсказка (необязательно)</label>
+            <input
+              id="hint"
+              type="text"
+              value={hint}
+              onChange={(e) => setHint(e.target.value)}
+              placeholder="Введите подсказку..."
+            />
+          </div>
+          <div className="form-actions">
+            <button
+              type="button"
+              onClick={handleClose}
+              className="btn-secondary"
+              disabled={loading}
+            >
               Отмена
             </button>
-            <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? 'Создание...' : 'Создать заметку'}
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={loading || !question.trim() || !answer.trim()}
+            >
+              {loading ? 'Создание...' : 'Создать карточку'}
             </button>
           </div>
         </form>
@@ -112,4 +174,4 @@ const CreateNoteModal: React.FC<CreateNoteModalProps> = ({
   );
 };
 
-export default CreateNoteModal;
+export default CreateFlashcardModal;

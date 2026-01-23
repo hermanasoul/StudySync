@@ -138,26 +138,46 @@ export const notesAPI = {
   delete: (id: string) => api.delete(`/notes/${id}`),
 };
 
+// Новые методы для работы с уведомлениями
 export const notificationsAPI = {
+  // Получение всех уведомлений с пагинацией
   getAll: (params?: {
     page?: number;
     limit?: number;
     type?: string;
     read?: string;
   }) => api.get('/notifications', { params }),
+  
+  // Получение количества непрочитанных уведомлений
   getUnreadCount: () => api.get('/notifications/unread-count'),
+  
+  // Получение конкретного уведомления
   getById: (id: string) => api.get(`/notifications/${id}`),
+  
+  // Пометить уведомление как прочитанное
   markAsRead: (id: string) => api.put(`/notifications/${id}/read`),
+  
+  // Пометить все уведомления как прочитанные
   markAllAsRead: () => api.put('/notifications/read-all'),
+  
+  // Архивация уведомления
   archive: (id: string) => api.put(`/notifications/${id}/archive`),
+  
+  // Удаление уведомления
   delete: (id: string) => api.delete(`/notifications/${id}`),
+  
+  // Массовое удаление прочитанных уведомлений
   cleanupRead: () => api.delete('/notifications/cleanup/read'),
+  
+  // Создание тестового уведомления
   createTest: (data: {
     type: string;
     title: string;
     message: string;
     data?: any;
   }) => api.post('/notifications/test', data),
+  
+  // Получение статистики по уведомлениям
   getStats: () => api.get('/notifications/stats/overview'),
 };
 

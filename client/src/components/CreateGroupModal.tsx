@@ -1,7 +1,7 @@
 // client/src/components/CreateGroupModal.tsx
 
 import React, { useState, useEffect } from 'react';
-import { groupsAPI, subjectsAPI } from '../services/api';
+import { groupsAPI, subjectsAPI, achievementsAPI } from '../services/api';
 import './CreateGroupModal.css';
 
 interface Subject {
@@ -84,6 +84,22 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
           allowMemberCreateNotes: true
         }
       });
+
+      // Проверяем достижения
+      try {
+        // Первая группа
+        await achievementsAPI.check('FIRST_GROUP');
+        
+        // Получаем общее количество групп для прогрессивных достижений
+        const myGroupsResponse = await groupsAPI.getMy();
+        const totalGroups = myGroupsResponse.data?.groups?.length || 0;
+        
+        // Прогрессивные достижения
+        await achievementsAPI.check('GROUP_ORGANIZER_3', Math.min(totalGroups / 3 * 100, 100));
+      } catch (achievementError) {
+        console.error('Error checking achievements:', achievementError);
+        // Не прерываем создание группы из-за ошибки достижений
+      }
 
       // Сброс формы
       setName('');

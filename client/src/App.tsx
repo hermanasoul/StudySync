@@ -1,10 +1,12 @@
-// client/src/App.tsx
+// client/src/App.tsx (дополнение)
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import WebSocketStatus from './components/WebSocketStatus';
+import AchievementNotification from './components/AchievementNotification';
+import LevelUpNotification from './components/LevelUpNotification'; // Добавляем новый компонент
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -17,11 +19,66 @@ import GroupPage from './pages/GroupPage';
 import ProfilePage from './pages/ProfilePage';
 import PublicGroupsPage from './pages/PublicGroupsPage';
 import SubjectsPage from './pages/SubjectsPage';
-import NotificationsPage from './pages/NotificationsPage'; // Импортируем страницу уведомлений
+import NotificationsPage from './pages/NotificationsPage';
+import AchievementsPage from './pages/AchievementsPage';
+import LevelsPage from './pages/LevelsPage'; // Добавим позже
 import './App.css';
 import './styles/buttons.css';
+import webSocketService from './services/websocket';
 
 function App() {
+  const [achievementNotification, setAchievementNotification] = useState<any>(null);
+  const [levelUpNotification, setLevelUpNotification] = useState<any>(null);
+  const [showAchievement, setShowAchievement] = useState(false);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+
+  useEffect(() => {
+    const handleAchievementNotification = (data: any) => {
+      if (data.type === 'achievement') {
+        setAchievementNotification({
+          name: data.data.achievementName,
+          icon: data.data.achievementIcon,
+          description: `Вы получили достижение "${data.data.achievementName}"!`,
+          points: data.data.achievementPoints,
+          difficulty: data.data.achievementDifficulty
+        });
+        setShowAchievement(true);
+      }
+    };
+
+    const handleLevelUpNotification = (data: any) => {
+      if (data.type === 'level_up') {
+        setLevelUpNotification({
+          oldLevel: data.data.oldLevel,
+          newLevel: data.data.newLevel,
+          levelName: data.data.levelName,
+          icon: data.data.icon,
+          color: data.data.color,
+          unlocks: data.data.unlocks
+        });
+        setShowLevelUp(true);
+      }
+    };
+
+    webSocketService.on('notification', handleAchievementNotification);
+    webSocketService.on('notification', handleLevelUpNotification);
+
+    return () => {
+      webSocketService.off('notification', handleAchievementNotification);
+      webSocketService.off('notification', handleLevelUpNotification);
+    };
+  }, []);
+
+  const handleCloseAchievement = () => {
+    setShowAchievement(false);
+    setAchievementNotification(null);
+  };
+
+  const handleCloseLevelUp = () => {
+    setShowLevelUp(false);
+    setLevelUpNotification(null);
+  };
+
   return (
     <AuthProvider>
       <Router>
@@ -63,6 +120,16 @@ function App() {
                 <NotificationsPage />
               </ProtectedRoute>
             } />
+            <Route path="/achievements" element={
+              <ProtectedRoute>
+                <AchievementsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/levels" element={
+              <ProtectedRoute>
+                <LevelsPage />
+              </ProtectedRoute>
+            } />
             <Route path="/subjects/:subjectId" element={
               <ProtectedRoute>
                 <NotesPage />
@@ -92,6 +159,22 @@ function App() {
           
           {/* Компонент статуса WebSocket */}
           <WebSocketStatus />
+          
+          {/* Уведомление о получении достижения */}
+          {showAchievement && achievementNotification && (
+            <AchievementNotification
+              achievement={achievementNotification}
+              onClose={handleCloseAchievement}
+            />
+          )}
+          
+          {/* Уведомление о повышении уровня */}
+          {showLevelUp && levelUpNotification && (
+            <LevelUpNotification
+              levelUp={levelUpNotification}
+              onClose={handleCloseLevelUp}
+            />
+          )}
         </div>
       </Router>
     </AuthProvider>

@@ -1,3 +1,5 @@
+/* client/src/pages/DashboardPage.css */
+
 .dashboard-page {
   min-height: 100vh;
   background: #f8fafc;
@@ -26,6 +28,109 @@
   color: #6b7280;
 }
 
+/* Секция достижений */
+.dashboard-section {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  margin-bottom: 30px;
+}
+
+.dashboard-section .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.dashboard-section h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.view-all-link {
+  color: #8b5cf6;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.view-all-link:hover {
+  text-decoration: underline;
+}
+
+.achievements-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.achievement-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.achievement-preview-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.achievement-preview-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  border: 2px solid;
+  flex-shrink: 0;
+  background: white;
+}
+
+.achievement-preview-info {
+  flex: 1;
+}
+
+.achievement-preview-info h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+  line-height: 1.4;
+}
+
+.achievement-date {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.achievement-points-badge {
+  background: #8b5cf6;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Секция предметов */
 .subjects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -141,7 +246,7 @@
   min-width: 0;
 }
 
-/* Стили кнопок перенесены в buttons.css */
+/* Секция статистики */
 .quick-stats {
   background: white;
   padding: 30px;
@@ -205,7 +310,17 @@
   .dashboard-container {
     padding: 80px 15px 30px;
   }
-
+  
+  .dashboard-section .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .achievements-preview {
+    grid-template-columns: 1fr;
+  }
+  
   .subjects-grid {
     grid-template-columns: 1fr;
   }

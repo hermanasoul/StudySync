@@ -6,6 +6,7 @@ import Header from '../components/Header';
 import Button from '../components/Button';
 import './DashboardPage.css';
 import '../App.css';
+import { subjectsAPI, achievementsAPI } from '../services/api';
 
 interface Subject {
   id: string;
@@ -15,9 +16,22 @@ interface Subject {
   progress: number;
 }
 
+interface RecentAchievement {
+  id: string;
+  achievement: {
+    name: string;
+    icon: string;
+    difficultyColor: string;
+    points: number;
+  };
+  unlockedAt: string;
+}
+
 const DashboardPage: React.FC = () => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [recentAchievements, setRecentAchievements] = useState<RecentAchievement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [achievementLoading, setAchievementLoading] = useState(false);
 
   const fetchWithAuth = async (endpoint: string, options: RequestInit = {}): Promise<Response> => {
     const token = localStorage.getItem('studysync_token');
@@ -33,12 +47,14 @@ const DashboardPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadSubjects();
+    loadDashboardData();
   }, []);
 
-  const loadSubjects = async () => {
+  const loadDashboardData = async () => {
     try {
       setLoading(true);
+      
+      // Загружаем предметы
       const response = await fetchWithAuth('/subjects');
       const data = await response.json();
       if (data.success) {
@@ -69,8 +85,11 @@ const DashboardPage: React.FC = () => {
         ];
         setSubjects(mockSubjects);
       }
+      
+      // Загружаем последние достижения
+      await loadRecentAchievements();
     } catch (error) {
-      console.error('Error loading subjects:', error);
+      console.error('Error loading dashboard data:', error);
       const mockSubjects: Subject[] = [
         {
           id: '1',
@@ -97,6 +116,37 @@ const DashboardPage: React.FC = () => {
       setSubjects(mockSubjects);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadRecentAchievements = async () => {
+    try {
+      setAchievementLoading(true);
+      const response = await achievementsAPI.getMy();
+      if (response.data.success) {
+        // Берем 4 последних разблокированных достижения
+        const unlocked = response.data.achievements
+          .filter((ua: any) => ua.isUnlocked)
+          .sort((a: any, b: any) => 
+            new Date(b.unlockedAt).getTime() - new Date(a.unlockedAt).getTime()
+          )
+          .slice(0, 4)
+          .map((ua: any) => ({
+            id: ua.id,
+            achievement: {
+              name: ua.achievement.name,
+              icon: ua.achievement.icon,
+              difficultyColor: ua.achievement.difficultyColor,
+              points: ua.achievement.points
+            },
+            unlockedAt: ua.unlockedAt
+          }));
+        setRecentAchievements(unlocked);
+      }
+    } catch (error) {
+      console.error('Error loading recent achievements:', error);
+    } finally {
+      setAchievementLoading(false);
     }
   };
 
@@ -130,6 +180,43 @@ const DashboardPage: React.FC = () => {
             <h1>Личный кабинет</h1>
             <p>Ваш прогресс по предметам</p>
           </div>
+
+          {/* Секция последних достижений */}
+          {recentAchievements.length > 0 && (
+            <div className="dashboard-section">
+              <div className="section-header">
+                <h2>🏆 Последние достижения</h2>
+                <Link to="/achievements" className="view-all-link">
+                  Все достижения →
+                </Link>
+              </div>
+              <div className="achievements-preview">
+                {recentAchievements.map((ua) => (
+                  <div key={ua.id} className="achievement-preview-item">
+                    <div 
+                      className="achievement-preview-icon"
+                      style={{ 
+                        backgroundColor: ua.achievement.difficultyColor + '20',
+                        borderColor: ua.achievement.difficultyColor 
+                      }}
+                    >
+                      {ua.achievement.icon}
+                    </div>
+                    <div className="achievement-preview-info">
+                      <h4>{ua.achievement.name}</h4>
+                      <p className="achievement-date">
+                        {new Date(ua.unlockedAt).toLocaleDateString('ru-RU')}
+                      </p>
+                    </div>
+                    <div className="achievement-points-badge">
+                      +{ua.achievement.points}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="subjects-grid">
             {subjects.map((subject) => (
               <div key={subject.id} className="subject-card">
@@ -139,7 +226,7 @@ const DashboardPage: React.FC = () => {
                 </div>
                 <p className="subject-description">{subject.description}</p>
                 <ProgressBar progress={subject.progress} color={subject.color} />
-                <div className="subject-actions button-group"> {/* Добавлен button-group для унифицированного выравнивания */}
+                <div className="subject-actions button-group">
                   <Button variant="outline" href={`/subjects/${subject.id}`}>
                     Заметки
                   </Button>
@@ -155,7 +242,7 @@ const DashboardPage: React.FC = () => {
             <div className="stats-grid">
               <div className="stat-card">
                 <div className="stat-icon">📚</div>
-                <div className="stat-info"> {/* Добавлен класс stat-info */}
+                <div className="stat-info">
                   <div className="stat-number">{subjects.length}</div>
                   <div className="stat-label">Предмета</div>
                 </div>
@@ -172,8 +259,8 @@ const DashboardPage: React.FC = () => {
               <div className="stat-card">
                 <div className="stat-icon">⭐</div>
                 <div className="stat-info">
-                  <div className="stat-number">12</div>
-                  <div className="stat-label">Изучено тем</div>
+                  <div className="stat-number">{recentAchievements.length}</div>
+                  <div className="stat-label">Достижений</div>
                 </div>
               </div>
             </div>

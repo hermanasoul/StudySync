@@ -1,7 +1,7 @@
 // client/src/components/CreateFlashcardModal.tsx
 
-import React, { useState } from 'react';
-import { flashcardsAPI } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import { flashcardsAPI, achievementsAPI } from '../services/api';
 import webSocketService from '../services/websocket';
 import './CreateFlashcardModal.css';
 
@@ -10,7 +10,7 @@ interface CreateFlashcardModalProps {
   onClose: () => void;
   onFlashcardCreated: () => void;
   subjectId: string;
-  groupId?: string; // Добавлен groupId для WebSocket
+  groupId?: string;
 }
 
 const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
@@ -36,8 +36,10 @@ const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
       setError('Не указан предмет для карточки');
       return;
     }
+    
     setLoading(true);
     setError('');
+
     try {
       const response = await flashcardsAPI.create({
         question: question.trim(),
@@ -61,6 +63,26 @@ const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
         });
       }
 
+      // Проверяем достижения
+      try {
+        // Первая карточка
+        await achievementsAPI.check('FIRST_FLASHCARD');
+        
+        // Получаем общее количество карточек для прогрессивных достижений
+        if (subjectId) {
+          const countResponse = await flashcardsAPI.getBySubject(subjectId);
+          const totalFlashcards = countResponse.data?.flashcards?.length || 0;
+          
+          // Прогрессивные достижения
+          await achievementsAPI.check('FLASHCARD_CREATOR_5', Math.min(totalFlashcards / 5 * 100, 100));
+          await achievementsAPI.check('FLASHCARD_MASTER_20', Math.min(totalFlashcards / 20 * 100, 100));
+        }
+      } catch (achievementError) {
+        console.error('Error checking achievements:', achievementError);
+        // Не прерываем создание карточки из-за ошибки достижений
+      }
+
+      // Сброс формы
       setQuestion('');
       setAnswer('');
       setHint('');
