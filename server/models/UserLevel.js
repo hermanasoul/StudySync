@@ -41,8 +41,26 @@ const levelSchema = new mongoose.Schema({
     trim: true
   },
   unlocks: {
-    type: mongoose.Schema.Types.Mixed,
-    default: {}
+    themes: {
+      type: [String],
+      default: []
+    },
+    badgeFrames: {
+      type: [String],
+      default: []
+    },
+    avatarEffects: {
+      type: [String],
+      default: []
+    },
+    specialAbilities: {
+      type: [String],
+      default: []
+    },
+    other: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {}
+    }
   },
   isActive: {
     type: Boolean,

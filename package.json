@@ -2,13 +2,23 @@
   "name": "studysync",
   "version": "1.0.0",
   "description": "Сервис для совместной учёбы и подготовки к экзаменам",
+  "main": "server/index.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd server && npm run dev",
     "client": "cd client && npm start",
     "install-all": "npm install && cd server && npm install && cd ../client && npm install",
     "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cypress:run": "cypress run",
+    "seed:achievements": "cd server && npm run seed:achievements",
+    "seed:levels": "cd server && npm run seed:levels",
+    "seed:quests": "cd server && npm run seed:quests",
+    "seed:all": "npm run seed:achievements && npm run seed:levels && npm run seed:quests",
+    "test": "cd server && npm test",
+    "build": "cd client && npm run build",
+    "start:prod": "cd server && npm start",
+    "lint": "cd server && npm run lint",
+    "format": "cd server && npm run format && cd ../client && npm run format"
   },
   "devDependencies": {
     "@types/cypress": "^0.1.6",
@@ -19,8 +29,23 @@
     "education",
     "study",
     "flashcards",
-    "notes"
+    "notes",
+    "achievements",
+    "levels",
+    "gamification"
   ],
   "author": "StudySync Team",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/studysync/studysync.git"
+  },
+  "bugs": {
+    "url": "https://github.com/studysync/studysync/issues"
+  },
+  "homepage": "https://studysync.example.com",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
 }

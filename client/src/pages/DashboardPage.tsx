@@ -4,9 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Button from '../components/Button';
+import LevelProgress from '../components/LevelProgress';
 import './DashboardPage.css';
 import '../App.css';
-import { subjectsAPI, achievementsAPI } from '../services/api';
+import { subjectsAPI, achievementsAPI, levelsAPI } from '../services/api';
 
 interface Subject {
   id: string;
@@ -30,6 +31,7 @@ interface RecentAchievement {
 const DashboardPage: React.FC = () => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [recentAchievements, setRecentAchievements] = useState<RecentAchievement[]>([]);
+  const [levelProgress, setLevelProgress] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [achievementLoading, setAchievementLoading] = useState(false);
 
@@ -84,6 +86,12 @@ const DashboardPage: React.FC = () => {
           }
         ];
         setSubjects(mockSubjects);
+      }
+      
+      // Загружаем прогресс уровня
+      const levelResponse = await levelsAPI.getMyProgress();
+      if (levelResponse.data.success) {
+        setLevelProgress(levelResponse.data.progress);
       }
       
       // Загружаем последние достижения
@@ -181,6 +189,19 @@ const DashboardPage: React.FC = () => {
             <p>Ваш прогресс по предметам</p>
           </div>
 
+          {/* Секция уровня */}
+          {levelProgress && (
+            <div className="dashboard-section">
+              <div className="section-header">
+                <h2>⭐ Мой уровень</h2>
+                <a href="/levels" className="view-all-link">
+                  Подробнее →
+                </a>
+              </div>
+              <LevelProgress compact={true} />
+            </div>
+          )}
+
           {/* Секция последних достижений */}
           {recentAchievements.length > 0 && (
             <div className="dashboard-section">
@@ -254,6 +275,15 @@ const DashboardPage: React.FC = () => {
                     {Math.round(subjects.reduce((acc, subject) => acc + subject.progress, 0) / subjects.length || 0)}%
                   </div>
                   <div className="stat-label">Общий прогресс</div>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">⭐</div>
+                <div className="stat-info">
+                  <div className="stat-number">
+                    {levelProgress ? levelProgress.level : '1'}
+                  </div>
+                  <div className="stat-label">Уровень</div>
                 </div>
               </div>
               <div className="stat-card">

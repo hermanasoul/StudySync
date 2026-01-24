@@ -1,0 +1,169 @@
+/* client/src/components/BadgeIcon.css */
+.badge-icon {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.badge-icon:hover {
+  transform: translateY(-2px);
+}
+
+.badge-icon-container {
+  position: relative;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.badge-icon-small .badge-icon-container {
+  width: 40px;
+  height: 40px;
+  border-width: 2px !important;
+}
+
+.badge-icon-medium .badge-icon-container {
+  width: 60px;
+  height: 60px;
+}
+
+.badge-icon-large .badge-icon-container {
+  width: 100px;
+  height: 100px;
+  border-width: 4px !important;
+}
+
+.badge-icon-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge-icon-small .badge-icon-emoji {
+  font-size: 20px;
+}
+
+.badge-icon-medium .badge-icon-emoji {
+  font-size: 30px;
+}
+
+.badge-icon-large .badge-icon-emoji {
+  font-size: 48px;
+}
+
+.badge-category-indicator {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+  z-index: 2;
+}
+
+.badge-difficulty-indicator {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid white;
+  z-index: 2;
+}
+
+/* Информация о бейдже для большого размера */
+.badge-info {
+  margin-top: 10px;
+  text-align: center;
+  max-width: 120px;
+}
+
+.badge-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.badge-difficulty {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 2px;
+}
+
+.badge-points {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8b5cf6;
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+/* Эффекты при наведении */
+.badge-icon:hover .badge-icon-container {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Анимация для новых бейджей */
+@keyframes badgeUnlock {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.badge-icon.unlocked {
+  animation: badgeUnlock 0.5s ease-out;
+}
+
+/* Тулаtip */
+.badge-icon[data-tooltip] {
+  position: relative;
+}
+
+.badge-icon[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  margin-bottom: 8px;
+}
+
+.badge-icon[data-tooltip]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.8);
+  margin-bottom: -4px;
+  z-index: 1000;
+}

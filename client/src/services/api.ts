@@ -100,6 +100,236 @@ export interface AchievementRecommendation {
   priority: number;
 }
 
+// Интерфейсы для уровней
+export interface UserLevel {
+  level: number;
+  name: string;
+  description: string;
+  requiredPoints: number;
+  icon: string;
+  color: string;
+  unlocks: any;
+}
+
+export interface LevelProgress {
+  level: number;
+  experiencePoints: number;
+  totalAchievementPoints: number;
+  currentLevel: UserLevel | null;
+  nextLevel: UserLevel | null;
+  progressPercentage: number;
+  pointsToNextLevel: number;
+  lastLevelUp: string;
+  rank: number;
+  totalUsers: number;
+  percentile: number;
+  recentLevelUps: any[];
+}
+
+export interface ExperienceHistory {
+  id: string;
+  points: number;
+  reason: string;
+  reasonLabel: string;
+  sourceId: string;
+  details: any;
+  newTotal: number;
+  createdAt: string;
+}
+
+export interface LevelLeaderboardUser {
+  rank: number;
+  id: string;
+  name: string;
+  email: string;
+  level: number;
+  experiencePoints: number;
+  totalAchievementPoints: number;
+  createdAt: string;
+}
+
+export interface LevelPosition {
+  byLevel: number;
+  byExperience: number;
+  totalUsers: number;
+}
+
+export interface LevelStats {
+  totalUsers: number;
+  averageLevel: number;
+  averageExperience: number;
+  levelDistribution: Array<{ _id: number; count: number }>;
+  topLevelUser: any;
+  topExperienceUser: any;
+}
+
+// Интерфейсы для бейджей
+export interface Badge {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: string;
+  difficulty: 'bronze' | 'silver' | 'gold' | 'platinum';
+  difficultyColor: string;
+  points: number;
+  unlockedAt: string;
+  isDisplayed: boolean;
+}
+
+export interface BadgeCollection {
+  displayed: Array<{
+    achievementId: string;
+    position: number;
+    name: string;
+    icon: string;
+    difficulty: string;
+    difficultyColor: string;
+    points: number;
+    category: string;
+  }>;
+  all: Badge[];
+  byCategory: {
+    study: Badge[];
+    group: Badge[];
+    flashcard: Badge[];
+    note: Badge[];
+    social: Badge[];
+    system: Badge[];
+  };
+  stats: {
+    total: number;
+    displayedCount: number;
+    byDifficulty: {
+      bronze: number;
+      silver: number;
+      gold: number;
+      platinum: number;
+    };
+  };
+}
+
+export interface Streak {
+  current: number;
+  longest: number;
+  lastActiveDate: string;
+  streakType: 'daily' | 'weekly' | 'monthly';
+}
+
+// Интерфейсы для заданий
+export interface Quest {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  icon: string;
+  type: 'daily' | 'weekly' | 'monthly' | 'special' | 'achievement';
+  typeLabel: string;
+  category: string;
+  difficulty: 'easy' | 'medium' | 'hard' | 'expert';
+  difficultyClass: string;
+  difficultyColor: string;
+  points: number;
+  requirements: any;
+  rewards: {
+    experience: number;
+    coins: number;
+    items: any[];
+    achievementId?: string;
+  };
+  timeLimit: number;
+  userProgress?: {
+    progress: number;
+    requiredProgress: number;
+    isCompleted: boolean;
+    completedAt?: string;
+    claimed: boolean;
+    expiresAt?: string;
+  };
+}
+
+export interface QuestStats {
+  totalCompleted: number;
+  totalClaimed: number;
+  totalPoints: number;
+  totalExperience: number;
+  dailyStreak: number;
+  byType: {
+    [key: string]: {
+      completed: number;
+      claimed: number;
+      points: number;
+    };
+  };
+  byCategory: {
+    [key: string]: {
+      completed: number;
+      claimed: number;
+      points: number;
+    };
+  };
+}
+
+// Интерфейсы для наград
+export interface ThemePreview {
+  primaryColor: string;
+  secondaryColor: string;
+  textColor: string;
+  accentColor: string;
+  gradient: string;
+}
+
+export interface EffectPreview {
+  name: string;
+  description: string;
+  animation: string | null;
+}
+
+export interface RewardItem {
+  id: string;
+  name: string;
+  icon?: string;
+  color?: string;
+  requiresLevel: number;
+  unlocked: boolean;
+  canUnlock: boolean;
+}
+
+export interface UserRewards {
+  unlockedThemes: string[];
+  unlockedBadgeFrames: string[];
+  unlockedAvatarEffects: string[];
+  unlockedSpecialAbilities: string[];
+  unlockedProfileBackgrounds: string[];
+  unlockedOther: any;
+}
+
+export interface AvailableRewards {
+  themes: RewardItem[];
+  avatarEffects: RewardItem[];
+  badgeFrames: RewardItem[];
+  profileBackgrounds: RewardItem[];
+  specialAbilities: RewardItem[];
+}
+
+export interface ActiveRewards {
+  theme: string;
+  avatarEffect: string;
+  badgeFrame: string;
+  profileBackground: string;
+}
+
+export interface RewardsData {
+  available: AvailableRewards;
+  unlocked: UserRewards;
+  active: ActiveRewards;
+  stats: {
+    totalUnlocked: number;
+    level: number;
+  };
+}
+
 export const groupsAPI = {
   getMy: () => api.get('/groups/my'),
   getById: (id: string) => api.get(`/groups/${id}`),
@@ -138,7 +368,7 @@ export const notesAPI = {
   delete: (id: string) => api.delete(`/notes/${id}`),
 };
 
-// Новые методы для работы с уведомлениями
+// Методы для работы с уведомлениями
 export const notificationsAPI = {
   // Получение всех уведомлений с пагинацией
   getAll: (params?: {
@@ -221,5 +451,139 @@ export const achievementsAPI = {
   reset: (achievementCode: string) => 
     api.delete(`/achievements/reset/${achievementCode}`),
 };
+
+// Методы для работы с уровнями
+export const levelsAPI = {
+  // Получение всех уровней
+  getAll: () => api.get('/levels'),
+  
+  // Получение уровня по номеру
+  getByLevel: (level: number) => api.get(`/levels/${level}`),
+  
+  // Получение прогресса текущего пользователя
+  getMyProgress: () => api.get('/levels/progress/my'),
+  
+  // Получение истории опыта
+  getExperienceHistory: (params?: {
+    page?: number;
+    limit?: number;
+  }) => api.get('/levels/experience/history', { params }),
+  
+  // Получение лидерборда по уровням
+  getLeaderboard: (params?: {
+    limit?: number;
+    sortBy?: 'level' | 'experience';
+  }) => api.get('/levels/leaderboard/top', { params }),
+  
+  // Получение позиции текущего пользователя в лидерборде
+  getMyPosition: () => api.get('/levels/leaderboard/my-position'),
+  
+  // Получение статистики по уровням
+  getStats: () => api.get('/levels/stats/overview'),
+};
+
+// Методы для работы с бейджами
+export const badgesAPI = {
+  // Получение бейджей пользователя
+  getMyBadges: () => api.get('/badges/my-badges'),
+  
+  // Добавление бейджа в отображаемые
+  addDisplayedBadge: (achievementId: string, position?: number) => 
+    api.post('/badges/display-badge', { achievementId, position }),
+  
+  // Удаление бейджа из отображаемые
+  removeDisplayedBadge: (achievementId: string) => 
+    api.delete(`/badges/remove-displayed-badge/${achievementId}`),
+  
+  // Обновление порядка бейджей
+  reorderBadges: (badgesOrder: string[]) => 
+    api.put('/badges/reorder-badges', { badgesOrder }),
+  
+  // Получение серии
+  getStreak: () => api.get('/badges/streak'),
+  
+  // Обновление серии
+  updateStreak: () => api.post('/badges/update-streak'),
+  
+  // Получение статистики
+  getStats: () => api.get('/badges/stats'),
+};
+
+// Методы для работы с заданиями
+export const questsAPI = {
+  // Получение всех заданий
+  getAll: (params?: {
+    type?: string;
+    category?: string;
+    difficulty?: string;
+  }) => api.get('/quests', { params }),
+  
+  // Получение заданий пользователя
+  getMyQuests: () => api.get('/quests/my-quests'),
+  
+  // Получение конкретного задания
+  getById: (questId: string) => api.get(`/quests/${questId}`),
+  
+  // Обновление прогресса задания
+  updateProgress: (questCode: string, progress?: number) => 
+    api.post(`/quests/update-progress/${questCode}`, { progress }),
+  
+  // Завершение задания и получение наград
+  claimReward: (userQuestId: string) => 
+    api.post(`/quests/claim/${userQuestId}`),
+  
+  // Получение статистики по заданиям
+  getStats: () => api.get('/quests/stats/my'),
+  
+  // Генерация ежедневных заданий
+  generateDaily: () => api.post('/quests/generate-daily'),
+};
+
+// Методы для работы с наградами
+export const rewardsAPI = {
+  // Получение всех доступных наград
+  getAvailable: () => api.get('/rewards/available'),
+  
+  // Получение наград пользователя
+  getMy: () => api.get('/rewards/my'),
+  
+  // Применение темы
+  applyTheme: (theme: string) => api.post('/rewards/apply-theme', { theme }),
+  
+  // Применение эффекта аватара
+  applyAvatarEffect: (effect: string) => api.post('/rewards/apply-avatar-effect', { effect }),
+  
+  // Применение рамки для бейджей
+  applyBadgeFrame: (frame: string) => api.post('/rewards/apply-badge-frame', { frame }),
+  
+  // Применение фона профиля
+  applyProfileBackground: (background: string) => 
+    api.post('/rewards/apply-profile-background', { background }),
+  
+  // Получение предпросмотра темы
+  getThemePreview: (theme: string) => api.get(`/rewards/preview-theme/${theme}`),
+  
+  // Получение предпросмотра эффекта аватара
+  getAvatarEffectPreview: (effect: string) => 
+    api.get(`/rewards/preview-avatar-effect/${effect}`),
+  
+  // Сброс настроек к значениям по умолчанию
+  resetDefaults: () => api.post('/rewards/reset-defaults'),
+};
+
+// Вспомогательные функции
+export const validateInviteCode = (code: string): { isValid: boolean; message?: string } => {
+  if (!code) return { isValid: false, message: 'Пустой код' };
+  if (code.length < 6) return { isValid: false, message: 'Короткий код' };
+  return { isValid: true };
+};
+
+export const normalizeSubject = (subject: string): string => subject.trim().toLowerCase();
+
+export type Role = 'owner' | 'member' | 'admin' | 'guest';
+
+const validRoles: Role[] = ['owner', 'member', 'admin', 'guest'];
+
+export const isValidRole = (role: string): boolean => validRoles.includes(role as Role);
 
 export default api;
