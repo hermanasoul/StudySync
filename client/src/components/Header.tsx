@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Button from './Button';
 import Notifications from './Notifications';
-import ChatNotification from './ChatNotification'; // Добавим
+import ChatNotification from './ChatNotification';
 import './Header.css';
 
 const Header: React.FC = () => {
@@ -27,7 +27,10 @@ const Header: React.FC = () => {
             <Link to="/subjects" className="nav-link">Предметы</Link>
             <Link to="/groups" className="nav-link">Группы</Link>
             <Link to="/friends" className="nav-link">👥 Друзья</Link>
-            <Link to="/chats" className="nav-link">💬 Сообщения</Link>
+            <Link to="/chats" className="nav-link">
+              <span className="nav-icon">💬</span>
+              <span className="nav-text">Сообщения</span>
+            </Link>
             <Link to="/notifications" className="nav-link">🔔 Уведомления</Link>
             <Link to="/achievements" className="nav-link">🏆 Достижения</Link>
           </nav>

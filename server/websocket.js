@@ -1,9 +1,9 @@
-// server/websocket.js
-
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User');
 const Notification = require('./models/Notification');
+const StudySession = require('./models/StudySession');
+const Flashcard = require('./models/Flashcard');
 const { AppError } = require('./middleware/errorHandler');
 
 class WebSocketServer {
@@ -21,6 +21,7 @@ class WebSocketServer {
 
     this.connectedUsers = new Map(); // userId -> socketId[]
     this.userRooms = new Map(); // userId -> room[]
+    this.studySessions = new Map(); // sessionId -> Set of userIds
     
     this.setupMiddleware();
     this.setupEventHandlers();
@@ -38,7 +39,7 @@ class WebSocketServer {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(decoded.id).select('isActive name email');
+        const user = await User.findById(decoded.id).select('isActive name email level avatarUrl');
 
         if (!user || !user.isActive) {
           return next(new Error('Authentication error: User not found or inactive'));
@@ -47,6 +48,8 @@ class WebSocketServer {
         socket.userId = decoded.id;
         socket.userName = user.name;
         socket.userEmail = user.email;
+        socket.userLevel = user.level;
+        socket.userAvatar = user.avatarUrl;
         next();
       } catch (error) {
         console.error('WebSocket auth error:', error.message);
@@ -175,6 +178,267 @@ class WebSocketServer {
         }
       });
 
+      // ========== ОБРАБОТКА СОБЫТИЙ УЧЕБНЫХ СЕССИЙ ==========
+      
+      // Присоединение к учебной сессии
+      socket.on('study_session_join', async (data) => {
+        try {
+          const { sessionId } = data;
+          console.log(`User ${socket.userId} joining study session: ${sessionId}`);
+
+          const session = await StudySession.findById(sessionId);
+          if (!session) {
+            socket.emit('study_session_error', {
+              message: 'Сессия не найдена'
+            });
+            return;
+          }
+
+          // Проверяем доступ
+          if (!await this.canJoinStudySession(socket.userId, session)) {
+            socket.emit('study_session_error', {
+              message: 'Нет доступа к сессии'
+            });
+            return;
+          }
+
+          // Входим в комнату сессии
+          const roomId = `study_session:${sessionId}`;
+          socket.join(roomId);
+          this.addUserToRoom(socket.userId, roomId);
+
+          // Добавляем пользователя в отслеживание сессии
+          if (!this.studySessions.has(sessionId)) {
+            this.studySessions.set(sessionId, new Set());
+          }
+          this.studySessions.get(sessionId).add(socket.userId);
+
+          // Добавляем пользователя в сессию в БД (асинхронно)
+          session.addParticipant(socket.userId).catch(console.error);
+
+          // Получаем полную информацию о сессии
+          const populatedSession = await StudySession.findById(sessionId)
+            .populate('host', 'name avatarUrl level')
+            .populate('participants.user', 'name avatarUrl level')
+            .populate('flashcards.flashcardId')
+            .populate('subjectId', 'name');
+
+          // Отправляем текущее состояние сессии новому участнику
+          socket.emit('study_session_state', {
+            session: populatedSession,
+            participants: Array.from(this.studySessions.get(sessionId) || []).map(userId => ({
+              userId,
+              online: this.isUserOnline(userId)
+            }))
+          });
+
+          // Уведомляем других участников о присоединении
+          socket.to(roomId).emit('study_session_participant_joined', {
+            userId: socket.userId,
+            userName: socket.userName,
+            userAvatar: socket.userAvatar,
+            userLevel: socket.userLevel,
+            timestamp: new Date().toISOString()
+          });
+
+          console.log(`User ${socket.userId} joined study session: ${sessionId}`);
+
+        } catch (error) {
+          console.error('Error joining study session:', error);
+          socket.emit('study_session_error', {
+            message: 'Ошибка при присоединении к сессии'
+          });
+        }
+      });
+
+      // Выход из учебной сессии
+      socket.on('study_session_leave', async (data) => {
+        const { sessionId } = data;
+        const roomId = `study_session:${sessionId}`;
+
+        // Выходим из комнаты
+        socket.leave(roomId);
+        this.removeUserFromRoom(socket.userId, roomId);
+
+        // Удаляем из отслеживания сессии
+        if (this.studySessions.has(sessionId)) {
+          this.studySessions.get(sessionId).delete(socket.userId);
+
+          // Уведомляем других участников
+          socket.to(roomId).emit('study_session_participant_left', {
+            userId: socket.userId,
+            userName: socket.userName,
+            timestamp: new Date().toISOString()
+          });
+
+          // Если сессия пуста, удаляем ее из отслеживания
+          if (this.studySessions.get(sessionId).size === 0) {
+            this.studySessions.delete(sessionId);
+          }
+        }
+
+        // Обновляем запись в БД (асинхронно)
+        StudySession.findById(sessionId).then(session => {
+          if (session) {
+            session.removeParticipant(socket.userId);
+          }
+        }).catch(console.error);
+
+        console.log(`User ${socket.userId} left study session: ${sessionId}`);
+      });
+
+      // Отправка сообщения в учебной сессии
+      socket.on('study_session_message', (data) => {
+        const { sessionId, content } = data;
+        const roomId = `study_session:${sessionId}`;
+
+        if (!socket.rooms.has(roomId)) {
+          return;
+        }
+
+        const message = {
+          type: 'study_session_message',
+          userId: socket.userId,
+          userName: socket.userName,
+          userAvatar: socket.userAvatar,
+          userLevel: socket.userLevel,
+          content: content.substring(0, 1000),
+          timestamp: new Date().toISOString()
+        };
+
+        // Отправляем сообщение всем участникам сессии, кроме отправителя
+        socket.to(roomId).emit('study_session_message', message);
+      });
+
+      // Обновление таймера Pomodoro
+      socket.on('study_session_timer_update', async (data) => {
+        const { sessionId, timerState } = data;
+        const roomId = `study_session:${sessionId}`;
+
+        try {
+          const session = await StudySession.findById(sessionId);
+          if (!session || session.host.toString() !== socket.userId) {
+            return; // Только хост может управлять таймером
+          }
+
+          session.timerState = timerState;
+          await session.save();
+
+          // Рассылаем обновление таймера всем участникам
+          this.io.to(roomId).emit('study_session_timer_update', {
+            timerState,
+            updatedBy: socket.userId,
+            timestamp: new Date().toISOString()
+          });
+
+        } catch (error) {
+          console.error('Error updating study session timer:', error);
+        }
+      });
+
+      // Смена карточки в учебной сессии
+      socket.on('study_session_flashcard_change', async (data) => {
+        const { sessionId, flashcardIndex } = data;
+        const roomId = `study_session:${sessionId}`;
+
+        try {
+          const session = await StudySession.findById(sessionId);
+          if (!session) return;
+
+          // Проверяем права (только хост или co-host в режиме host-controlled)
+          if (session.studyMode === 'host-controlled') {
+            const participant = session.participants.find(p => 
+              p.user.toString() === socket.userId
+            );
+            if (!participant || (participant.role !== 'host' && participant.role !== 'co-host')) {
+              return;
+            }
+          }
+
+          session.currentFlashcardIndex = flashcardIndex;
+          await session.save();
+
+          // Рассылаем обновление всем участникам
+          this.io.to(roomId).emit('study_session_flashcard_change', {
+            flashcardIndex,
+            changedBy: socket.userId,
+            timestamp: new Date().toISOString()
+          });
+
+        } catch (error) {
+          console.error('Error changing flashcard in study session:', error);
+        }
+      });
+
+      // Ответ на карточку в учебной сессии
+      socket.on('study_session_flashcard_answer', async (data) => {
+        const { sessionId, flashcardId, isCorrect } = data;
+        const roomId = `study_session:${sessionId}`;
+
+        try {
+          const session = await StudySession.findById(sessionId);
+          if (!session) return;
+
+          // Обновляем статистику участника
+          const participant = session.participants.find(p => 
+            p.user.toString() === socket.userId
+          );
+          
+          if (participant) {
+            participant.stats.cardsReviewed += 1;
+            if (isCorrect) {
+              participant.stats.correctAnswers += 1;
+              participant.stats.streak += 1;
+            } else {
+              participant.stats.streak = 0;
+            }
+            
+            await session.save();
+            
+            // Обновляем статистику карточки
+            const flashcard = session.flashcards.find(f => 
+              f.flashcardId && f.flashcardId.toString() === flashcardId
+            );
+            
+            if (flashcard) {
+              flashcard.reviewedBy.push({
+                user: socket.userId,
+                isCorrect,
+                reviewedAt: new Date()
+              });
+              await session.save();
+            }
+            
+            // Отправляем обновление другим участникам
+            socket.to(roomId).emit('study_session_flashcard_answer', {
+              userId: socket.userId,
+              userName: socket.userName,
+              flashcardId,
+              isCorrect,
+              streak: participant.stats.streak,
+              timestamp: new Date().toISOString()
+            });
+          }
+        } catch (error) {
+          console.error('Error handling flashcard answer:', error);
+        }
+      });
+
+      // Обновление статуса пользователя в сессии
+      socket.on('study_session_user_status', (data) => {
+        const { sessionId, status } = data;
+        const roomId = `study_session:${sessionId}`;
+
+        if (!socket.rooms.has(roomId)) return;
+
+        socket.to(roomId).emit('study_session_user_status', {
+          userId: socket.userId,
+          userName: socket.userName,
+          status,
+          timestamp: new Date().toISOString()
+        });
+      });
+
       // Запрос на получение статистики уведомлений
       socket.on('get-notification-stats', async () => {
         try {
@@ -188,9 +452,38 @@ class WebSocketServer {
         }
       });
 
+      // Запрос на получение информации об участниках сессии
+      socket.on('get_study_session_participants', async (data) => {
+        const { sessionId } = data;
+        const roomId = `study_session:${sessionId}`;
+
+        if (!this.studySessions.has(sessionId)) {
+          socket.emit('study_session_participants', { participants: [] });
+          return;
+        }
+
+        const participants = Array.from(this.studySessions.get(sessionId)).map(userId => ({
+          userId,
+          online: this.isUserOnline(userId)
+        }));
+
+        socket.emit('study_session_participants', { participants });
+      });
+
       // Обработка отключения
       socket.on('disconnect', () => {
         console.log(`❌ WebSocket: User ${socket.userId} disconnected`);
+        
+        // Удаляем пользователя из всех учебных сессий
+        if (this.userRooms.has(socket.userId)) {
+          this.userRooms.get(socket.userId).forEach(roomId => {
+            if (roomId.startsWith('study_session:')) {
+              const sessionId = roomId.replace('study_session:', '');
+              this.handleStudySessionDisconnect(socket.userId, sessionId);
+            }
+          });
+        }
+
         this.removeConnectedUser(socket.userId, socket.id);
       });
 
@@ -246,6 +539,54 @@ class WebSocketServer {
     }
   }
 
+  // Методы для учебных сессий
+  async canJoinStudySession(userId, session) {
+    // Публичная сессия
+    if (session.accessType === 'public') {
+      return true;
+    }
+    
+    // Приватная сессия
+    if (session.accessType === 'private') {
+      return session.invitedUsers.some(id => id.toString() === userId) ||
+             session.participants.some(p => p.user.toString() === userId);
+    }
+    
+    // Сессия для друзей
+    if (session.accessType === 'friends') {
+      const user = await User.findById(userId);
+      const host = await User.findById(session.host);
+      
+      if (!user || !host) return false;
+      
+      // Проверяем, являются ли пользователи друзьями
+      return user.friends.some(friend => 
+        friend.userId && friend.userId.toString() === host._id.toString() && friend.status === 'accepted'
+      ) || session.participants.some(p => p.user.toString() === userId);
+    }
+    
+    return false;
+  }
+
+  handleStudySessionDisconnect(userId, sessionId) {
+    const roomId = `study_session:${sessionId}`;
+    
+    if (this.studySessions.has(sessionId)) {
+      this.studySessions.get(sessionId).delete(userId);
+      
+      // Уведомляем других участников
+      this.io.to(roomId).emit('study_session_participant_left', {
+        userId,
+        timestamp: new Date().toISOString()
+      });
+
+      // Если сессия пуста, удаляем ее из отслеживания
+      if (this.studySessions.get(sessionId).size === 0) {
+        this.studySessions.delete(sessionId);
+      }
+    }
+  }
+
   // Методы для отправки событий из других частей приложения
   emitToUser(userId, event, data) {
     this.io.to(`user:${userId}`).emit(event, data);
@@ -255,8 +596,13 @@ class WebSocketServer {
     this.io.to(`group:${groupId}`).emit(event, data);
   }
 
-  emitToRoom(room, event, data) {
-    this.io.to(room).emit(event, data);
+  emitToStudySession(sessionId, event, data, excludeUserId = null) {
+    const roomId = `study_session:${sessionId}`;
+    if (excludeUserId) {
+      this.io.to(roomId).except(`user:${excludeUserId}`).emit(event, data);
+    } else {
+      this.io.to(roomId).emit(event, data);
+    }
   }
 
   // Метод для проверки, онлайн ли пользователь
@@ -276,6 +622,22 @@ class WebSocketServer {
     }
     
     return onlineUsers;
+  }
+
+  // Метод для получения списка онлайн участников учебной сессии
+  getOnlineParticipantsInStudySession(sessionId) {
+    if (!this.studySessions.has(sessionId)) {
+      return [];
+    }
+    
+    const onlineParticipants = [];
+    this.studySessions.get(sessionId).forEach(userId => {
+      if (this.isUserOnline(userId)) {
+        onlineParticipants.push(userId);
+      }
+    });
+    
+    return onlineParticipants;
   }
 
   // Метод для создания и отправки уведомления
@@ -314,39 +676,42 @@ class WebSocketServer {
     }
   }
 
-  // Метод для отправки группового уведомления всем участникам
-  async sendGroupNotification(groupId, notificationData, excludeUserId = null) {
+  // Метод для отправки уведомления всем участникам учебной сессии
+  async sendStudySessionNotification(sessionId, notificationData, excludeUserId = null) {
     try {
-      const Group = require('./models/Group');
-      const group = await Group.findById(groupId).populate('members.user');
-      
-      if (!group) {
-        console.error(`Группа ${groupId} не найдена`);
+      const session = await StudySession.findById(sessionId);
+      if (!session) {
+        console.error(`Учебная сессия ${sessionId} не найдена`);
         return [];
       }
 
       const notifications = [];
-      for (const member of group.members) {
+      for (const participant of session.participants) {
         // Пропускаем исключенного пользователя
-        if (excludeUserId && member.user._id.toString() === excludeUserId) {
+        if (excludeUserId && participant.user.toString() === excludeUserId) {
+          continue;
+        }
+
+        // Пропускаем неактивных участников
+        if (participant.status !== 'active') {
           continue;
         }
 
         try {
           const notification = await this.sendNotification(
-            member.user._id.toString(),
+            participant.user.toString(),
             notificationData
           );
           notifications.push(notification);
         } catch (error) {
-          console.error(`Ошибка при отправке уведомления участнику ${member.user._id}:`, error);
+          console.error(`Ошибка при отправке уведомления участнику ${participant.user}:`, error);
         }
       }
 
-      console.log(`📢 Групповое уведомление отправлено ${notifications.length} участникам группы ${groupId}`);
+      console.log(`📢 Уведомление отправлено ${notifications.length} участникам учебной сессии ${sessionId}`);
       return notifications;
     } catch (error) {
-      console.error('Ошибка при отправке группового уведомления:', error);
+      console.error('Ошибка при отправке уведомления участникам учебной сессии:', error);
       throw error;
     }
   }
@@ -359,7 +724,7 @@ class WebSocketServer {
     });
   }
 
-  // Метод для отправки уведомления всем участникам группы
+  // Метод для отправки группового уведомления всем участникам группы
   sendGroupNotificationToAll(groupId, notification) {
     this.emitToGroup(groupId, 'group-notification', {
       ...notification,
@@ -390,6 +755,37 @@ class WebSocketServer {
     } catch (error) {
       console.error('Error sending notification stats:', error);
       return 0;
+    }
+  }
+
+  // Метод для отправки приглашения в учебную сессию
+  async sendStudySessionInvite(userId, sessionId, hostName) {
+    try {
+      const session = await StudySession.findById(sessionId)
+        .populate('subjectId', 'name')
+        .populate('host', 'name');
+
+      if (!session) {
+        throw new Error('Сессия не найдена');
+      }
+
+      const notification = await this.sendNotification(userId, {
+        type: 'study_session_invite',
+        title: 'Приглашение в учебную сессию',
+        message: `${hostName || session.host.name} приглашает вас в учебную сессию "${session.name}" по предмету ${session.subjectId.name}`,
+        data: {
+          sessionId: session._id,
+          sessionName: session.name,
+          subjectName: session.subjectId.name,
+          hostId: session.host._id,
+          hostName: hostName || session.host.name
+        }
+      });
+
+      return notification;
+    } catch (error) {
+      console.error('Error sending study session invite:', error);
+      throw error;
     }
   }
 }

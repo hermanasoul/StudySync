@@ -1,5 +1,3 @@
-// server/server.js
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -60,20 +58,33 @@ app.use('/api/subjects', require('./routes/subjects'));
 app.use('/api/notes', require('./routes/notes'));
 app.use('/api/flashcards', require('./routes/flashcards'));
 app.use('/api/groups', require('./routes/groups'));
-app.use('/api/notifications', require('./routes/notifications')); // Новый маршрут уведомлений
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/study-sessions', require('./routes/studySessions')); // Новый маршрут учебных сессий
+app.use('/api/achievements', require('./routes/achievements'));
+app.use('/api/levels', require('./routes/levels'));
+app.use('/api/badges', require('./routes/badges'));
+app.use('/api/quests', require('./routes/quests'));
+app.use('/api/rewards', require('./routes/rewards'));
+app.use('/api/friends', require('./routes/friends'));
+app.use('/api/follows', require('./routes/follows'));
+app.use('/api/leaderboards', require('./routes/leaderboards'));
 
 // Проверка работы сервера
 app.get('/', (req, res) => {
   res.json({
     message: 'StudySync Backend is working! 🚀',
-    version: '1.3.0',
+    version: '1.4.0',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
     features: {
       redis: redis.isConnected,
-      websocket: wsServer.io.engine.clientsCount,
+      websocket: wsServer.wss.clients.size,
       database: mongoose.connection.readyState === 1,
-      notifications: true
+      notifications: true,
+      study_sessions: true,
+      achievements: true,
+      levels: true,
+      friends: true
     }
   });
 });
@@ -82,7 +93,7 @@ app.get('/', (req, res) => {
 app.get('/api/health', async (req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
   const redisStatus = redis.isConnected ? 'Connected' : 'Disconnected';
-  const websocketStatus = wsServer.io.engine.clientsCount;
+  const websocketStatus = wsServer.wss.clients.size;
   
   // Получаем статистику уведомлений
   const Notification = require('./models/Notification');
@@ -104,10 +115,14 @@ app.get('/api/health', async (req, res) => {
   const Group = require('./models/Group');
   const groupCount = await Group.countDocuments();
   
+  // Получаем количество учебных сессий
+  const StudySession = require('./models/StudySession');
+  const studySessionCount = await StudySession.countDocuments();
+  
   res.json({
     status: 'OK',
     message: 'Server is running smoothly',
-    version: '1.3.0',
+    version: '1.4.0',
     services: {
       database: dbStatus,
       redis: redisStatus,
@@ -119,6 +134,7 @@ app.get('/api/health', async (req, res) => {
     statistics: {
       users: userCount,
       groups: groupCount,
+      study_sessions: studySessionCount,
       notifications: notificationStats[0] || { total: 0, unread: 0 }
     },
     uptime: process.uptime(),
@@ -131,7 +147,8 @@ app.get('/api/ws-test', (req, res) => {
   const { userId, event = 'test', data = {} } = req.query;
   
   if (userId && wsServer.isUserOnline(userId)) {
-    wsServer.emitToUser(userId, event, {
+    wsServer.sendToUser(userId, {
+      type: event,
       ...data,
       serverTime: new Date().toISOString()
     });
@@ -146,6 +163,88 @@ app.get('/api/ws-test', (req, res) => {
       success: false,
       message: `User ${userId} is not online`,
       online: false
+    });
+  }
+});
+
+// Study session test endpoint
+app.get('/api/study-sessions/test', async (req, res) => {
+  const { userId, action = 'create', sessionId } = req.query;
+  
+  if (!userId) {
+    return res.status(400).json({
+      success: false,
+      message: 'User ID is required'
+    });
+  }
+  
+  try {
+    const StudySession = require('./models/StudySession');
+    let result;
+    
+    switch (action) {
+      case 'create':
+        const Subject = require('./models/Subject');
+        const subject = await Subject.findOne();
+        
+        if (!subject) {
+          return res.status(404).json({
+            success: false,
+            message: 'No subjects found'
+          });
+        }
+        
+        const newSession = new StudySession({
+          name: 'Test Study Session',
+          description: 'This is a test study session',
+          host: userId,
+          subjectId: subject._id,
+          accessType: 'public',
+          studyMode: 'collaborative',
+          participants: [{
+            user: userId,
+            role: 'host',
+            status: 'active'
+          }],
+          status: 'waiting'
+        });
+        
+        await newSession.save();
+        result = newSession;
+        break;
+        
+      case 'join':
+        if (!sessionId) {
+          return res.status(400).json({
+            success: false,
+            message: 'Session ID is required'
+          });
+        }
+        
+        const session = await StudySession.findById(sessionId);
+        if (!session) {
+          return res.status(404).json({
+            success: false,
+            message: 'Session not found'
+          });
+        }
+        
+        await session.addParticipant(userId);
+        result = session;
+        break;
+    }
+    
+    res.json({
+      success: true,
+      message: `Study session ${action} test completed`,
+      result
+    });
+  } catch (error) {
+    console.error('Error in study session test:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error in study session test',
+      error: error.message
     });
   }
 });
@@ -208,15 +307,20 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/studysync
   .then(() => {
     console.log('✅ Connected to MongoDB successfully');
     
-    // Проверяем наличие модели Notification
-    const Notification = require('./models/Notification');
-    console.log('✅ Notification model loaded');
+    // Проверяем наличие моделей и создаем индексы
+    const models = ['Notification', 'StudySession', 'User', 'Group', 'Achievement'];
     
-    // Создаем индексы для уведомлений
-    Notification.createIndexes().then(() => {
-      console.log('✅ Notification indexes created');
-    }).catch(err => {
-      console.error('❌ Error creating notification indexes:', err);
+    models.forEach(modelName => {
+      try {
+        const model = require(`./models/${modelName}`);
+        model.createIndexes().then(() => {
+          console.log(`✅ ${modelName} indexes created`);
+        }).catch(err => {
+          console.error(`❌ Error creating ${modelName} indexes:`, err);
+        });
+      } catch (error) {
+        console.error(`❌ Error loading ${modelName} model:`, error);
+      }
     });
   })
   .catch((error) => {
@@ -235,13 +339,15 @@ const gracefulShutdown = async () => {
     });
     
     // Закрываем WebSocket сервер
-    wsServer.io.close(() => {
+    wsServer.wss.close(() => {
       console.log('✅ WebSocket server closed');
     });
     
     // Закрываем Redis соединение
-    await redis.disconnect();
-    console.log('✅ Redis connection closed');
+    if (redis && redis.disconnect) {
+      await redis.disconnect();
+      console.log('✅ Redis connection closed');
+    }
     
     // Закрываем MongoDB соединение
     await mongoose.connection.close();
@@ -281,6 +387,8 @@ server.listen(PORT, () => {
   console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
   console.log(`📁 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🧠 Redis: ${redis.isConnected ? 'Connected' : 'Disconnected'}`);
-  console.log(`🔄 WebSocket: ${wsServer.io.engine.clientsCount} clients connected`);
-  console.log(`📬 Notifications: Enabled`);
+  console.log(`🔄 WebSocket: ${wsServer.wss.clients.size} clients connected`);
+  console.log(`📚 Study Sessions: Enabled`);
+  console.log(`🏆 Achievements System: Enabled`);
+  console.log(`👥 Social Features: Enabled`);
 });

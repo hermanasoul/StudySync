@@ -4,7 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import WebSocketStatus from './components/WebSocketStatus';
 import AchievementNotification from './components/AchievementNotification';
-import LevelUpNotification from './components/LevelUpNotification'; // Добавляем новый компонент
+import LevelUpNotification from './components/LevelUpNotification';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -20,7 +20,8 @@ import SubjectsPage from './pages/SubjectsPage';
 import NotificationsPage from './pages/NotificationsPage';
 import AchievementsPage from './pages/AchievementsPage';
 import LevelsPage from './pages/LevelsPage';
-import FriendsPage from './pages/FriendsPage'; // Добавляем новую страницу
+import FriendsPage from './pages/FriendsPage';
+import ChatsPage from './pages/ChatsPage';
 import './App.css';
 import './styles/buttons.css';
 import webSocketService from './services/websocket';
@@ -132,6 +133,11 @@ function App() {
             <Route path="/friends" element={
               <ProtectedRoute>
                 <FriendsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/chats" element={
+              <ProtectedRoute>
+                <ChatsPage />
               </ProtectedRoute>
             } />
             <Route path="/subjects/:subjectId" element={
