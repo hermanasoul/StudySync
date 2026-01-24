@@ -1,5 +1,3 @@
-// client/src/App.tsx (дополнение)
-
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -21,7 +19,8 @@ import PublicGroupsPage from './pages/PublicGroupsPage';
 import SubjectsPage from './pages/SubjectsPage';
 import NotificationsPage from './pages/NotificationsPage';
 import AchievementsPage from './pages/AchievementsPage';
-import LevelsPage from './pages/LevelsPage'; // Добавим позже
+import LevelsPage from './pages/LevelsPage';
+import FriendsPage from './pages/FriendsPage'; // Добавляем новую страницу
 import './App.css';
 import './styles/buttons.css';
 import webSocketService from './services/websocket';
@@ -128,6 +127,11 @@ function App() {
             <Route path="/levels" element={
               <ProtectedRoute>
                 <LevelsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/friends" element={
+              <ProtectedRoute>
+                <FriendsPage />
               </ProtectedRoute>
             } />
             <Route path="/subjects/:subjectId" element={

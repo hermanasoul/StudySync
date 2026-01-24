@@ -1,5 +1,3 @@
-// server/index.js
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -20,6 +18,10 @@ const notificationRoutes = require('./routes/notifications');
 const badgeRoutes = require('./routes/badges');
 const questRoutes = require('./routes/quests');
 const rewardRoutes = require('./routes/rewards');
+// Новые маршруты для социальных функций
+const friendsRoutes = require('./routes/friends');
+const followsRoutes = require('./routes/follows');
+const leaderboardsRoutes = require('./routes/leaderboards');
 
 // Импорт middleware
 const { errorHandler } = require('./middleware/errorHandler');
@@ -95,7 +97,10 @@ app.get('/', (req, res) => {
       notifications: '/api/notifications',
       badges: '/api/badges',
       quests: '/api/quests',
-      rewards: '/api/rewards'
+      rewards: '/api/rewards',
+      friends: '/api/friends',
+      follows: '/api/follows',
+      leaderboards: '/api/leaderboards'
     }
   });
 });
@@ -112,6 +117,10 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/badges', badgeRoutes);
 app.use('/api/quests', questRoutes);
 app.use('/api/rewards', rewardRoutes);
+// Новые социальные маршруты
+app.use('/api/friends', friendsRoutes);
+app.use('/api/follows', followsRoutes);
+app.use('/api/leaderboards', leaderboardsRoutes);
 
 // 404 обработчик
 app.use('*', (req, res) => {
@@ -131,6 +140,7 @@ httpServer.listen(PORT, () => {
   console.log(`🚀 Сервер запущен на порту ${PORT}`);
   console.log(`📡 API доступно по адресу: http://localhost:${PORT}`);
   console.log(`🌐 WebSocket доступен на: ws://localhost:${PORT}`);
+  console.log(`👥 Социальные функции: Включены`);
 });
 
 // Обработка необработанных обещаний

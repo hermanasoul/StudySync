@@ -1,5 +1,3 @@
-// client/src/services/api.ts
-
 import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api';
@@ -330,6 +328,96 @@ export interface RewardsData {
   };
 }
 
+// Интерфейсы для социальных функций
+export interface Friend {
+  friendshipId: string;
+  userId: string;
+  name: string;
+  email: string;
+  avatarUrl: string;
+  level: number;
+  experiencePoints: number;
+  status: string;
+  isRequester: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FriendRequest {
+  friendshipId: string;
+  requester: {
+    id: string;
+    name: string;
+    email: string;
+    avatarUrl: string;
+    level: number;
+    experiencePoints: number;
+  };
+  status: string;
+  createdAt: string;
+}
+
+export interface UserSearchResult {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl: string;
+  level: number;
+  experiencePoints: number;
+  followerCount: number;
+  followingCount: number;
+  friendshipStatus: string | null;
+  isRequester?: boolean;
+}
+
+export interface FollowInfo {
+  followId: string;
+  userId: string;
+  name: string;
+  email: string;
+  avatarUrl: string;
+  level: number;
+  experiencePoints: number;
+  notificationsEnabled: boolean;
+  followedAt: string;
+  isFollowing?: boolean;
+}
+
+export interface LeaderboardRanking {
+  userId: string;
+  rank: number;
+  score: number;
+  metric: string;
+  details: {
+    name: string;
+    avatarUrl: string;
+    level: number;
+    additionalStats: any;
+  };
+  previousRank?: number;
+  rankChange?: number;
+}
+
+export interface LeaderboardData {
+  leaderboard: {
+    type: string;
+    metric: string;
+    period: {
+      startDate: string;
+      endDate: string;
+    };
+    lastUpdated: string;
+    rankings: LeaderboardRanking[];
+  };
+  userRank: {
+    rank: number;
+    score: number;
+    totalParticipants: number;
+    percentile: number;
+  } | null;
+  totalParticipants: number;
+}
+
 export const groupsAPI = {
   getMy: () => api.get('/groups/my'),
   getById: (id: string) => api.get(`/groups/${id}`),
@@ -569,6 +657,105 @@ export const rewardsAPI = {
   
   // Сброс настроек к значениям по умолчанию
   resetDefaults: () => api.post('/rewards/reset-defaults'),
+};
+
+// Методы для работы с друзьями
+export const friendsAPI = {
+  // Получение списка друзей
+  getFriends: (params?: { status?: string; limit?: number; skip?: number }) =>
+    api.get('/friends', { params }),
+  
+  // Получение входящих запросов
+  getIncomingRequests: () => api.get('/friends/requests/incoming'),
+  
+  // Получение исходящих запросов
+  getOutgoingRequests: () => api.get('/friends/requests/outgoing'),
+  
+  // Отправка запроса в друзья
+  sendRequest: (userId: string) => api.post(`/friends/request/${userId}`),
+  
+  // Принятие запроса
+  acceptRequest: (friendshipId: string) => api.post(`/friends/accept/${friendshipId}`),
+  
+  // Отклонение запроса
+  rejectRequest: (friendshipId: string) => api.post(`/friends/reject/${friendshipId}`),
+  
+  // Удаление из друзей
+  removeFriend: (friendshipId: string) => api.delete(`/friends/${friendshipId}`),
+  
+  // Получение статуса дружбы
+  getFriendshipStatus: (userId: string) => api.get(`/friends/status/${userId}`),
+  
+  // Поиск пользователей
+  searchUsers: (query: string, params?: { excludeFriends?: boolean; limit?: number }) =>
+    api.get('/friends/search', { params: { query, ...params } }),
+  
+  // Получение статистики друзей
+  getFriendsStats: () => api.get('/friends/stats'),
+};
+
+// Методы для работы с подписками
+export const followsAPI = {
+  // Подписаться на пользователя
+  followUser: (userId: string) => api.post(`/follows/follow/${userId}`),
+  
+  // Отписаться от пользователя
+  unfollowUser: (userId: string) => api.delete(`/follows/follow/${userId}`),
+  
+  // Получить подписчиков
+  getFollowers: (params?: { limit?: number; skip?: number }) =>
+    api.get('/follows/followers', { params }),
+  
+  // Получить подписки
+  getFollowing: (params?: { limit?: number; skip?: number }) =>
+    api.get('/follows/following', { params }),
+  
+  // Получить подписчиков другого пользователя
+  getUserFollowers: (userId: string, params?: { limit?: number; skip?: number }) =>
+    api.get(`/follows/${userId}/followers`, { params }),
+  
+  // Получить подписки другого пользователя
+  getUserFollowing: (userId: string, params?: { limit?: number; skip?: number }) =>
+    api.get(`/follows/${userId}/following`, { params }),
+  
+  // Проверить подписку
+  checkFollow: (userId: string) => api.get(`/follows/check/${userId}`),
+  
+  // Получить рекомендации
+  getRecommendations: (params?: { limit?: number }) =>
+    api.get('/follows/recommendations', { params }),
+};
+
+// Методы для работы с лидербордами
+export const leaderboardsAPI = {
+  // Базовый метод для получения лидербордов
+  get: (endpoint: string, params?: any) => api.get(endpoint, { params }),
+  
+  // Глобальный лидерборд
+  getGlobal: (params?: { metric?: string; limit?: number }) =>
+    api.get('/leaderboards/global', { params }),
+  
+  // Групповой лидерборд
+  getGroup: (groupId: string, params?: { metric?: string; limit?: number }) =>
+    api.get(`/leaderboards/group/${groupId}`, { params }),
+  
+  // Лидерборд по предмету
+  getSubject: (subjectId: string, params?: { metric?: string; limit?: number }) =>
+    api.get(`/leaderboards/subject/${subjectId}`, { params }),
+  
+  // Еженедельный лидерборд
+  getWeekly: (params?: { metric?: string; limit?: number }) =>
+    api.get('/leaderboards/weekly', { params }),
+  
+  // Ежемесячный лидерборд
+  getMonthly: (params?: { metric?: string; limit?: number }) =>
+    api.get('/leaderboards/monthly', { params }),
+  
+  // Сравнение с друзьями
+  compareWithFriends: () => api.get('/leaderboards/compare/friends'),
+  
+  // Статистика лидербордов
+  getStats: () => api.get('/leaderboards/stats'),
 };
 
 // Вспомогательные функции

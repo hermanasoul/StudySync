@@ -381,3 +381,407 @@
     text-align: center;
   }
 }
+
+/* client/src/components/LevelProgress.css */
+.level-progress-compact {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.level-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.level-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.xp-info {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.next-level {
+  font-size: 14px;
+  color: #8b5cf6;
+  font-weight: 500;
+  background: #f5f3ff;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #6366f1);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.progress-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress-percentage {
+  font-size: 14px;
+  font-weight: 600;
+  color: #8b5cf6;
+}
+
+.next-reward {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fef3c7;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.reward-icon {
+  font-size: 16px;
+}
+
+.reward-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #92400e;
+}
+
+/* Полная версия */
+.level-progress {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.level-display {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.current-level, .next-level-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100px;
+}
+
+.level-number, .next-level-number {
+  font-size: 48px;
+  font-weight: 800;
+  color: #8b5cf6;
+  line-height: 1;
+}
+
+.next-level-number {
+  color: #c7d2fe;
+}
+
+.level-label, .next-level-label {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 8px;
+}
+
+.progress-section {
+  flex: 1;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.xp-info {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.xp-current {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.xp-separator {
+  font-size: 20px;
+  color: #d1d5db;
+}
+
+.xp-next {
+  font-size: 20px;
+  color: #9ca3af;
+}
+
+.xp-label {
+  font-size: 14px;
+  color: #6b7280;
+  margin-left: 8px;
+}
+
+.xp-to-next {
+  font-size: 14px;
+  color: #8b5cf6;
+  background: #f5f3ff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.progress-bar-large {
+  height: 12px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progress-fill-large {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #6366f1, #a78bfa);
+  border-radius: 6px;
+  transition: width 0.5s ease;
+  position: relative;
+}
+
+.progress-fill-large::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.3), 
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress-percentage-large {
+  font-size: 16px;
+  font-weight: 700;
+  color: #8b5cf6;
+}
+
+.next-level-info {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.level-details {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 30px;
+}
+
+.unlocked-rewards h4,
+.next-reward-info h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 15px 0;
+}
+
+.rewards-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.reward-item-small {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  padding: 10px 15px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.reward-icon-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.reward-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.no-rewards {
+  text-align: center;
+  padding: 20px;
+  color: #9ca3af;
+  font-style: italic;
+  background: #f9fafb;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.next-reward-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  margin-bottom: 30px;
+}
+
+.reward-icon-large {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  border: 3px solid;
+}
+
+.reward-details {
+  flex: 1;
+}
+
+.reward-level {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.reward-name-large {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 10px;
+}
+
+.reward-progress {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.progress-bar-small {
+  flex: 1;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill-small {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.level-progress-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  min-width: 50px;
+}
+
+.level-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  background: #f9fafb;
+  padding: 25px;
+  border-radius: 12px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 32px;
+  font-weight: 800;
+  color: #8b5cf6;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .level-display {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .progress-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .next-reward-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .level-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .rewards-list {
+    justify-content: center;
+  }
+}

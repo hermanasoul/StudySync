@@ -1,0 +1,129 @@
+.chats-page .page-with-header {
+  padding: 0;
+  height: calc(100vh - 64px);
+}
+
+.chats-container {
+  display: flex;
+  height: 100%;
+}
+
+.chats-sidebar {
+  width: 300px;
+  border-right: 1px solid #e5e7eb;
+  background: white;
+}
+
+.chats-main {
+  flex: 1;
+  background: #f9fafb;
+}
+
+.no-chat-selected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+  text-align: center;
+  color: #374151;
+}
+
+.welcome-icon {
+  font-size: 80px;
+  margin-bottom: 24px;
+  opacity: 0.8;
+}
+
+.no-chat-selected h2 {
+  margin: 0 0 16px 0;
+  font-size: 28px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.no-chat-selected p {
+  margin: 0 0 40px 0;
+  color: #6b7280;
+  font-size: 16px;
+  max-width: 400px;
+}
+
+.chat-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+  max-width: 800px;
+  width: 100%;
+}
+
+.feature {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.feature:hover {
+  transform: translateY(-4px);
+}
+
+.feature-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.feature-text h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.feature-text p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 18px;
+  color: #666;
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+  .chats-sidebar {
+    width: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .chats-container {
+    flex-direction: column;
+  }
+  
+  .chats-sidebar {
+    width: 100%;
+    height: 300px;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .chats-main {
+    height: calc(100% - 300px);
+  }
+  
+  .chat-features {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,273 @@
+.message-wrapper {
+  display: flex;
+  gap: 8px;
+  position: relative;
+}
+
+.own-message {
+  flex-direction: row-reverse;
+}
+
+.other-message {
+  flex-direction: row;
+}
+
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  position: relative;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+.avatar-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-text {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.avatar-level {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #10b981;
+  color: white;
+  font-size: 8px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+.message-content-wrapper {
+  max-width: 70%;
+  display: flex;
+  flex-direction: column;
+}
+
+.own-message .message-content-wrapper {
+  align-items: flex-end;
+}
+
+.message-sender {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 4px;
+  padding-left: 4px;
+}
+
+.message-reply {
+  background: #f3f4f6;
+  border-left: 3px solid #3b82f6;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  max-width: 100%;
+}
+
+.reply-sender {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 2px;
+}
+
+.reply-content {
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-bubble-container {
+  position: relative;
+  max-width: 100%;
+}
+
+.message-bubble {
+  padding: 12px 16px;
+  border-radius: 18px;
+  position: relative;
+  word-wrap: break-word;
+  max-width: 100%;
+}
+
+.message-bubble.own {
+  background: #3b82f6;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message-bubble.other {
+  background: #f3f4f6;
+  color: #374151;
+  border-bottom-left-radius: 4px;
+}
+
+.message-text {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.edited-badge {
+  font-size: 11px;
+  opacity: 0.8;
+  margin-left: 4px;
+}
+
+.message-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 0 4px;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.own-message .message-meta {
+  justify-content: flex-end;
+}
+
+.message-time {
+  font-size: 11px;
+}
+
+.message-read {
+  color: #10b981;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.system-message {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0;
+}
+
+.system-content {
+  background: #f3f4f6;
+  color: #6b7280;
+  padding: 8px 16px;
+  border-radius: 16px;
+  font-size: 12px;
+  max-width: 80%;
+  text-align: center;
+}
+
+.message-context-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  min-width: 160px;
+  overflow: hidden;
+}
+
+.context-menu-item {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.context-menu-item:hover {
+  background: #f3f4f6;
+}
+
+.context-menu-item.delete {
+  color: #ef4444;
+}
+
+.context-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99;
+}
+
+.message-edit-container {
+  background: white;
+  border: 1px solid #3b82f6;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.message-edit-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.message-edit-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.message-edit-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.edit-btn {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.edit-btn.save {
+  background: #10b981;
+  color: white;
+}
+
+.edit-btn.save:hover {
+  background: #059669;
+}
+
+.edit-btn.cancel {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.edit-btn.cancel:hover {
+  background: #e5e7eb;
+}

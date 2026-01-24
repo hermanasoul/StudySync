@@ -1,10 +1,9 @@
-// client/src/components/Header.tsx
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Button from './Button';
 import Notifications from './Notifications';
+import ChatNotification from './ChatNotification'; // Добавим
 import './Header.css';
 
 const Header: React.FC = () => {
@@ -27,14 +26,16 @@ const Header: React.FC = () => {
             <Link to="/dashboard" className="nav-link">Главная</Link>
             <Link to="/subjects" className="nav-link">Предметы</Link>
             <Link to="/groups" className="nav-link">Группы</Link>
-            <Link to="/notifications" className="nav-link">Уведомления</Link>
-            <Link to="/help" className="nav-link">Помощь</Link>
+            <Link to="/friends" className="nav-link">👥 Друзья</Link>
+            <Link to="/chats" className="nav-link">💬 Сообщения</Link>
+            <Link to="/notifications" className="nav-link">🔔 Уведомления</Link>
             <Link to="/achievements" className="nav-link">🏆 Достижения</Link>
           </nav>
           <div className="header-buttons button-group">
             {user ? (
               <>
                 <span className="user-name">Привет, {user.name}!</span>
+                <ChatNotification />
                 <Notifications />
                 <Button variant="success" size="small" href="/profile">
                   Профиль

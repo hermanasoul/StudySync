@@ -1,7 +1,8 @@
 // client/src/pages/ProfilePage.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { levelsAPI, achievementsAPI, badgesAPI, questsAPI } from '../services/api';
+import { levelsAPI, achievementsAPI, badgesAPI, questsAPI, rewardsAPI } from '../services/api';
 import Header from '../components/Header';
 import LevelProgress from '../components/LevelProgress';
 import BadgeGrid from '../components/BadgeGrid';
@@ -14,8 +15,9 @@ const ProfilePage: React.FC = () => {
   const [badges, setBadges] = useState<any>(null);
   const [streak, setStreak] = useState<any>(null);
   const [dailyQuests, setDailyQuests] = useState<any[]>([]);
+  const [rewards, setRewards] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'badges' | 'quests' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'badges' | 'quests' | 'rewards' | 'settings'>('overview');
 
   useEffect(() => {
     if (user) {
@@ -23,6 +25,12 @@ const ProfilePage: React.FC = () => {
       updateStreak();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (user && activeTab === 'rewards') {
+      loadRewardsData();
+    }
+  }, [activeTab, user]);
 
   const loadUserData = async () => {
     try {
@@ -73,6 +81,17 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const loadRewardsData = async () => {
+    try {
+      const rewardsResponse = await rewardsAPI.getAvailable();
+      if (rewardsResponse.data.success) {
+        setRewards(rewardsResponse.data.rewards);
+      }
+    } catch (error) {
+      console.error('Error loading rewards data:', error);
+    }
+  };
+
   const updateStreak = async () => {
     try {
       await badgesAPI.updateStreak();
@@ -84,6 +103,97 @@ const ProfilePage: React.FC = () => {
   const handleBadgeClick = (badge: any) => {
     console.log('Badge clicked:', badge);
     // Можно открыть модальное окно с деталями бейджа
+  };
+
+  const handleApplyTheme = async (theme: string) => {
+    try {
+      await rewardsAPI.applyTheme(theme);
+      loadRewardsData();
+    } catch (error) {
+      console.error('Error applying theme:', error);
+    }
+  };
+
+  const handleApplyAvatarEffect = async (effect: string) => {
+    try {
+      await rewardsAPI.applyAvatarEffect(effect);
+      loadRewardsData();
+    } catch (error) {
+      console.error('Error applying avatar effect:', error);
+    }
+  };
+
+  const handleApplyBadgeFrame = async (frame: string) => {
+    try {
+      await rewardsAPI.applyBadgeFrame(frame);
+      loadRewardsData();
+    } catch (error) {
+      console.error('Error applying badge frame:', error);
+    }
+  };
+
+  const handleApplyProfileBackground = async (background: string) => {
+    try {
+      await rewardsAPI.applyProfileBackground(background);
+      loadRewardsData();
+    } catch (error) {
+      console.error('Error applying profile background:', error);
+    }
+  };
+
+  const handleResetDefaults = async () => {
+    try {
+      await rewardsAPI.resetDefaults();
+      loadRewardsData();
+    } catch (error) {
+      console.error('Error resetting defaults:', error);
+    }
+  };
+
+  const getEffectIcon = (effectId: string) => {
+    switch (effectId) {
+      case 'sparkle': return '✨';
+      case 'glow': return '💫';
+      case 'fire': return '🔥';
+      case 'halo': return '😇';
+      case 'rainbow': return '🌈';
+      case 'pulse': return '💓';
+      default: return '👤';
+    }
+  };
+
+  const getFrameIcon = (frameId: string) => {
+    switch (frameId) {
+      case 'bronze-frame': return '🥉';
+      case 'silver-frame': return '🥈';
+      case 'gold-frame': return '🥇';
+      case 'platinum-frame': return '🏆';
+      case 'crystal-frame': return '💎';
+      default: return '🖼️';
+    }
+  };
+
+  const getBackgroundIcon = (backgroundId: string) => {
+    switch (backgroundId) {
+      case 'particles': return '✨';
+      case 'gradient-animated': return '🌊';
+      case 'stars': return '⭐';
+      case 'geometric': return '🔶';
+      default: return '🎨';
+    }
+  };
+
+  const getAbilityIcon = (abilityId: string) => {
+    switch (abilityId) {
+      case 'daily_quests': return '📅';
+      case 'weekly_quests': return '📆';
+      case 'monthly_quests': return '🗓️';
+      case 'custom_themes': return '🎨';
+      case 'priority_support': return '🚀';
+      case 'advanced_analytics': return '📊';
+      case 'unlimited_groups': return '👥';
+      default: return '🎁';
+    }
   };
 
   const renderOverview = () => (
@@ -281,6 +391,259 @@ const ProfilePage: React.FC = () => {
     </div>
   );
 
+  const renderRewardsTab = () => (
+    <div className="profile-section">
+      <div className="section-header">
+        <h3>🎁 Награды и визуальные эффекты</h3>
+        <div className="rewards-stats">
+          <span className="stat-item">
+            <strong>{rewards?.stats?.totalUnlocked || 0}</strong> разблокировано
+          </span>
+          <span className="stat-item">
+            Уровень <strong>{rewards?.stats?.level || 1}</strong>
+          </span>
+        </div>
+      </div>
+      
+      {rewards ? (
+        <div className="rewards-container">
+          {/* Активные награды */}
+          <div className="active-rewards">
+            <h4>Активные настройки</h4>
+            <div className="active-rewards-grid">
+              <div className="active-reward-item">
+                <div className="active-reward-label">Тема:</div>
+                <div className="active-reward-value">
+                  {rewards.active.theme === 'default' ? 'Стандартная' : 
+                   rewards.active.theme === 'dark' ? 'Темная' :
+                   rewards.active.theme === 'premium' ? 'Премиум' :
+                   rewards.active.theme === 'gradient' ? 'Градиент' :
+                   rewards.active.theme === 'nebula' ? 'Туманность' :
+                   rewards.active.theme === 'sunset' ? 'Закат' :
+                   rewards.active.theme === 'forest' ? 'Лес' :
+                   rewards.active.theme === 'ocean' ? 'Океан' : rewards.active.theme}
+                </div>
+              </div>
+              <div className="active-reward-item">
+                <div className="active-reward-label">Эффект аватара:</div>
+                <div className="active-reward-value">
+                  {rewards.active.avatarEffect === 'none' ? 'Без эффекта' :
+                   rewards.active.avatarEffect === 'sparkle' ? 'Блеск' :
+                   rewards.active.avatarEffect === 'glow' ? 'Свечение' :
+                   rewards.active.avatarEffect === 'fire' ? 'Огонь' :
+                   rewards.active.avatarEffect === 'halo' ? 'Нимб' :
+                   rewards.active.avatarEffect === 'rainbow' ? 'Радуга' :
+                   rewards.active.avatarEffect === 'pulse' ? 'Пульсация' : rewards.active.avatarEffect}
+                </div>
+              </div>
+              <div className="active-reward-item">
+                <div className="active-reward-label">Рамка бейджей:</div>
+                <div className="active-reward-value">
+                  {rewards.active.badgeFrame === 'none' ? 'Без рамки' :
+                   rewards.active.badgeFrame === 'bronze-frame' ? 'Бронзовая' :
+                   rewards.active.badgeFrame === 'silver-frame' ? 'Серебряная' :
+                   rewards.active.badgeFrame === 'gold-frame' ? 'Золотая' :
+                   rewards.active.badgeFrame === 'platinum-frame' ? 'Платиновая' :
+                   rewards.active.badgeFrame === 'crystal-frame' ? 'Кристальная' : rewards.active.badgeFrame}
+                </div>
+              </div>
+              <div className="active-reward-item">
+                <div className="active-reward-label">Фон профиля:</div>
+                <div className="active-reward-value">
+                  {rewards.active.profileBackground === 'default' ? 'Стандартный' :
+                   rewards.active.profileBackground === 'particles' ? 'Частицы' :
+                   rewards.active.profileBackground === 'gradient-animated' ? 'Анимированный градиент' :
+                   rewards.active.profileBackground === 'stars' ? 'Звезды' :
+                   rewards.active.profileBackground === 'geometric' ? 'Геометрия' : rewards.active.profileBackground}
+                </div>
+              </div>
+            </div>
+            <button 
+              className="btn-outline reset-btn"
+              onClick={handleResetDefaults}
+            >
+              Сбросить к стандартным
+            </button>
+          </div>
+          
+          {/* Темы профиля */}
+          <div className="reward-category">
+            <h4>Темы профиля</h4>
+            <div className="reward-items">
+              {rewards.available.themes.map((theme: any) => (
+                <div key={theme.id} className={`reward-item ${theme.unlocked ? 'unlocked' : 'locked'}`}>
+                  <div 
+                    className="reward-icon" 
+                    style={{ 
+                      backgroundColor: theme.color,
+                      background: theme.id === 'gradient' ? 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)' :
+                                 theme.id === 'nebula' ? 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%)' :
+                                 theme.id === 'sunset' ? 'linear-gradient(135deg, #ec4899 0%, #f97316 100%)' :
+                                 theme.id === 'forest' ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' :
+                                 theme.id === 'ocean' ? 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)' : theme.color
+                    }}
+                  ></div>
+                  <div className="reward-info">
+                    <div className="reward-name">{theme.name}</div>
+                    <div className="reward-description">
+                      {theme.unlocked ? 'Разблокировано' : `Требуется уровень ${theme.requiresLevel}`}
+                    </div>
+                  </div>
+                  {theme.unlocked && rewards.active.theme === theme.id && (
+                    <div className="reward-applied">Применено</div>
+                  )}
+                  {theme.unlocked && rewards.active.theme !== theme.id && (
+                    <button 
+                      className="btn-outline"
+                      onClick={() => handleApplyTheme(theme.id)}
+                    >
+                      Применить
+                    </button>
+                  )}
+                  {!theme.unlocked && (
+                    <div className="reward-locked">
+                      <span className="lock-icon">🔒</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Эффекты аватара */}
+          <div className="reward-category">
+            <h4>Эффекты аватара</h4>
+            <div className="reward-items">
+              {rewards.available.avatarEffects.map((effect: any) => (
+                <div key={effect.id} className={`reward-item ${effect.unlocked ? 'unlocked' : 'locked'}`}>
+                  <div className="reward-icon">{getEffectIcon(effect.id)}</div>
+                  <div className="reward-info">
+                    <div className="reward-name">{effect.name}</div>
+                    <div className="reward-description">
+                      {effect.unlocked ? 'Разблокировано' : `Требуется уровень ${effect.requiresLevel}`}
+                    </div>
+                  </div>
+                  {effect.unlocked && rewards.active.avatarEffect === effect.id && (
+                    <div className="reward-applied">Применено</div>
+                  )}
+                  {effect.unlocked && rewards.active.avatarEffect !== effect.id && (
+                    <button 
+                      className="btn-outline"
+                      onClick={() => handleApplyAvatarEffect(effect.id)}
+                    >
+                      Применить
+                    </button>
+                  )}
+                  {!effect.unlocked && (
+                    <div className="reward-locked">
+                      <span className="lock-icon">🔒</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Рамки для бейджей */}
+          <div className="reward-category">
+            <h4>Рамки для бейджей</h4>
+            <div className="reward-items">
+              {rewards.available.badgeFrames.map((frame: any) => (
+                <div key={frame.id} className={`reward-item ${frame.unlocked ? 'unlocked' : 'locked'}`}>
+                  <div className="reward-icon">{getFrameIcon(frame.id)}</div>
+                  <div className="reward-info">
+                    <div className="reward-name">{frame.name}</div>
+                    <div className="reward-description">
+                      {frame.unlocked ? 'Разблокировано' : `Требуется уровень ${frame.requiresLevel}`}
+                    </div>
+                  </div>
+                  {frame.unlocked && rewards.active.badgeFrame === frame.id && (
+                    <div className="reward-applied">Применено</div>
+                  )}
+                  {frame.unlocked && rewards.active.badgeFrame !== frame.id && (
+                    <button 
+                      className="btn-outline"
+                      onClick={() => handleApplyBadgeFrame(frame.id)}
+                    >
+                      Применить
+                    </button>
+                  )}
+                  {!frame.unlocked && (
+                    <div className="reward-locked">
+                      <span className="lock-icon">🔒</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Фоны профиля */}
+          <div className="reward-category">
+            <h4>Фоны профиля</h4>
+            <div className="reward-items">
+              {rewards.available.profileBackgrounds.map((background: any) => (
+                <div key={background.id} className={`reward-item ${background.unlocked ? 'unlocked' : 'locked'}`}>
+                  <div className="reward-icon">{getBackgroundIcon(background.id)}</div>
+                  <div className="reward-info">
+                    <div className="reward-name">{background.name}</div>
+                    <div className="reward-description">
+                      {background.unlocked ? 'Разблокировано' : `Требуется уровень ${background.requiresLevel}`}
+                    </div>
+                  </div>
+                  {background.unlocked && rewards.active.profileBackground === background.id && (
+                    <div className="reward-applied">Применено</div>
+                  )}
+                  {background.unlocked && rewards.active.profileBackground !== background.id && (
+                    <button 
+                      className="btn-outline"
+                      onClick={() => handleApplyProfileBackground(background.id)}
+                    >
+                      Применить
+                    </button>
+                  )}
+                  {!background.unlocked && (
+                    <div className="reward-locked">
+                      <span className="lock-icon">🔒</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Особые возможности */}
+          <div className="reward-category">
+            <h4>Особые возможности</h4>
+            <div className="reward-items">
+              {rewards.available.specialAbilities.map((ability: any) => (
+                <div key={ability.id} className={`reward-item ${ability.unlocked ? 'unlocked' : 'locked'}`}>
+                  <div className="reward-icon">{getAbilityIcon(ability.id)}</div>
+                  <div className="reward-info">
+                    <div className="reward-name">{ability.name}</div>
+                    <div className="reward-description">
+                      {ability.unlocked ? 'Разблокировано' : `Требуется уровень ${ability.requiresLevel}`}
+                    </div>
+                  </div>
+                  {ability.unlocked && (
+                    <div className="reward-applied">Активно</div>
+                  )}
+                  {!ability.unlocked && (
+                    <div className="reward-locked">
+                      <span className="lock-icon">🔒</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="loading">Загрузка наград...</div>
+      )}
+    </div>
+  );
+
   const handleGenerateDailyQuests = async () => {
     try {
       await questsAPI.generateDaily();
@@ -327,6 +690,12 @@ const ProfilePage: React.FC = () => {
             onClick={() => setActiveTab('quests')}
           >
             Задания
+          </button>
+          <button
+            className={`profile-tab ${activeTab === 'rewards' ? 'active' : ''}`}
+            onClick={() => setActiveTab('rewards')}
+          >
+            Награды
           </button>
           <button
             className={`profile-tab ${activeTab === 'settings' ? 'active' : ''}`}
@@ -391,6 +760,7 @@ const ProfilePage: React.FC = () => {
           {activeTab === 'overview' && renderOverview()}
           {activeTab === 'badges' && renderBadgesTab()}
           {activeTab === 'quests' && renderQuestsTab()}
+          {activeTab === 'rewards' && renderRewardsTab()}
           {activeTab === 'settings' && (
             <div className="profile-section">
               <h3>Настройки профиля</h3>

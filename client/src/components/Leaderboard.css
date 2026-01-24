@@ -1,0 +1,410 @@
+.leaderboard-container {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.leaderboard-container.compact {
+  padding: 16px;
+}
+
+.leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.header-left h2 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.scope-name {
+  display: inline-block;
+  padding: 4px 12px;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.leaderboard-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 14px;
+  color: #666;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.time-range-selector {
+  display: flex;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.time-range-btn {
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.time-range-btn:hover {
+  background-color: #f3f4f6;
+}
+
+.time-range-btn.active {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.metric-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.metric-select {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #333;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.metric-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #666;
+  font-size: 16px;
+}
+
+.user-position {
+  margin-bottom: 24px;
+}
+
+.position-card {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border-radius: 12px;
+  padding: 20px;
+  color: white;
+}
+
+.position-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.position-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.position-rank {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.rank-number {
+  font-size: 32px;
+}
+
+.position-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 16px;
+}
+
+.position-stats .stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.leaderboard-table {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table-header {
+  display: flex;
+  background-color: #f9fafb;
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+
+.header-cell {
+  padding: 0 12px;
+}
+
+.rank-cell {
+  width: 80px;
+  text-align: center;
+}
+
+.user-cell {
+  flex: 1;
+}
+
+.score-cell {
+  width: 120px;
+  text-align: center;
+}
+
+.level-cell {
+  width: 100px;
+  text-align: center;
+}
+
+.change-cell {
+  width: 100px;
+  text-align: center;
+}
+
+.table-body {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.table-row {
+  display: flex;
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.3s;
+  align-items: center;
+}
+
+.table-row:hover {
+  background-color: #f9fafb;
+}
+
+.table-row.current-user {
+  background-color: #eff6ff;
+  border-left: 4px solid #3b82f6;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.cell {
+  padding: 0 12px;
+}
+
+.rank-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 80px;
+}
+
+.rank-icon {
+  font-size: 20px;
+}
+
+.rank-number {
+  font-size: 14px;
+  color: #666;
+}
+
+.user-cell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.user-stats {
+  display: flex;
+  gap: 8px;
+}
+
+.stat-badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  background-color: #f3f4f6;
+  color: #666;
+  border-radius: 12px;
+}
+
+.score-cell {
+  width: 120px;
+  text-align: center;
+}
+
+.score-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.level-cell {
+  width: 100px;
+  text-align: center;
+}
+
+.level-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 60px;
+}
+
+.change-cell {
+  width: 100px;
+  text-align: center;
+}
+
+.rank-change {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.rank-change.up {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.rank-change.down {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.rank-change.same {
+  background-color: #f3f4f6;
+  color: #666;
+}
+
+.view-all-link {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.view-all-link a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.view-all-link a:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.empty-leaderboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-leaderboard h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.empty-leaderboard p {
+  margin: 0;
+  color: #666;
+  max-width: 400px;
+}

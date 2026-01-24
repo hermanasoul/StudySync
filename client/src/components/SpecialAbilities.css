@@ -1,0 +1,284 @@
+/* client/src/components/SpecialAbilities.css */
+.special-abilities {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.abilities-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.abilities-header h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.abilities-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.abilities-stats .stat {
+  background: #f3f4f6;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.abilities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+}
+
+.ability-card {
+  position: relative;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  background: white;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.ability-card.unlocked {
+  border-color: #8b5cf6;
+  background: linear-gradient(135deg, #f8fafc 0%, #f5f3ff 100%);
+}
+
+.ability-card.active {
+  border-color: #10b981;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
+}
+
+.ability-card.locked {
+  background: #f9fafb;
+  opacity: 0.8;
+}
+
+.ability-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.ability-card.locked:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.ability-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.ability-icon {
+  font-size: 32px;
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #e5e7eb;
+}
+
+.ability-card.unlocked .ability-icon {
+  border-color: #8b5cf6;
+  background: #f5f3ff;
+}
+
+.ability-card.active .ability-icon {
+  border-color: #10b981;
+  background: #dcfce7;
+}
+
+.ability-status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid currentColor;
+}
+
+.ability-content {
+  margin-bottom: 20px;
+}
+
+.ability-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 10px 0;
+}
+
+.ability-description {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+  margin: 0 0 15px 0;
+}
+
+.ability-benefit {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 4px solid #8b5cf6;
+}
+
+.ability-card.active .ability-benefit {
+  border-left-color: #10b981;
+}
+
+.benefit-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.benefit-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.ability-footer {
+  margin-top: 20px;
+}
+
+.ability-actions .btn-outline {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ability-actions .btn-outline.active {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.ability-requirements {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.level-requirement {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.requirement-icon {
+  font-size: 16px;
+}
+
+.requirement-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.progress-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #6366f1);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  min-width: 40px;
+  text-align: right;
+}
+
+.ability-lock-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(2px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ability-card.locked:hover .ability-lock-overlay {
+  opacity: 1;
+}
+
+.lock-icon {
+  font-size: 32px;
+  color: #9ca3af;
+}
+
+.lock-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  text-align: center;
+  max-width: 80%;
+}
+
+@media (max-width: 768px) {
+  .abilities-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .abilities-stats {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .abilities-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,132 +1,102 @@
 // client/src/components/LevelProgress.tsx
-
 import React, { useState, useEffect } from 'react';
 import './LevelProgress.css';
-import { levelsAPI, LevelProgress as LevelProgressType } from '../services/api';
 
 interface LevelProgressProps {
   compact?: boolean;
   showDetails?: boolean;
-  onLevelUp?: (newLevel: number) => void;
+  currentLevel?: number;
+  experiencePoints?: number;
+  nextLevel?: number;
+  progressPercentage?: number;
+  pointsToNextLevel?: number;
+  unlocks?: any;
 }
 
-const LevelProgress: React.FC<LevelProgressProps> = ({ 
-  compact = false, 
+const LevelProgress: React.FC<LevelProgressProps> = ({
+  compact = false,
   showDetails = true,
-  onLevelUp 
+  currentLevel = 1,
+  experiencePoints = 0,
+  nextLevel = 2,
+  progressPercentage = 0,
+  pointsToNextLevel = 100,
+  unlocks = {}
 }) => {
-  const [progress, setProgress] = useState<LevelProgressType | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [nextUnlock, setNextUnlock] = useState<any>(null);
+  const [unlockedItems, setUnlockedItems] = useState<any[]>([]);
 
   useEffect(() => {
-    loadProgress();
-  }, []);
+    // Симуляция получения разблокированных предметов
+    const mockUnlocked = [];
+    if (currentLevel >= 5) mockUnlocked.push({ type: 'theme', name: 'Темная тема' });
+    if (currentLevel >= 10) mockUnlocked.push({ type: 'effect', name: 'Эффект огня' });
+    if (currentLevel >= 15) mockUnlocked.push({ type: 'ability', name: 'Расширенная аналитика' });
+    
+    setUnlockedItems(mockUnlocked);
 
-  const loadProgress = async () => {
-    try {
-      setLoading(true);
-      const response = await levelsAPI.getMyProgress();
-      if (response.data.success) {
-        setProgress(response.data.progress);
-        
-        // Проверяем, был ли уровень повышен с последней загрузки
-        const lastLevel = localStorage.getItem('last_known_level');
-        const currentLevel = response.data.progress.level.toString();
-        
-        if (lastLevel && parseInt(lastLevel) < response.data.progress.level) {
-          if (onLevelUp) {
-            onLevelUp(response.data.progress.level);
-          }
-        }
-        
-        localStorage.setItem('last_known_level', currentLevel);
-      }
-    } catch (error) {
-      console.error('Error loading level progress:', error);
-      setError('Ошибка загрузки прогресса уровня');
-    } finally {
-      setLoading(false);
+    // Определяем следующую награду
+    if (currentLevel < 5) {
+      setNextUnlock({ level: 5, reward: 'Темная тема', type: 'theme' });
+    } else if (currentLevel < 10) {
+      setNextUnlock({ level: 10, reward: 'Эффект огня', type: 'effect' });
+    } else if (currentLevel < 15) {
+      setNextUnlock({ level: 15, reward: 'Расширенная аналитика', type: 'ability' });
+    } else if (currentLevel < 20) {
+      setNextUnlock({ level: 20, reward: 'Премиум тема', type: 'theme' });
+    } else {
+      setNextUnlock(null);
+    }
+  }, [currentLevel]);
+
+  const getRewardIcon = (type: string) => {
+    switch (type) {
+      case 'theme': return '🎨';
+      case 'effect': return '✨';
+      case 'ability': return '🚀';
+      case 'frame': return '🖼️';
+      default: return '🎁';
     }
   };
 
-  const getLevelIcon = (level: number) => {
-    if (level >= 100) return '🌌';
-    if (level >= 90) return '💫';
-    if (level >= 80) return '🧙';
-    if (level >= 70) return '⚡';
-    if (level >= 60) return '🌟';
-    if (level >= 50) return '👑';
-    if (level >= 40) return '🎓';
-    if (level >= 30) return '🔍';
-    if (level >= 20) return '📚';
-    if (level >= 10) return '🌱';
-    return '⭐';
+  const getRewardColor = (type: string) => {
+    switch (type) {
+      case 'theme': return '#8b5cf6';
+      case 'effect': return '#f59e0b';
+      case 'ability': return '#10b981';
+      case 'frame': return '#3b82f6';
+      default: return '#6b7280';
+    }
   };
-
-  const getLevelColor = (level: number) => {
-    if (level >= 100) return '#f97316';
-    if (level >= 90) return '#06b6d4';
-    if (level >= 80) return '#7c3aed';
-    if (level >= 70) return '#ef4444';
-    if (level >= 60) return '#ec4899';
-    if (level >= 50) return '#f59e0b';
-    if (level >= 40) return '#10b981';
-    if (level >= 30) return '#8b5cf6';
-    if (level >= 20) return '#3b82f6';
-    if (level >= 10) return '#6b7280';
-    return '#9ca3af';
-  };
-
-  if (loading) {
-    return (
-      <div className="level-progress-loading">
-        <div className="loading-spinner"></div>
-        <span>Загрузка прогресса...</span>
-      </div>
-    );
-  }
-
-  if (error || !progress) {
-    return (
-      <div className="level-progress-error">
-        <span>{error || 'Не удалось загрузить прогресс'}</span>
-      </div>
-    );
-  }
 
   if (compact) {
     return (
       <div className="level-progress-compact">
-        <div className="level-info-compact">
-          <div 
-            className="level-icon-compact"
-            style={{ backgroundColor: getLevelColor(progress.level) }}
-          >
-            {getLevelIcon(progress.level)}
+        <div className="progress-header">
+          <div className="level-info">
+            <span className="level-label">Уровень {currentLevel}</span>
+            <span className="xp-info">{experiencePoints} опыта</span>
           </div>
-          <div className="level-details-compact">
-            <div className="level-name-compact">
-              Уровень {progress.level}
-              {progress.currentLevel && (
-                <span className="level-title-compact">
-                  : {progress.currentLevel.name}
-                </span>
-              )}
-            </div>
-            <div className="level-exp-compact">
-              {progress.experiencePoints} XP
-            </div>
+          <div className="next-level">
+            До уровня {nextLevel}: {pointsToNextLevel} XP
           </div>
         </div>
-        <div className="progress-bar-compact">
+        
+        <div className="progress-bar">
           <div 
-            className="progress-fill-compact"
-            style={{ 
-              width: `${progress.progressPercentage}%`,
-              backgroundColor: getLevelColor(progress.level)
-            }}
+            className="progress-fill"
+            style={{ width: `${progressPercentage}%` }}
           />
+        </div>
+        
+        <div className="progress-footer">
+          <div className="progress-percentage">{Math.round(progressPercentage)}%</div>
+          {nextUnlock && (
+            <div className="next-reward">
+              <span className="reward-icon">{getRewardIcon(nextUnlock.type)}</span>
+              <span className="reward-text">Уровень {nextUnlock.level}: {nextUnlock.reward}</span>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -134,132 +104,120 @@ const LevelProgress: React.FC<LevelProgressProps> = ({
 
   return (
     <div className="level-progress">
-      <div className="level-header">
-        <div className="level-info">
-          <div 
-            className="level-icon"
-            style={{ 
-              backgroundColor: getLevelColor(progress.level),
-              borderColor: getLevelColor(progress.level)
-            }}
-          >
-            {progress.currentLevel?.icon || getLevelIcon(progress.level)}
-          </div>
-          <div className="level-details">
-            <h3 className="level-name">
-              Уровень {progress.level}
-              {progress.currentLevel && (
-                <span className="level-title">: {progress.currentLevel.name}</span>
-              )}
-            </h3>
-            <p className="level-description">
-              {progress.currentLevel?.description || 'Продолжайте учиться для повышения уровня'}
-            </p>
-          </div>
-        </div>
-        
-        <div className="level-stats">
-          <div className="stat-item">
-            <div className="stat-value">{progress.experiencePoints}</div>
-            <div className="stat-label">Опыт</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-value">{progress.totalAchievementPoints}</div>
-            <div className="stat-label">Очки достижений</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-value">#{progress.rank}</div>
-            <div className="stat-label">Ранг</div>
-          </div>
-        </div>
-      </div>
-      
-      <div className="progress-section">
-        <div className="progress-info">
-          <div className="progress-labels">
-            <span className="current-level">
-              Ур. {progress.level}
-            </span>
-            <span className="progress-percentage">
-              {progress.progressPercentage}%
-            </span>
-            {progress.nextLevel && (
-              <span className="next-level">
-                Ур. {progress.nextLevel.level}
-              </span>
-            )}
+      <div className="progress-container">
+        <div className="level-display">
+          <div className="current-level">
+            <div className="level-number">{currentLevel}</div>
+            <div className="level-label">Текущий уровень</div>
           </div>
           
-          <div className="progress-bar">
-            <div 
-              className="progress-fill"
-              style={{ 
-                width: `${progress.progressPercentage}%`,
-                backgroundColor: getLevelColor(progress.level)
-              }}
-            />
-            <div className="progress-marker" style={{ left: `${progress.progressPercentage}%` }} />
-          </div>
-          
-          <div className="progress-numbers">
-            <span className="current-points">
-              {progress.experiencePoints} XP
-            </span>
-            {progress.nextLevel && (
-              <span className="points-to-next">
-                До след. уровня: {progress.pointsToNextLevel} XP
-              </span>
-            )}
-          </div>
-        </div>
-        
-        {showDetails && progress.nextLevel && (
-          <div className="next-level-info">
-            <h4>Следующий уровень:</h4>
-            <div className="next-level-details">
-              <div 
-                className="next-level-icon"
-                style={{ 
-                  backgroundColor: progress.nextLevel.color + '20',
-                  borderColor: progress.nextLevel.color
-                }}
-              >
-                {progress.nextLevel.icon}
+          <div className="progress-section">
+            <div className="progress-header">
+              <div className="xp-info">
+                <span className="xp-current">{experiencePoints}</span>
+                <span className="xp-separator">/</span>
+                <span className="xp-next">{experiencePoints + pointsToNextLevel}</span>
+                <span className="xp-label">опыта</span>
               </div>
-              <div className="next-level-content">
-                <h5>Уровень {progress.nextLevel.level}: {progress.nextLevel.name}</h5>
-                <p>{progress.nextLevel.description}</p>
-                <div className="next-level-requirements">
-                  <span className="required-points">
-                    Требуется: {progress.nextLevel.requiredPoints} XP
-                  </span>
+              <div className="xp-to-next">
+                До следующего уровня: {pointsToNextLevel} XP
+              </div>
+            </div>
+            
+            <div className="progress-bar-large">
+              <div 
+                className="progress-fill-large"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
+            
+            <div className="progress-info">
+              <span className="progress-percentage-large">{Math.round(progressPercentage)}%</span>
+              <span className="next-level-info">Уровень {nextLevel}</span>
+            </div>
+          </div>
+          
+          <div className="next-level-preview">
+            <div className="next-level-number">{nextLevel}</div>
+            <div className="next-level-label">Следующий уровень</div>
+          </div>
+        </div>
+
+        {showDetails && (
+          <div className="level-details">
+            <div className="unlocked-rewards">
+              <h4>Разблокированные награды</h4>
+              {unlockedItems.length > 0 ? (
+                <div className="rewards-list">
+                  {unlockedItems.map((item, index) => (
+                    <div key={index} className="reward-item-small">
+                      <span 
+                        className="reward-icon-small"
+                        style={{ backgroundColor: getRewardColor(item.type) + '20', color: getRewardColor(item.type) }}
+                      >
+                        {getRewardIcon(item.type)}
+                      </span>
+                      <span className="reward-name">{item.name}</span>
+                    </div>
+                  ))}
                 </div>
+              ) : (
+                <div className="no-rewards">Нет разблокированных наград</div>
+              )}
+            </div>
+            
+            {nextUnlock && (
+              <div className="next-reward-info">
+                <h4>Следующая награда</h4>
+                <div className="next-reward-card">
+                  <div 
+                    className="reward-icon-large"
+                    style={{ 
+                      backgroundColor: getRewardColor(nextUnlock.type) + '20',
+                      borderColor: getRewardColor(nextUnlock.type)
+                    }}
+                  >
+                    {getRewardIcon(nextUnlock.type)}
+                  </div>
+                  <div className="reward-details">
+                    <div className="reward-level">Уровень {nextUnlock.level}</div>
+                    <div className="reward-name-large">{nextUnlock.reward}</div>
+                    <div className="reward-progress">
+                      <div className="progress-bar-small">
+                        <div 
+                          className="progress-fill-small"
+                          style={{ 
+                            width: `${Math.min((currentLevel / nextUnlock.level) * 100, 100)}%`,
+                            backgroundColor: getRewardColor(nextUnlock.type)
+                          }}
+                        />
+                      </div>
+                      <span className="level-progress-text">
+                        {currentLevel}/{nextUnlock.level}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <div className="level-stats">
+              <div className="stat-item">
+                <div className="stat-number">{currentLevel}</div>
+                <div className="stat-label">Текущий уровень</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-number">{experiencePoints}</div>
+                <div className="stat-label">Всего опыта</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-number">{pointsToNextLevel}</div>
+                <div className="stat-label">XP до след. уровня</div>
               </div>
             </div>
           </div>
         )}
       </div>
-      
-      {showDetails && progress.recentLevelUps && progress.recentLevelUps.length > 0 && (
-        <div className="recent-level-ups">
-          <h4>Последние повышения уровня:</h4>
-          <div className="level-up-list">
-            {progress.recentLevelUps.slice(0, 3).map((levelUp: any, index: number) => (
-              <div key={index} className="level-up-item">
-                <div className="level-up-icon">🎉</div>
-                <div className="level-up-details">
-                  <div className="level-up-title">
-                    Уровень {levelUp.details?.oldLevel} → {levelUp.details?.newLevel}
-                  </div>
-                  <div className="level-up-date">
-                    {new Date(levelUp.createdAt).toLocaleDateString('ru-RU')}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
