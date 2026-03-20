@@ -1,3 +1,5 @@
+// server/server.js
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -10,6 +12,7 @@ const { generalLimiter, authLimiter } = require('./middleware/rateLimiter');
 const { cacheMiddleware, rateLimitMiddleware } = require('./middleware/cache');
 const redis = require('./config/redis');
 const WebSocketServer = require('./websocket');
+const AchievementTriggers = require('./services/achievementTriggers'); // <-- добавлено
 
 const app = express();
 const server = http.createServer(app);
@@ -17,6 +20,10 @@ const server = http.createServer(app);
 // Инициализация WebSocket сервера
 const wsServer = new WebSocketServer(server);
 app.set('ws', wsServer); // Делаем доступным в маршрутах
+
+// Инициализация триггеров достижений
+const achievementTriggers = new AchievementTriggers(wsServer);
+app.set('achievementTriggers', achievementTriggers); // <-- добавлено
 
 // Безопасность: Helmet для защиты заголовков
 app.use(helmet({
@@ -59,7 +66,7 @@ app.use('/api/notes', require('./routes/notes'));
 app.use('/api/flashcards', require('./routes/flashcards'));
 app.use('/api/groups', require('./routes/groups'));
 app.use('/api/notifications', require('./routes/notifications'));
-app.use('/api/study-sessions', require('./routes/studySessions')); // Новый маршрут учебных сессий
+app.use('/api/study-sessions', require('./routes/studySessions'));
 app.use('/api/achievements', require('./routes/achievements'));
 app.use('/api/levels', require('./routes/levels'));
 app.use('/api/badges', require('./routes/badges'));

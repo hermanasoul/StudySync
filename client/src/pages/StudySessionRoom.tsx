@@ -1,3 +1,5 @@
+// client/src/pages/StudySessionRoom.tsx
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -191,8 +193,25 @@ const StudySessionRoom: React.FC = () => {
       }]);
     };
 
+    const handleSessionCompleted = (data: any) => {
+      setSession(prev => prev ? { ...prev, status: 'completed' } : null);
+      setMessages(prev => [...prev, {
+        userId: 'system',
+        userName: 'Система',
+        content: `Сессия завершена! 🏁 ${data.reason === 'all_flashcards_reviewed' ? 'Все карточки изучены!' : ''}`,
+        timestamp: new Date().toISOString()
+      }]);
+      setTimeout(() => {
+        navigate('/study-sessions');
+      }, 3000);
+    };
+
     const handleError = (data: any) => {
       setError(data.message);
+    };
+
+    const handleChatHistory = (data: any[]) => {
+      setMessages(data);
     };
 
     webSocketService.on('study_session_state', handleState);
@@ -203,7 +222,9 @@ const StudySessionRoom: React.FC = () => {
     webSocketService.on('study_session_flashcard_change', handleFlashcardChange);
     webSocketService.on('study_session_flashcard_answer', handleFlashcardAnswer);
     webSocketService.on('study_session_started', handleSessionStarted);
+    webSocketService.on('study_session_completed', handleSessionCompleted);
     webSocketService.on('study_session_error', handleError);
+    webSocketService.on('study_session_messages', handleChatHistory);
 
     return () => {
       webSocketService.off('study_session_state', handleState);
@@ -214,10 +235,12 @@ const StudySessionRoom: React.FC = () => {
       webSocketService.off('study_session_flashcard_change', handleFlashcardChange);
       webSocketService.off('study_session_flashcard_answer', handleFlashcardAnswer);
       webSocketService.off('study_session_started', handleSessionStarted);
+      webSocketService.off('study_session_completed', handleSessionCompleted);
       webSocketService.off('study_session_error', handleError);
+      webSocketService.off('study_session_messages', handleChatHistory);
       webSocketService.leaveStudySession(sessionId);
     };
-  }, [sessionId, webSocketConnected]);
+  }, [sessionId, webSocketConnected, navigate]);
 
   useEffect(() => {
     loadSession();
@@ -297,6 +320,7 @@ const StudySessionRoom: React.FC = () => {
   const isHost = session?.host?._id === user?.id;
   const isWaiting = session?.status === 'waiting';
   const isActive = session?.status === 'active';
+  const isCompleted = session?.status === 'completed';
 
   if (loading) {
     return (
@@ -363,7 +387,7 @@ const StudySessionRoom: React.FC = () => {
         <div className={`status-indicator ${session.status}`}>
           {isWaiting && '⏳ Ожидание начала'}
           {isActive && '🟢 Активна'}
-          {session.status === 'completed' && '🏁 Завершена'}
+          {isCompleted && '🏁 Завершена'}
         </div>
         <div className="participants-count">
           👥 Участников: {session.participants.filter(p => p.status === 'active').length} онлайн ({participantsOnline.size})

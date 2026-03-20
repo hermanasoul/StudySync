@@ -1,10 +1,10 @@
 // client/src/pages/NotificationsPage.tsx
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Button from '../components/Button';
-import { notificationsAPI } from '../services/api';
+import { notificationsAPI, studySessionsAPI } from '../services/api';
 import webSocketService from '../services/websocket';
 import './NotificationsPage.css';
 import '../App.css';
@@ -32,6 +32,7 @@ interface NotificationStats {
 }
 
 const NotificationsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
   const [stats, setStats] = useState<NotificationStats | null>(null);
@@ -50,7 +51,6 @@ const NotificationsPage: React.FC = () => {
     loadNotifications();
     loadStats();
     
-    // Подписка на новые уведомления через WebSocket
     const handleNewNotification = (notification: Notification) => {
       console.log('New notification received on page:', notification);
       setNotifications(prev => [notification, ...prev]);
@@ -83,7 +83,6 @@ const NotificationsPage: React.FC = () => {
         } else {
           setNotifications(prev => [...prev, ...response.data.notifications]);
         }
-        
         setHasMore(pageNum < response.data.pagination.pages);
         setPage(pageNum);
       }
@@ -107,7 +106,6 @@ const NotificationsPage: React.FC = () => {
 
   const filterNotifications = () => {
     let filtered = [...notifications];
-    
     if (filter.search) {
       const searchLower = filter.search.toLowerCase();
       filtered = filtered.filter(notif =>
@@ -115,7 +113,6 @@ const NotificationsPage: React.FC = () => {
         notif.message.toLowerCase().includes(searchLower)
       );
     }
-    
     setFilteredNotifications(filtered);
   };
 
@@ -133,7 +130,7 @@ const NotificationsPage: React.FC = () => {
           notif.id === id ? { ...notif, isRead: true } : notif
         )
       );
-      loadStats(); // Обновляем статистику
+      loadStats();
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
@@ -141,8 +138,6 @@ const NotificationsPage: React.FC = () => {
 
   const handleMarkAsUnread = async (id: string) => {
     try {
-      // Для этого метода нужно добавить API endpoint на сервере
-      // Пока просто обновим локальное состояние
       setNotifications(prev =>
         prev.map(notif =>
           notif.id === id ? { ...notif, isRead: false } : notif
@@ -193,17 +188,14 @@ const NotificationsPage: React.FC = () => {
     
     try {
       if (bulkAction === 'read') {
-        // Массовое помечание как прочитанных
         for (const id of selectedNotifications) {
           await notificationsAPI.markAsRead(id);
         }
       } else if (bulkAction === 'archive') {
-        // Массовая архивация
         for (const id of selectedNotifications) {
           await notificationsAPI.archive(id);
         }
       } else if (bulkAction === 'delete') {
-        // Массовое удаление
         if (window.confirm(`Вы уверены, что хотите удалить ${selectedNotifications.length} уведомлений?`)) {
           for (const id of selectedNotifications) {
             await notificationsAPI.delete(id);
@@ -211,7 +203,6 @@ const NotificationsPage: React.FC = () => {
         }
       }
       
-      // Обновляем список
       loadNotifications(1);
       setSelectedNotifications([]);
       loadStats();
@@ -232,6 +223,18 @@ const NotificationsPage: React.FC = () => {
     );
   };
 
+  const handleJoinStudySession = async (sessionId: string, notificationId: string) => {
+    try {
+      await studySessionsAPI.join(sessionId);
+      navigate(`/study-sessions/${sessionId}`);
+      // Пометим уведомление как прочитанное
+      await handleMarkAsRead(notificationId);
+    } catch (error) {
+      console.error('Error joining study session:', error);
+      alert('Не удалось присоединиться к сессии');
+    }
+  };
+
   const getTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
       'group_invitation': 'Приглашения в группы',
@@ -240,7 +243,8 @@ const NotificationsPage: React.FC = () => {
       'note_created': 'Новые заметки',
       'study_reminder': 'Напоминания',
       'achievement': 'Достижения',
-      'system': 'Системные'
+      'system': 'Системные',
+      'study_session_invite': 'Приглашение в учебную сессию'
     };
     return labels[type] || type;
   };
@@ -253,14 +257,18 @@ const NotificationsPage: React.FC = () => {
       'note_created': '📝',
       'study_reminder': '⏰',
       'achievement': '🏆',
-      'system': '⚙️'
+      'system': '⚙️',
+      'study_session_invite': '🚀'
     };
     return icons[type] || '🔔';
   };
 
   const getNotificationAction = (notification: Notification) => {
+    if (notification.type === 'study_session_invite' && notification.data?.sessionId) {
+      return () => handleJoinStudySession(notification.data.sessionId, notification.id);
+    }
     if (notification.data?.groupId) {
-      return `/groups/${notification.data.groupId}`;
+      return () => navigate(`/groups/${notification.data.groupId}`);
     }
     return null;
   };
@@ -321,6 +329,7 @@ const NotificationsPage: React.FC = () => {
                   <option value="study_reminder">Напоминания</option>
                   <option value="achievement">Достижения</option>
                   <option value="system">Системные</option>
+                  <option value="study_session_invite">Приглашения в сессии</option>
                 </select>
               </div>
               
@@ -392,7 +401,7 @@ const NotificationsPage: React.FC = () => {
             ) : (
               <>
                 {filteredNotifications.map((notification) => {
-                  const actionLink = getNotificationAction(notification);
+                  const actionHandler = getNotificationAction(notification);
                   return (
                     <div
                       key={notification.id}
@@ -440,6 +449,11 @@ const NotificationsPage: React.FC = () => {
                                 <strong>Автор:</strong> {notification.data.author.name}
                               </div>
                             )}
+                            {notification.data.sessionName && (
+                              <div className="data-item">
+                                <strong>Сессия:</strong> {notification.data.sessionName}
+                              </div>
+                            )}
                           </div>
                         )}
                         
@@ -474,10 +488,13 @@ const NotificationsPage: React.FC = () => {
                             🗑️ Удалить
                           </button>
                           
-                          {actionLink && (
-                            <Link to={actionLink} className="action-btn view-btn">
+                          {actionHandler && (
+                            <button
+                              className="action-btn view-btn"
+                              onClick={() => actionHandler()}
+                            >
                               👁️ Перейти
-                            </Link>
+                            </button>
                           )}
                         </div>
                       </div>
@@ -510,6 +527,7 @@ const NotificationsPage: React.FC = () => {
               <li><strong>Напоминания:</strong> Время повторять изученные карточки</li>
               <li><strong>Достижения:</strong> Вы получили новое достижение</li>
               <li><strong>Системные:</strong> Важные системные уведомления</li>
+              <li><strong>Приглашения в сессии:</strong> Вас пригласили в учебную сессию</li>
             </ul>
           </div>
         </div>

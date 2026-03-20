@@ -286,6 +286,86 @@ const achievements = [
     secret: false,
     isActive: true,
     sortOrder: 21
+  },
+
+  // === ДОСТИЖЕНИЯ ДЛЯ УЧЕБНЫХ СЕССИЙ ===
+  {
+    code: 'FIRST_STUDY_SESSION',
+    name: 'Первая сессия',
+    description: 'Создайте свою первую учебную сессию',
+    icon: '🚀',
+    category: 'study',
+    difficulty: 'bronze',
+    points: 20,
+    requirements: { type: 'create', target: 'study_session', count: 1 },
+    secret: false,
+    isActive: true,
+    sortOrder: 22
+  },
+  {
+    code: 'STUDY_SESSION_CREATOR_5',
+    name: 'Организатор сессий',
+    description: 'Создайте 5 учебных сессий',
+    icon: '🎯',
+    category: 'study',
+    difficulty: 'silver',
+    points: 50,
+    requirements: { type: 'create', target: 'study_session', count: 5 },
+    secret: false,
+    isActive: true,
+    sortOrder: 23
+  },
+  {
+    code: 'STUDY_SESSION_PARTICIPANT_5',
+    name: 'Активный участник',
+    description: 'Присоединитесь к 5 учебным сессиям',
+    icon: '👥',
+    category: 'study',
+    difficulty: 'silver',
+    points: 40,
+    requirements: { type: 'join', target: 'study_session', count: 5 },
+    secret: false,
+    isActive: true,
+    sortOrder: 24
+  },
+  {
+    code: 'COLLABORATIVE_CARDS_100',
+    name: 'Совместное обучение',
+    description: 'Изучите 100 карточек в совместных сессиях',
+    icon: '🤝',
+    category: 'study',
+    difficulty: 'gold',
+    points: 100,
+    requirements: { type: 'study', target: 'collaborative_cards', count: 100 },
+    secret: false,
+    isActive: true,
+    sortOrder: 25
+  },
+  {
+    code: 'POMODORO_MASTER',
+    name: 'Мастер Pomodoro',
+    description: 'Завершите полный цикл Pomodoro в учебной сессии',
+    icon: '🍅',
+    category: 'study',
+    difficulty: 'silver',
+    points: 60,
+    requirements: { type: 'complete', target: 'pomodoro_cycle', count: 1 },
+    secret: false,
+    isActive: true,
+    sortOrder: 26
+  },
+  {
+    code: 'SESSION_COMPLETE_ALL_CARDS',
+    name: 'Полное прохождение',
+    description: 'Завершите сессию, изучив все карточки',
+    icon: '🏁',
+    category: 'study',
+    difficulty: 'gold',
+    points: 80,
+    requirements: { type: 'complete', target: 'session_all_cards', count: 1 },
+    secret: false,
+    isActive: true,
+    sortOrder: 27
   }
 ];
 

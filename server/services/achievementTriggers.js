@@ -1,7 +1,13 @@
 // server/services/achievementTriggers.js
 
+const mongoose = require('mongoose');
 const Achievement = require('../models/Achievement');
 const UserAchievement = require('../models/UserAchievement');
+const StudySession = require('../models/StudySession');
+const StudySessionParticipant = require('../models/StudySessionParticipant');
+const Flashcard = require('../models/Flashcard');
+const Group = require('../models/Group');
+const User = require('../models/User');
 
 class AchievementTriggers {
   constructor(wsServer) {
@@ -52,7 +58,7 @@ class AchievementTriggers {
       }
 
       // Достижение "Создатель карточек" (5 карточек)
-      const flashcardCount = await require('../models/Flashcard').countDocuments({ authorId: userId });
+      const flashcardCount = await Flashcard.countDocuments({ authorId: userId });
       userAchievement = await Achievement.checkAchievement(userId, 'FLASHCARD_CREATOR_5', Math.min(flashcardCount / 5 * 100, 100));
       achievement = await Achievement.findOne({ code: 'FLASHCARD_CREATOR_5' });
       if (achievement) {
@@ -82,9 +88,8 @@ class AchievementTriggers {
       }
 
       // Достижение "Усердный ученик" (10 правильных ответов)
-      const Flashcard = require('../models/Flashcard');
       const correctCount = await Flashcard.aggregate([
-        { $match: { authorId: new require('mongoose').Types.ObjectId(userId) } },
+        { $match: { authorId: new mongoose.Types.ObjectId(userId) } },
         { $group: { _id: null, total: { $sum: '$knowCount' } } }
       ]);
       
@@ -102,10 +107,6 @@ class AchievementTriggers {
         await this.sendAchievementNotification(userId, achievement, userAchievement);
       }
 
-      // Достижение "Серия правильных ответов" (5 подряд)
-      // Здесь нужно хранить состояние серии в кэше или сессии
-      // Пока пропускаем, реализуем позже
-
     } catch (error) {
       console.error('Error in onFlashcardStudied trigger:', error);
     }
@@ -122,7 +123,8 @@ class AchievementTriggers {
       }
 
       // Достижение "Автор заметок" (5 заметок)
-      const noteCount = await require('../models/Note').countDocuments({ authorId: userId });
+      const Note = require('../models/Note');
+      const noteCount = await Note.countDocuments({ authorId: userId });
       userAchievement = await Achievement.checkAchievement(userId, 'NOTE_AUTHOR_5', Math.min(noteCount / 5 * 100, 100));
       achievement = await Achievement.findOne({ code: 'NOTE_AUTHOR_5' });
       if (achievement) {
@@ -145,7 +147,7 @@ class AchievementTriggers {
       }
 
       // Достижение "Организатор" (3 группы)
-      const groupCount = await require('../models/Group').countDocuments({ createdBy: userId });
+      const groupCount = await Group.countDocuments({ createdBy: userId });
       userAchievement = await Achievement.checkAchievement(userId, 'GROUP_ORGANIZER_3', Math.min(groupCount / 3 * 100, 100));
       achievement = await Achievement.findOne({ code: 'GROUP_ORGANIZER_3' });
       if (achievement) {
@@ -168,7 +170,6 @@ class AchievementTriggers {
       }
 
       // Достижение "Активный участник" (присоединиться к 3 группам)
-      const Group = require('../models/Group');
       const userGroups = await Group.countDocuments({ 'members.user': userId });
       userAchievement = await Achievement.checkAchievement(userId, 'ACTIVE_MEMBER_3', Math.min(userGroups / 3 * 100, 100));
       achievement = await Achievement.findOne({ code: 'ACTIVE_MEMBER_3' });
@@ -192,7 +193,8 @@ class AchievementTriggers {
       }
 
       // Достижение "Наставник" (пригласить 5 участников)
-      const inviteCount = await require('../models/GroupInvite').countDocuments({ invitedBy: userId, status: 'accepted' });
+      const GroupInvite = require('../models/GroupInvite');
+      const inviteCount = await GroupInvite.countDocuments({ invitedBy: userId, status: 'accepted' });
       userAchievement = await Achievement.checkAchievement(userId, 'MENTOR_5', Math.min(inviteCount / 5 * 100, 100));
       achievement = await Achievement.findOne({ code: 'MENTOR_5' });
       if (achievement) {
@@ -207,13 +209,7 @@ class AchievementTriggers {
   // Триггер для ежедневного входа
   async onDailyLogin(userId) {
     try {
-      // Достижение "Ежедневный посетитель" (войти 3 дня подряд)
-      // Здесь нужна логика отслеживания серий
-      // Пока пропускаем, реализуем позже
-
-      // Достижение "Неделя активности" (войти 7 дней)
-      // Аналогично
-
+      // Здесь будет логика отслеживания серий
     } catch (error) {
       console.error('Error in onDailyLogin trigger:', error);
     }
@@ -222,14 +218,13 @@ class AchievementTriggers {
   // Триггер для заполнения профиля
   async onProfileUpdated(userId, profileData) {
     try {
-      // Достижение "Профиль завершен" (заполнить все поля профиля)
-      const User = require('../models/User');
       const user = await User.findById(userId);
       
       let completionPercentage = 0;
       if (user.name && user.name.trim().length > 0) completionPercentage += 25;
       if (user.email && user.email.trim().length > 0) completionPercentage += 25;
-      // Добавьте другие поля профиля по необходимости
+      if (user.avatarUrl && user.avatarUrl.trim().length > 0) completionPercentage += 25;
+      if (user.bio && user.bio.trim().length > 0) completionPercentage += 25;
       
       const userAchievement = await Achievement.checkAchievement(userId, 'PROFILE_COMPLETE', completionPercentage);
       const achievement = await Achievement.findOne({ code: 'PROFILE_COMPLETE' });
@@ -245,8 +240,6 @@ class AchievementTriggers {
   // Триггер для изучения всех карточек в предмете
   async onSubjectCompleted(userId, subjectId) {
     try {
-      // Достижение "Предмет освоен" (изучить все карточки в предмете)
-      const Flashcard = require('../models/Flashcard');
       const totalFlashcards = await Flashcard.countDocuments({ 
         subjectId, 
         authorId: userId 
@@ -268,6 +261,120 @@ class AchievementTriggers {
 
     } catch (error) {
       console.error('Error in onSubjectCompleted trigger:', error);
+    }
+  }
+
+  // ========== НОВЫЕ МЕТОДЫ ДЛЯ УЧЕБНЫХ СЕССИЙ ==========
+
+  // Триггер для создания учебной сессии
+  async onStudySessionCreated(userId, sessionData) {
+    try {
+      // Достижение "Первая сессия"
+      let userAchievement = await Achievement.checkAchievement(userId, 'FIRST_STUDY_SESSION');
+      let achievement = await Achievement.findOne({ code: 'FIRST_STUDY_SESSION' });
+      if (achievement) {
+        await this.sendAchievementNotification(userId, achievement, userAchievement);
+      }
+
+      // Достижение "Организатор сессий" (5 сессий)
+      const sessionCount = await StudySession.countDocuments({ host: userId });
+      userAchievement = await Achievement.checkAchievement(userId, 'STUDY_SESSION_CREATOR_5', Math.min(sessionCount / 5 * 100, 100));
+      achievement = await Achievement.findOne({ code: 'STUDY_SESSION_CREATOR_5' });
+      if (achievement) {
+        await this.sendAchievementNotification(userId, achievement, userAchievement);
+      }
+    } catch (error) {
+      console.error('Error in onStudySessionCreated trigger:', error);
+    }
+  }
+
+  // Триггер для присоединения к учебной сессии (участие)
+  async onStudySessionJoined(userId, sessionData) {
+    try {
+      // Подсчитываем количество сессий, в которых пользователь участвовал (активно или завершён)
+      const participatedCount = await StudySessionParticipant.countDocuments({
+        user: userId,
+        status: { $in: ['active', 'left'] }
+      });
+
+      // Достижение "Активный участник" (5 сессий)
+      let userAchievement = await Achievement.checkAchievement(userId, 'STUDY_SESSION_PARTICIPANT_5', Math.min(participatedCount / 5 * 100, 100));
+      let achievement = await Achievement.findOne({ code: 'STUDY_SESSION_PARTICIPANT_5' });
+      if (achievement) {
+        await this.sendAchievementNotification(userId, achievement, userAchievement);
+      }
+    } catch (error) {
+      console.error('Error in onStudySessionJoined trigger:', error);
+    }
+  }
+
+  // Триггер для ответа на карточку в учебной сессии (коллаборативное изучение)
+  async onStudySessionFlashcardAnswered(userId, sessionId, flashcardId, isCorrect) {
+    try {
+      // Достижение "Совместное обучение" - считаем только ответы в сессиях с >1 участником
+      const session = await StudySession.findById(sessionId).populate('participants');
+      if (session && session.participants.length > 1) {
+        // Получаем текущий прогресс пользователя по этому достижению
+        const achievement = await Achievement.findOne({ code: 'COLLABORATIVE_CARDS_100' });
+        if (achievement) {
+          let userAchievement = await UserAchievement.findOne({ userId, achievementId: achievement._id });
+          if (userAchievement) {
+            const newProgress = Math.min(userAchievement.progress + 1, 100);
+            userAchievement.progress = newProgress;
+            if (newProgress >= 100 && !userAchievement.isUnlocked) {
+              userAchievement.isUnlocked = true;
+              userAchievement.unlockedAt = new Date();
+              userAchievement.notified = false;
+              await this.sendAchievementNotification(userId, achievement, userAchievement);
+            }
+            await userAchievement.save();
+          } else {
+            // Создаём новое
+            const newUserAchievement = new UserAchievement({
+              userId,
+              achievementId: achievement._id,
+              progress: 1,
+              isUnlocked: false,
+              notified: false
+            });
+            await newUserAchievement.save();
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error in onStudySessionFlashcardAnswered trigger:', error);
+    }
+  }
+
+  // Триггер для завершения сессии
+  async onStudySessionCompleted(userId, sessionData) {
+    try {
+      const session = sessionData.session;
+      // Достижение "Полное прохождение сессии" (если изучены все карточки)
+      if (session && session.flashcards.length > 0 && 
+          session.sessionStats.totalCardsReviewed >= session.flashcards.length) {
+        let userAchievement = await Achievement.checkAchievement(userId, 'SESSION_COMPLETE_ALL_CARDS');
+        let achievement = await Achievement.findOne({ code: 'SESSION_COMPLETE_ALL_CARDS' });
+        if (achievement) {
+          await this.sendAchievementNotification(userId, achievement, userAchievement);
+        }
+      }
+    } catch (error) {
+      console.error('Error in onStudySessionCompleted trigger:', error);
+    }
+  }
+
+  // Триггер для завершения таймера Pomodoro (полный цикл)
+  async onPomodoroComplete(userId, sessionId, cycleCount) {
+    try {
+      // Достижение "Мастер Pomodoro" за 1 полный цикл (work + break)
+      let userAchievement = await Achievement.checkAchievement(userId, 'POMODORO_MASTER', Math.min(cycleCount, 100));
+      let achievement = await Achievement.findOne({ code: 'POMODORO_MASTER' });
+      if (achievement) {
+        await this.sendAchievementNotification(userId, achievement, userAchievement);
+      }
+    } catch (error) {
+      console.error('Error in onPomodoroComplete trigger:', error);
     }
   }
 }
