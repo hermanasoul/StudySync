@@ -1,0 +1,169 @@
+.pomodoro-timer {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.timer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.timer-type {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.timer-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.timer-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-btn:hover:not(:disabled) {
+  background: #e2e8f0;
+  transform: scale(1.05);
+}
+
+.timer-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.timer-btn-start {
+  background: #10b981;
+  color: white;
+}
+
+.timer-btn-start:hover:not(:disabled) {
+  background: #059669;
+}
+
+.timer-btn-pause {
+  background: #f59e0b;
+  color: white;
+}
+
+.timer-btn-pause:hover:not(:disabled) {
+  background: #d97706;
+}
+
+.timer-btn-reset {
+  background: #ef4444;
+  color: white;
+}
+
+.timer-btn-reset:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.timer-btn-switch {
+  background: #6366f1;
+  color: white;
+}
+
+.timer-btn-switch:hover:not(:disabled) {
+  background: #4f46e5;
+}
+
+.timer-circle {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 20px auto;
+}
+
+.timer-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.timer-bg {
+  stroke: #e2e8f0;
+  stroke-width: 8;
+}
+
+.timer-progress {
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+.timer-progress.work {
+  stroke: url(#gradient);
+}
+
+.timer-progress.break {
+  stroke: #10b981;
+}
+
+.timer-time {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+.timer-settings-info {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.setting {
+  display: flex;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.setting-label {
+  color: #64748b;
+}
+
+.setting-value {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+@media (max-width: 768px) {
+  .timer-circle {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .timer-time {
+    font-size: 2rem;
+  }
+  
+  .timer-settings-info {
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+}

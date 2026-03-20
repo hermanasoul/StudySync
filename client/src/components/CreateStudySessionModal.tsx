@@ -1,7 +1,5 @@
-// client/src/components/CreateStudySessionModal.tsx
-
 import React, { useState, useEffect } from 'react';
-import { studySessionsAPI, flashcardsAPI, subjectsAPI, groupsAPI } from '../services/api';
+import { studySessionsAPI, flashcardsAPI, subjectsAPI, groupsAPI, friendsAPI } from '../services/api';
 import './CreateStudySessionModal.css';
 
 interface Subject {
@@ -22,6 +20,12 @@ interface Flashcard {
   question: string;
   answer: string;
   difficulty: string;
+}
+
+interface Friend {
+  _id: string;
+  name: string;
+  avatarUrl: string;
 }
 
 interface CreateStudySessionModalProps {
@@ -64,8 +68,10 @@ const CreateStudySessionModal: React.FC<CreateStudySessionModalProps> = ({
   const [selectedFlashcardIds, setSelectedFlashcardIds] = useState<string[]>([]);
   const [flashcardsLoading, setFlashcardsLoading] = useState(false);
 
-  // Приглашенные пользователи (для приватных сессий)
-  const [invitedUsers, setInvitedUsers] = useState<string[]>([]);
+  // Друзья для приглашений
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
+  const [loadingFriends, setLoadingFriends] = useState(false);
 
   // Загружаем карточки при выборе предмета
   useEffect(() => {
@@ -73,6 +79,13 @@ const CreateStudySessionModal: React.FC<CreateStudySessionModalProps> = ({
       fetchFlashcards();
     }
   }, [subjectId]);
+
+  // Загружаем друзей, если выбрана приватная сессия
+  useEffect(() => {
+    if (accessType === 'private') {
+      loadFriends();
+    }
+  }, [accessType]);
 
   const fetchFlashcards = async () => {
     try {
@@ -88,14 +101,28 @@ const CreateStudySessionModal: React.FC<CreateStudySessionModalProps> = ({
     }
   };
 
+  const loadFriends = async () => {
+    setLoadingFriends(true);
+    try {
+      const response = await friendsAPI.getFriends({ status: 'accepted', limit: 100 });
+      if (response.data.success) {
+        setFriends(response.data.data);
+      }
+    } catch (err) {
+      console.error('Error loading friends:', err);
+    } finally {
+      setLoadingFriends(false);
+    }
+  };
+
   const handleNextStep = () => {
     if (step === 1 && (!name.trim() || !subjectId)) {
       setError('Заполните название и выберите предмет');
       return;
     }
     
-    if (step === 2 && accessType === 'private' && invitedUsers.length === 0) {
-      setError('Для приватной сессии нужно добавить хотя бы одного участника');
+    if (step === 2 && accessType === 'private' && selectedFriends.length === 0) {
+      setError('Для приватной сессии нужно пригласить хотя бы одного друга');
       return;
     }
     
@@ -148,7 +175,7 @@ const CreateStudySessionModal: React.FC<CreateStudySessionModalProps> = ({
         studyMode,
         pomodoroSettings,
         flashcardIds: selectedFlashcardIds.length > 0 ? selectedFlashcardIds : undefined,
-        invitedUsers: accessType === 'private' ? invitedUsers : undefined
+        invitedUsers: accessType === 'private' ? selectedFriends : undefined
       };
 
       const response = await studySessionsAPI.create(sessionData);
@@ -360,16 +387,33 @@ const CreateStudySessionModal: React.FC<CreateStudySessionModalProps> = ({
 
       {accessType === 'private' && (
         <div className="form-group">
-          <label className="form-label">Пригласить пользователей</label>
-          <div className="invite-section">
-            <p className="invite-hint">
-              Приватная сессия. Добавьте пользователей, которых хотите пригласить.
-            </p>
-            {/* Здесь можно добавить компонент для выбора пользователей */}
-            <div className="placeholder-invite">
-              ⚠️ Функция приглашения пользователей будет добавлена в следующем обновлении
+          <label className="form-label">Пригласить друзей</label>
+          {loadingFriends ? (
+            <div className="loading-friends">Загрузка списка друзей...</div>
+          ) : friends.length === 0 ? (
+            <div className="no-friends-message">
+              У вас пока нет друзей. Добавьте друзей, чтобы приглашать их в приватные сессии.
             </div>
-          </div>
+          ) : (
+            <div className="friends-list">
+              {friends.map(friend => (
+                <label key={friend._id} className="friend-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={selectedFriends.includes(friend._id)}
+                    onChange={() => {
+                      setSelectedFriends(prev =>
+                        prev.includes(friend._id)
+                          ? prev.filter(id => id !== friend._id)
+                          : [...prev, friend._id]
+                      );
+                    }}
+                  />
+                  <span className="friend-name">{friend.name}</span>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

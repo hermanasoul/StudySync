@@ -24,7 +24,8 @@ router.post('/',
       accessType = 'public',
       studyMode = 'collaborative',
       pomodoroSettings = {},
-      flashcardIds = []
+      flashcardIds = [],
+      invitedUsers = [] // <-- добавлено
     } = req.body;
 
     // Проверяем существование предмета
@@ -96,7 +97,8 @@ router.post('/',
         role: 'host',
         status: 'active'
       }],
-      status: 'waiting'
+      status: 'waiting',
+      invitedUsers // <-- добавлено
     });
 
     await session.save();
@@ -613,6 +615,66 @@ router.put('/:id/settings',
         notifications: session.notifications,
         accessType: session.accessType
       }
+    });
+  })
+);
+
+// Запуск сессии (только хост)
+router.post('/:id/start',
+  auth,
+  catchAsync(async (req, res, next) => {
+    const session = await StudySession.findById(req.params.id);
+    
+    if (!session) {
+      return next(new AppError('Сессия не найдена', 404));
+    }
+    
+    // Проверяем, что пользователь - хост
+    if (session.host.toString() !== req.user.id) {
+      return next(new AppError('Только хост может начать сессию', 403));
+    }
+    
+    if (session.status !== 'waiting') {
+      return next(new AppError('Сессия уже начата или завершена', 400));
+    }
+    
+    session.status = 'active';
+    // Сбрасываем таймер на рабочий интервал
+    session.timerState = {
+      active: false,
+      type: 'work',
+      startTime: null,
+      remaining: session.pomodoroSettings.workDuration * 60,
+      totalElapsed: 0
+    };
+    await session.save();
+    
+    // Отправляем уведомления всем участникам через WebSocket
+    const ws = req.app.get('ws');
+    if (ws) {
+      ws.emitToStudySession(session._id, 'study_session_started', {
+        sessionId: session._id,
+        startedBy: req.user.id,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Также можно создать уведомления в БД для участников, которые не в онлайне
+      for (const participant of session.participants) {
+        if (participant.status === 'active' && participant.user.toString() !== req.user.id) {
+          await ws.sendNotification(participant.user.toString(), {
+            type: 'study_session_started',
+            title: 'Сессия началась!',
+            message: `Учебная сессия "${session.name}" началась. Присоединяйтесь!`,
+            data: { sessionId: session._id }
+          });
+        }
+      }
+    }
+    
+    res.json({
+      success: true,
+      message: 'Сессия начата',
+      session
     });
   })
 );

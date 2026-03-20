@@ -165,6 +165,7 @@ export interface CreateStudySessionData {
     autoSwitch?: boolean;
   };
   flashcardIds?: string[];
+  invitedUsers?: string[]; // <-- добавить
 }
 
 // Существующие интерфейсы (оставлены для совместимости)
@@ -264,6 +265,10 @@ export const studySessionsAPI = {
   // Завершение сессии
   complete: (sessionId: string) => 
     api.post(`/study-sessions/${sessionId}/complete`),
+
+  // Запуск сессии
+  start: (sessionId: string) => 
+    api.post(`/study-sessions/${sessionId}/start`),
 };
 
 // Существующие методы API (оставлены для совместимости)

@@ -25,6 +25,8 @@ import ChatsPage from './pages/ChatsPage';
 import './App.css';
 import './styles/buttons.css';
 import webSocketService from './services/websocket';
+import StudySessionsPage from './pages/StudySessionsPage';
+import StudySessionRoom from './pages/StudySessionRoom';
 
 function App() {
   const [achievementNotification, setAchievementNotification] = useState<any>(null);
@@ -165,6 +167,12 @@ function App() {
                 <GroupPage />
               </ProtectedRoute>
             } />
+            <Route path="/study-sessions" element={
+              <StudySessionsPage />
+              } />
+              <Route path="/study-session/:sessionId" element={
+                <StudySessionRoom />
+              } />
           </Routes>
           
           {/* Компонент статуса WebSocket */}
