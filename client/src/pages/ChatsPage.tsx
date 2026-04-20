@@ -5,19 +5,21 @@ import ChatList from '../components/ChatList';
 import ChatWindow from '../components/ChatWindow';
 import './ChatsPage.css';
 
+interface ChatParticipant {
+  userId: {
+    _id: string;
+    name: string;
+    avatarUrl: string;
+    level: number;
+  };
+  lastRead: string;
+}
+
 interface Chat {
   _id: string;
   type: 'direct' | 'group';
   name?: string;
-  participants: Array<{
-    userId: {
-      _id: string;
-      name: string;
-      avatarUrl: string;
-      level: number;
-    };
-    lastRead: string;
-  }>;
+  participants: ChatParticipant[];
   lastMessage?: {
     content: string;
     senderId: {
@@ -31,10 +33,34 @@ interface Chat {
   updatedAt: string;
 }
 
+// Тип, ожидаемый ChatWindow
+interface MappedChat {
+  _id: string;
+  type: 'direct' | 'group';
+  name?: string;
+  participants: Array<{
+    _id: string;
+    name: string;
+    avatarUrl?: string;
+  }>;
+  lastMessage?: {
+    _id: string;
+    chatId: string;
+    userId: {
+      _id: string;
+      name: string;
+      avatarUrl?: string;
+    };
+    content: string;
+    createdAt: string;
+    isRead: boolean;
+  };
+  unreadCount: number;
+}
+
 const ChatsPage: React.FC = () => {
   const { user } = useAuth();
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
-  const [showNewChatModal, setShowNewChatModal] = useState(false);
 
   const handleSelectChat = (chat: Chat) => {
     setSelectedChat(chat);
@@ -42,6 +68,33 @@ const ChatsPage: React.FC = () => {
 
   const handleCloseChat = () => {
     setSelectedChat(null);
+  };
+
+  // Преобразование чата к формату для ChatWindow
+  const mapChatForWindow = (chat: Chat): MappedChat => {
+    return {
+      _id: chat._id,
+      type: chat.type,
+      name: chat.name,
+      participants: chat.participants.map(p => ({
+        _id: p.userId._id,
+        name: p.userId.name,
+        avatarUrl: p.userId.avatarUrl,
+      })),
+      unreadCount: chat.unreadCount,
+      // lastMessage преобразуем, если нужно
+      lastMessage: chat.lastMessage ? {
+        _id: '', // временно, ChatWindow не использует _id сообщения в пропсах
+        chatId: chat._id,
+        userId: {
+          _id: chat.lastMessage.senderId._id,
+          name: chat.lastMessage.senderId.name,
+        },
+        content: chat.lastMessage.content,
+        createdAt: chat.lastMessage.sentAt,
+        isRead: false,
+      } : undefined,
+    };
   };
 
   if (!user) {
@@ -68,7 +121,7 @@ const ChatsPage: React.FC = () => {
           <div className="chats-main">
             {selectedChat ? (
               <ChatWindow 
-                chat={selectedChat}
+                chat={mapChatForWindow(selectedChat)}
                 onClose={handleCloseChat}
               />
             ) : (

@@ -3,7 +3,8 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const auth = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
+const { body, validationResult } = require('express-validator');
 const { 
   registerValidation, 
   loginValidation, 
@@ -18,7 +19,7 @@ if (!JWT_SECRET) {
   throw new AppError('JWT_SECRET is not configured', 500);
 }
 
-// Регистрация с валидацией
+// Регистрация
 router.post('/register', 
   sanitizeInput,
   registerValidation,
@@ -30,24 +31,12 @@ router.post('/register',
       throw new AppError('Пользователь с таким email уже существует', 409);
     }
 
-    const newUser = await User.create({ 
-      name, 
-      email, 
-      password 
-    });
+    const newUser = await User.create({ name, email, password });
 
     const token = jwt.sign(
-      { 
-        id: newUser._id, 
-        email: newUser.email, 
-        role: newUser.role 
-      },
+      { id: newUser._id, email: newUser.email, role: newUser.role },
       JWT_SECRET,
-      { 
-        expiresIn: '7d',
-        issuer: 'studysync-api',
-        audience: 'studysync-client'
-      }
+      { expiresIn: '7d', issuer: 'studysync-api', audience: 'studysync-client' }
     );
 
     const userResponse = {
@@ -69,7 +58,7 @@ router.post('/register',
   })
 );
 
-// Логин с валидацией
+// Логин
 router.post('/login', 
   sanitizeInput,
   loginValidation,
@@ -87,17 +76,9 @@ router.post('/login',
     }
 
     const token = jwt.sign(
-      { 
-        id: user._id, 
-        email: user.email, 
-        role: user.role 
-      },
+      { id: user._id, email: user.email, role: user.role },
       JWT_SECRET,
-      { 
-        expiresIn: '7d',
-        issuer: 'studysync-api',
-        audience: 'studysync-client'
-      }
+      { expiresIn: '7d', issuer: 'studysync-api', audience: 'studysync-client' }
     );
 
     const userResponse = {
@@ -118,30 +99,25 @@ router.post('/login',
   })
 );
 
-// Получение информации о текущем пользователе
-router.get('/me', 
-  auth, 
-  catchAsync(async (req, res) => {
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      throw new AppError('Пользователь не найден', 404);
+// Получение текущего пользователя
+router.get('/me', auth, catchAsync(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  if (!user) throw new AppError('Пользователь не найден', 404);
+
+  res.json({
+    success: true,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatarUrl: user.avatarUrl,
+      createdAt: user.createdAt
     }
+  });
+}));
 
-    res.json({
-      success: true,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatarUrl: user.avatarUrl,
-        createdAt: user.createdAt
-      }
-    });
-  })
-);
-
-// Обновление информации о пользователе
+// Обновление профиля
 router.put('/profile', 
   auth,
   sanitizeInput,
@@ -154,7 +130,6 @@ router.put('/profile',
   ],
   catchAsync(async (req, res) => {
     const { name } = req.body;
-    
     if (!name && Object.keys(req.body).length === 0) {
       throw new AppError('Не предоставлены данные для обновления', 400);
     }
@@ -165,15 +140,10 @@ router.put('/profile',
     const user = await User.findByIdAndUpdate(
       req.user.id,
       updateData,
-      { 
-        new: true, 
-        runValidators: true 
-      }
+      { new: true, runValidators: true }
     ).select('-password');
 
-    if (!user) {
-      throw new AppError('Пользователь не найден', 404);
-    }
+    if (!user) throw new AppError('Пользователь не найден', 404);
 
     res.json({
       success: true,
@@ -189,24 +159,14 @@ router.put('/profile',
   })
 );
 
-// Выход (на клиенте токен удаляется)
+// Выход (клиент удаляет токен)
 router.post('/logout', (req, res) => {
-  res.json({ 
-    success: true, 
-    message: 'Выход выполнен успешно' 
-  });
+  res.json({ success: true, message: 'Выход выполнен успешно' });
 });
 
 // Проверка токена
-router.post('/verify-token', 
-  auth, 
-  (req, res) => {
-    res.json({ 
-      success: true, 
-      message: 'Токен действителен',
-      user: req.user 
-    });
-  }
-);
+router.post('/verify-token', auth, (req, res) => {
+  res.json({ success: true, message: 'Токен действителен', user: req.user });
+});
 
 module.exports = router;

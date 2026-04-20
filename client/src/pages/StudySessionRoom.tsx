@@ -179,6 +179,7 @@ const StudySessionRoom: React.FC = () => {
       setCurrentFlashcardIndex(data.flashcardIndex);
     };
 
+    // Переименованный обработчик для WebSocket события
     const handleSocketFlashcardAnswer = (data: any) => {
       console.log(`User ${data.userName} answered ${data.isCorrect ? 'correctly' : 'incorrectly'}`);
     };
@@ -220,7 +221,7 @@ const StudySessionRoom: React.FC = () => {
     webSocketService.on('study_session_message', handleMessage);
     webSocketService.on('study_session_timer_update', handleTimerUpdate);
     webSocketService.on('study_session_flashcard_change', handleFlashcardChange);
-    webSocketService.on('study_session_flashcard_answer', handleFlashcardAnswer);
+    webSocketService.on('study_session_flashcard_answer', handleSocketFlashcardAnswer);
     webSocketService.on('study_session_started', handleSessionStarted);
     webSocketService.on('study_session_completed', handleSessionCompleted);
     webSocketService.on('study_session_error', handleError);
@@ -233,7 +234,7 @@ const StudySessionRoom: React.FC = () => {
       webSocketService.off('study_session_message', handleMessage);
       webSocketService.off('study_session_timer_update', handleTimerUpdate);
       webSocketService.off('study_session_flashcard_change', handleFlashcardChange);
-      webSocketService.off('study_session_flashcard_answer', handleFlashcardAnswer);
+      webSocketService.off('study_session_flashcard_answer', handleSocketFlashcardAnswer);
       webSocketService.off('study_session_started', handleSessionStarted);
       webSocketService.off('study_session_completed', handleSessionCompleted);
       webSocketService.off('study_session_error', handleError);
@@ -266,7 +267,8 @@ const StudySessionRoom: React.FC = () => {
     console.log(`Timer ${type} completed`);
   };
 
-  const handleFlashcardAnswer = (flashcardId: string, isCorrect: boolean) => {
+  // Локальный обработчик ответа на карточку (отправка на сервер)
+  const handleAnswerFlashcard = (flashcardId: string, isCorrect: boolean) => {
     if (!sessionId) return;
     webSocketService.answerStudySessionFlashcard(sessionId, flashcardId, isCorrect);
   };
@@ -417,7 +419,7 @@ const StudySessionRoom: React.FC = () => {
               studyMode={session.studyMode}
               isHost={isHost}
               userId={user?.id || ''}
-              onAnswer={handleFlashcardAnswer}
+              onAnswer={handleAnswerFlashcard}
               onNext={handleNextFlashcard}
               onPrevious={handlePreviousFlashcard}
               onJump={handleJumpFlashcard}

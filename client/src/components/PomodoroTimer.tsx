@@ -1,6 +1,6 @@
 // client/src/components/PomodoroTimer.tsx
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './PomodoroTimer.css';
 
 interface PomodoroTimerProps {
@@ -36,11 +36,13 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Синхронизация с пропсами
+  // Синхронизация с пропсами (только при реальном изменении)
   useEffect(() => {
-    setLocalRemaining(remainingSeconds);
+    if (remainingSeconds !== localRemaining) {
+      setLocalRemaining(remainingSeconds);
+    }
     setLocalActive(isActive);
-  }, [remainingSeconds, isActive]);
+  }, [remainingSeconds, isActive, localRemaining]);
 
   // Основной таймер
   useEffect(() => {
@@ -89,7 +91,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [localActive, disabled, timerType, workDuration, breakDuration, autoSwitch, onTimerUpdate, onTimerComplete]);
+  }, [localActive, disabled, timerType, workDuration, breakDuration, autoSwitch, onTimerUpdate, onTimerComplete, localRemaining]);
 
   // Обновляем родительский компонент при изменении оставшегося времени
   useEffect(() => {
@@ -101,7 +103,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
         startTime: localActive ? new Date() : undefined
       });
     }
-  }, [localRemaining]);
+  }, [localRemaining, localActive, timerType, onTimerUpdate, remainingSeconds]);
 
   const playSound = () => {
     try {

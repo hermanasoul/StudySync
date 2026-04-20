@@ -1,15 +1,14 @@
-// client/src/pages/AchievementsPage.tsx
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import AchievementsList from '../components/AchievementsList';
 import AchievementProgress from '../components/AchievementProgress';
-import { achievementsAPI, Achievement, AchievementProgress as ProgressType } from '../services/api';
+import { achievementsAPI, Achievement } from '../services/api';
 import './AchievementsPage.css';
 
 const AchievementsPage: React.FC = () => {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [userAchievements, setUserAchievements] = useState<any[]>([]);
-  const [progress, setProgress] = useState<ProgressType | null>(null);
+  const [progress, setProgress] = useState<any>(null);   // <-- убрали несуществующий тип
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'all' | 'my' | 'progress' | 'leaderboard'>('all');
   const [leaderboard, setLeaderboard] = useState<any[]>([]);

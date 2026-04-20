@@ -29,14 +29,20 @@ const LoginPage: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      const result = await login(formData.email, formData.password); // Теперь возвращает object
+      const result = await login(formData.email, formData.password);
       if (result.success) {
         navigate('/dashboard');
       } else {
-        setError(result.error || 'Неверный email или пароль. Проверьте данные.');
+        // result.error может быть строкой или объектом ошибки
+        const errorMessage = 
+          typeof result.error === 'string' 
+            ? result.error 
+            : (result.error as any)?.message || 'Неверный email или пароль. Проверьте данные.';
+        setError(errorMessage);
       }
     } catch (err: any) {
-      setError('Произошла ошибка при входе');
+      const message = err?.response?.data?.message || err?.message || 'Произошла ошибка при входе';
+      setError(message);
       console.error('Login error:', err);
     } finally {
       setLoading(false);

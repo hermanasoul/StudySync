@@ -1,6 +1,7 @@
 // server/routes/subjects.js
 
 const express = require('express');
+const { body, query, param } = require('express-validator');   // <-- ДОБАВИТЬ СЮДА
 const Subject = require('../models/Subject');
 const { auth, restrictTo } = require('../middleware/auth');
 const { 
@@ -10,6 +11,7 @@ const {
 const { AppError, catchAsync } = require('../middleware/errorHandler');
 
 const router = express.Router();
+
 
 // Получение всех предметов пользователя
 router.get('/', 
@@ -356,6 +358,3 @@ router.get('/search',
 );
 
 module.exports = router;
-
-// Импортируем body и query для валидации
-const { body, query } = require('express-validator');

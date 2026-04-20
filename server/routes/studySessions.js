@@ -8,13 +8,168 @@ const User = require('../models/User');
 const Flashcard = require('../models/Flashcard');
 const Group = require('../models/Group');
 const Subject = require('../models/Subject');
-const auth = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 const { AppError, catchAsync } = require('../middleware/errorHandler');
 const mongoose = require('mongoose');
 const AchievementTriggers = require('../services/achievementTriggers');
 const Notification = require('../models/Notification');
 
-// Создание учебной сессии
+/**
+ * @swagger
+ * tags:
+ *   name: StudySessions
+ *   description: Управление учебными сессиями
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     StudySession:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *         host:
+ *           $ref: '#/components/schemas/User'
+ *         subjectId:
+ *           $ref: '#/components/schemas/Subject'
+ *         groupId:
+ *           $ref: '#/components/schemas/Group'
+ *         accessType:
+ *           type: string
+ *           enum: [public, friends, private]
+ *         studyMode:
+ *           type: string
+ *           enum: [collaborative, individual, host-controlled]
+ *         status:
+ *           type: string
+ *           enum: [waiting, active, paused, completed]
+ *         participantCount:
+ *           type: number
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     User:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         avatarUrl:
+ *           type: string
+ *         level:
+ *           type: number
+ *     Subject:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         icon:
+ *           type: string
+ *     Group:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ */
+
+// ==================== СОЗДАНИЕ СЕССИИ ====================
+/**
+ * @swagger
+ * /study-sessions:
+ *   post:
+ *     summary: Создать новую учебную сессию
+ *     tags: [StudySessions]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - subjectId
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Название сессии
+ *                 example: "Подготовка к экзамену по математике"
+ *               description:
+ *                 type: string
+ *                 description: Описание сессии
+ *               subjectId:
+ *                 type: string
+ *                 description: ID предмета
+ *               groupId:
+ *                 type: string
+ *                 description: ID группы (опционально)
+ *               accessType:
+ *                 type: string
+ *                 enum: [public, friends, private]
+ *                 default: public
+ *               studyMode:
+ *                 type: string
+ *                 enum: [collaborative, individual, host-controlled]
+ *                 default: collaborative
+ *               pomodoroSettings:
+ *                 type: object
+ *                 properties:
+ *                   workDuration:
+ *                     type: number
+ *                     default: 25
+ *                   breakDuration:
+ *                     type: number
+ *                     default: 5
+ *                   autoSwitch:
+ *                     type: boolean
+ *                     default: true
+ *               flashcardIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: ID карточек для изучения
+ *               invitedUsers:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: ID приглашаемых пользователей (для private)
+ *     responses:
+ *       201:
+ *         description: Сессия успешно создана
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                 session:
+ *                   $ref: '#/components/schemas/StudySession'
+ *       400:
+ *         description: Неверные данные
+ *       401:
+ *         description: Не авторизован
+ *       403:
+ *         description: Доступ запрещён
+ */
 router.post('/', 
   auth,
   catchAsync(async (req, res, next) => {
@@ -147,7 +302,77 @@ router.post('/',
   })
 );
 
-// Получение активных сессий с пагинацией
+// ==================== ПОЛУЧЕНИЕ АКТИВНЫХ СЕССИЙ ====================
+/**
+ * @swagger
+ * /study-sessions/active:
+ *   get:
+ *     summary: Получить список активных учебных сессий
+ *     tags: [StudySessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: accessType
+ *         schema:
+ *           type: string
+ *           enum: [public, friends, private]
+ *         description: Фильтр по типу доступа
+ *       - in: query
+ *         name: subjectId
+ *         schema:
+ *           type: string
+ *         description: Фильтр по ID предмета
+ *       - in: query
+ *         name: groupId
+ *         schema:
+ *           type: string
+ *         description: Фильтр по ID группы
+ *       - in: query
+ *         name: friendsOnly
+ *         schema:
+ *           type: boolean
+ *         description: Только сессии друзей
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Номер страницы
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Количество элементов на странице
+ *     responses:
+ *       200:
+ *         description: Список активных сессий
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     pages:
+ *                       type: integer
+ *                 count:
+ *                   type: integer
+ *                 sessions:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/StudySession'
+ */
 router.get('/active',
   auth,
   catchAsync(async (req, res, next) => {
@@ -201,7 +426,43 @@ router.get('/active',
   })
 );
 
-// Присоединение к сессии
+// ==================== ПРИСОЕДИНЕНИЕ К СЕССИИ ====================
+/**
+ * @swagger
+ * /study-sessions/{id}/join:
+ *   post:
+ *     summary: Присоединиться к учебной сессии
+ *     tags: [StudySessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID сессии
+ *     responses:
+ *       200:
+ *         description: Успешное присоединение
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 session:
+ *                   $ref: '#/components/schemas/StudySession'
+ *       400:
+ *         description: Пользователь уже в сессии
+ *       403:
+ *         description: Нет доступа
+ *       404:
+ *         description: Сессия не найдена
+ */
 router.post('/:id/join',
   auth,
   catchAsync(async (req, res, next) => {
@@ -257,7 +518,41 @@ router.post('/:id/join',
   })
 );
 
-// Получение информации о сессии
+// ==================== ПОЛУЧЕНИЕ ИНФОРМАЦИИ О СЕССИИ ====================
+/**
+ * @swagger
+ * /study-sessions/{id}:
+ *   get:
+ *     summary: Получить подробную информацию о сессии
+ *     tags: [StudySessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID сессии
+ *     responses:
+ *       200:
+ *         description: Информация о сессии
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 session:
+ *                   $ref: '#/components/schemas/StudySession'
+ *                 participantsStats:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       404:
+ *         description: Сессия не найдена
+ */
 router.get('/:id',
   auth,
   catchAsync(async (req, res, next) => {
@@ -283,7 +578,56 @@ router.get('/:id',
   })
 );
 
-// Управление таймером Pomodoro
+// ==================== УПРАВЛЕНИЕ ТАЙМЕРОМ ====================
+/**
+ * @swagger
+ * /study-sessions/{id}/timer:
+ *   post:
+ *     summary: Управление таймером Pomodoro
+ *     tags: [StudySessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID сессии
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - action
+ *             properties:
+ *               action:
+ *                 type: string
+ *                 enum: [start, pause, reset, switch]
+ *               timerType:
+ *                 type: string
+ *                 enum: [work, break]
+ *     responses:
+ *       200:
+ *         description: Таймер обновлён
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 timerState:
+ *                   type: object
+ *       403:
+ *         description: Недостаточно прав
+ *       404:
+ *         description: Сессия не найдена
+ */
 router.post('/:id/timer',
   auth,
   catchAsync(async (req, res, next) => {
@@ -358,7 +702,66 @@ router.post('/:id/timer',
   })
 );
 
-// Управление карточками
+// ==================== УПРАВЛЕНИЕ КАРТОЧКАМИ ====================
+/**
+ * @swagger
+ * /study-sessions/{id}/flashcards:
+ *   post:
+ *     summary: Управление карточками (навигация, ответ)
+ *     tags: [StudySessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID сессии
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - action
+ *             properties:
+ *               action:
+ *                 type: string
+ *                 enum: [next, previous, jump, answer]
+ *               flashcardId:
+ *                 type: string
+ *                 description: ID карточки (для action=answer)
+ *               answer:
+ *                 type: string
+ *                 enum: [correct, incorrect]
+ *               index:
+ *                 type: integer
+ *                 description: Индекс карточки (для action=jump)
+ *     responses:
+ *       200:
+ *         description: Действие выполнено
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 currentFlashcardIndex:
+ *                   type: integer
+ *                 currentFlashcard:
+ *                   type: object
+ *                 totalFlashcards:
+ *                   type: integer
+ *       400:
+ *         description: Неверные параметры
+ *       404:
+ *         description: Сессия не найдена
+ */
 router.post('/:id/flashcards',
   auth,
   catchAsync(async (req, res, next) => {
@@ -469,7 +872,37 @@ router.post('/:id/flashcards',
   })
 );
 
-// Выход из сессии
+// ==================== ВЫХОД ИЗ СЕССИИ ====================
+/**
+ * @swagger
+ * /study-sessions/{id}/leave:
+ *   post:
+ *     summary: Покинуть учебную сессию
+ *     tags: [StudySessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID сессии
+ *     responses:
+ *       200:
+ *         description: Успешный выход
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Сессия не найдена
+ */
 router.post('/:id/leave',
   auth,
   catchAsync(async (req, res, next) => {
@@ -502,7 +935,44 @@ router.post('/:id/leave',
   })
 );
 
-// Получение статистики сессии
+// ==================== СТАТИСТИКА СЕССИИ ====================
+/**
+ * @swagger
+ * /study-sessions/{id}/stats:
+ *   get:
+ *     summary: Получить статистику сессии
+ *     tags: [StudySessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID сессии
+ *     responses:
+ *       200:
+ *         description: Статистика сессии
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 stats:
+ *                   type: object
+ *                   properties:
+ *                     session:
+ *                       type: object
+ *                     participants:
+ *                       type: array
+ *                     leaderboard:
+ *                       type: array
+ *       404:
+ *         description: Сессия не найдена
+ */
 router.get('/:id/stats',
   auth,
   catchAsync(async (req, res, next) => {
@@ -549,7 +1019,55 @@ router.get('/:id/stats',
   })
 );
 
-// Приглашение пользователей в сессию
+// ==================== ПРИГЛАШЕНИЕ ПОЛЬЗОВАТЕЛЕЙ ====================
+/**
+ * @swagger
+ * /study-sessions/{id}/invite:
+ *   post:
+ *     summary: Пригласить пользователей в сессию
+ *     tags: [StudySessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID сессии
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userIds
+ *             properties:
+ *               userIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Массив ID пользователей
+ *     responses:
+ *       200:
+ *         description: Приглашения отправлены
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 invitedCount:
+ *                   type: integer
+ *       403:
+ *         description: Только хост может приглашать
+ *       404:
+ *         description: Сессия не найдена
+ */
 router.post('/:id/invite',
   auth,
   catchAsync(async (req, res, next) => {
@@ -593,7 +1111,58 @@ router.post('/:id/invite',
   })
 );
 
-// Изменение настроек сессии
+// ==================== ИЗМЕНЕНИЕ НАСТРОЕК ====================
+/**
+ * @swagger
+ * /study-sessions/{id}/settings:
+ *   put:
+ *     summary: Изменить настройки сессии
+ *     tags: [StudySessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID сессии
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               studyMode:
+ *                 type: string
+ *                 enum: [collaborative, individual, host-controlled]
+ *               pomodoroSettings:
+ *                 type: object
+ *               notifications:
+ *                 type: object
+ *               accessType:
+ *                 type: string
+ *                 enum: [public, friends, private]
+ *     responses:
+ *       200:
+ *         description: Настройки обновлены
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 settings:
+ *                   type: object
+ *       403:
+ *         description: Только хост может менять настройки
+ *       404:
+ *         description: Сессия не найдена
+ */
 router.put('/:id/settings',
   auth,
   catchAsync(async (req, res, next) => {
@@ -624,7 +1193,43 @@ router.put('/:id/settings',
   })
 );
 
-// Запуск сессии
+// ==================== ЗАПУСК СЕССИИ ====================
+/**
+ * @swagger
+ * /study-sessions/{id}/start:
+ *   post:
+ *     summary: Запустить сессию (только хост)
+ *     tags: [StudySessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID сессии
+ *     responses:
+ *       200:
+ *         description: Сессия запущена
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 session:
+ *                   $ref: '#/components/schemas/StudySession'
+ *       400:
+ *         description: Сессия уже начата или завершена
+ *       403:
+ *         description: Только хост может начать сессию
+ *       404:
+ *         description: Сессия не найдена
+ */
 router.post('/:id/start',
   auth,
   catchAsync(async (req, res, next) => {
@@ -666,7 +1271,41 @@ router.post('/:id/start',
   })
 );
 
-// Завершение сессии (хостом)
+// ==================== ЗАВЕРШЕНИЕ СЕССИИ (хостом) ====================
+/**
+ * @swagger
+ * /study-sessions/{id}/complete:
+ *   post:
+ *     summary: Завершить сессию (только хост)
+ *     tags: [StudySessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID сессии
+ *     responses:
+ *       200:
+ *         description: Сессия завершена
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Сессия уже завершена
+ *       403:
+ *         description: Только хост может завершить сессию
+ *       404:
+ *         description: Сессия не найдена
+ */
 router.post('/:id/complete',
   auth,
   catchAsync(async (req, res, next) => {
@@ -689,6 +1328,129 @@ router.post('/:id/complete',
     }
     
     res.json({ success: true, message: 'Сессия завершена' });
+  })
+);
+
+// ==================== ИСТОРИЯ СЕССИЙ ПОЛЬЗОВАТЕЛЯ ====================
+/**
+ * @swagger
+ * /study-sessions/history:
+ *   get:
+ *     summary: Получить историю завершённых учебных сессий пользователя
+ *     tags: [StudySessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: subjectId
+ *         schema:
+ *           type: string
+ *         description: Фильтр по ID предмета
+ *       - in: query
+ *         name: from
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Начальная дата (YYYY-MM-DD)
+ *       - in: query
+ *         name: to
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Конечная дата (YYYY-MM-DD)
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Номер страницы
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Количество элементов на странице
+ *     responses:
+ *       200:
+ *         description: История сессий
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 pagination:
+ *                   type: object
+ *                 sessions:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/StudySession'
+ */
+router.get('/history',
+  auth,
+  catchAsync(async (req, res, next) => {
+    const { subjectId, from, to, page = 1, limit = 20 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const limitNum = parseInt(limit);
+
+    // Базовый фильтр: пользователь является участником и сессия завершена
+    const query = {
+      'participants.user': req.user.id,
+      status: 'completed'
+    };
+
+    if (subjectId) {
+      query.subjectId = subjectId;
+    }
+
+    if (from || to) {
+      query.createdAt = {};
+      if (from) query.createdAt.$gte = new Date(from);
+      if (to) query.createdAt.$lte = new Date(to);
+    }
+
+    const [sessions, total] = await Promise.all([
+      StudySession.find(query)
+        .populate('host', 'name avatarUrl')
+        .populate('subjectId', 'name icon color')
+        .populate('groupId', 'name')
+        .sort('-createdAt')
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      StudySession.countDocuments(query)
+    ]);
+
+    // Для каждой сессии подгружаем статистику текущего пользователя
+    const sessionsWithUserStats = await Promise.all(sessions.map(async (session) => {
+      const participantStats = await StudySessionParticipant.findOne({
+        session: session._id,
+        user: req.user.id
+      }).select('stats').lean();
+
+      return {
+        ...session,
+        userStats: participantStats?.stats || {
+          timeSpent: 0,
+          cardsReviewed: 0,
+          correctAnswers: 0,
+          streak: 0
+        }
+      };
+    }));
+
+    res.json({
+      success: true,
+      pagination: {
+        page: parseInt(page),
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum)
+      },
+      count: sessionsWithUserStats.length,
+      sessions: sessionsWithUserStats
+    });
   })
 );
 

@@ -1,5 +1,5 @@
 // server/routes/notifications.js
-
+const { body, param, query } = require('express-validator');
 const express = require('express');
 const mongoose = require('mongoose');
 const Notification = require('../models/Notification');
@@ -380,6 +380,3 @@ router.get('/stats/overview',
 );
 
 module.exports = router;
-
-// Импортируем body и query для валидации
-const { body, query } = require('express-validator');

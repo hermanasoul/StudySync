@@ -1,11 +1,37 @@
-// client/src/pages/LevelsPage.tsx
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Header from '../components/Header';
 import LevelProgress from '../components/LevelProgress';
-import Button from '../components/Button';
 import './LevelsPage.css';
-import { levelsAPI, LevelLeaderboardUser, LevelStats, ExperienceHistory } from '../services/api';
+import { levelsAPI } from '../services/api';
+
+interface LevelLeaderboardUser {
+  id: string;
+  rank: number;
+  name: string;
+  level: number;
+  experiencePoints: number;
+  createdAt: string;
+}
+
+interface ExperienceHistory {
+  id: string;
+  reason: string;
+  reasonLabel: string;
+  points: number;
+  newTotal: number;
+  createdAt: string;
+}
+
+interface LevelStats {
+  totalUsers: number;
+  averageLevel: number;
+  averageExperience: number;
+  topLevelUser?: {
+    name: string;
+    level: number;
+    experiencePoints: number;
+  };
+}
 
 const LevelsPage: React.FC = () => {
   const [progress, setProgress] = useState<any>(null);
@@ -16,47 +42,7 @@ const LevelsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'progress' | 'leaderboard' | 'history'>('progress');
   const [sortBy, setSortBy] = useState<'level' | 'experience'>('level');
 
-  useEffect(() => {
-    loadData();
-  }, [sortBy]);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      
-      // Загружаем прогресс пользователя
-      const progressResponse = await levelsAPI.getMyProgress();
-      if (progressResponse.data.success) {
-        setProgress(progressResponse.data.progress);
-      }
-      
-      // Загружаем лидерборд
-      const leaderboardResponse = await levelsAPI.getLeaderboard({ 
-        limit: 10, 
-        sortBy 
-      });
-      if (leaderboardResponse.data.success) {
-        setLeaderboard(leaderboardResponse.data.leaderboard);
-      }
-      
-      // Загружаем статистику
-      const statsResponse = await levelsAPI.getStats();
-      if (statsResponse.data.success) {
-        setStats(statsResponse.data.stats);
-      }
-      
-      // Загружаем историю опыта
-      if (activeTab === 'history') {
-        await loadExperienceHistory();
-      }
-    } catch (error) {
-      console.error('Error loading levels data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadExperienceHistory = async () => {
+  const loadExperienceHistory = useCallback(async () => {
     try {
       const response = await levelsAPI.getExperienceHistory({ limit: 20 });
       if (response.data.success) {
@@ -65,7 +51,43 @@ const LevelsPage: React.FC = () => {
     } catch (error) {
       console.error('Error loading experience history:', error);
     }
-  };
+  }, []);
+
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      const progressResponse = await levelsAPI.getMyProgress();
+      if (progressResponse.data.success) {
+        setProgress(progressResponse.data.progress);
+      }
+      
+      const leaderboardResponse = await levelsAPI.getLeaderboard({ 
+        limit: 10, 
+        sortBy 
+      });
+      if (leaderboardResponse.data.success) {
+        setLeaderboard(leaderboardResponse.data.leaderboard);
+      }
+      
+      const statsResponse = await levelsAPI.getStats();
+      if (statsResponse.data.success) {
+        setStats(statsResponse.data.stats);
+      }
+      
+      if (activeTab === 'history') {
+        await loadExperienceHistory();
+      }
+    } catch (error) {
+      console.error('Error loading levels data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [sortBy, activeTab, loadExperienceHistory]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const getReasonIcon = (reason: string) => {
     const icons: { [key: string]: string } = {

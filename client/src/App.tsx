@@ -1,3 +1,5 @@
+// client\src\App.tsx
+
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -27,6 +29,7 @@ import './styles/buttons.css';
 import webSocketService from './services/websocket';
 import StudySessionsPage from './pages/StudySessionsPage';
 import StudySessionRoom from './pages/StudySessionRoom';
+import StudyHistoryPage from './pages/StudyHistoryPage';
 
 function App() {
   const [achievementNotification, setAchievementNotification] = useState<any>(null);
@@ -173,6 +176,11 @@ function App() {
               <Route path="/study-session/:sessionId" element={
                 <StudySessionRoom />
               } />
+              <Route path="/study-history" element={
+                <ProtectedRoute>
+                  <StudyHistoryPage />
+                  </ProtectedRoute>
+                } />
           </Routes>
           
           {/* Компонент статуса WebSocket */}

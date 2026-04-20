@@ -1,6 +1,4 @@
-// client/src/pages/NotesPage.tsx
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import CreateNoteModal from '../components/CreateNoteModal';
@@ -45,7 +43,7 @@ const NotesPage: React.FC = () => {
     return await fetch(`http://localhost:5000/api${endpoint}`, config);
   };
 
-  const loadNotes = async () => {
+  const loadNotes = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -63,7 +61,7 @@ const NotesPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [subjectId]);
 
   const handleCreateNote = async (noteData: { title: string; content: string; tags: string[] }) => {
     try {
@@ -152,7 +150,7 @@ const NotesPage: React.FC = () => {
     if (subjectId) {
       loadNotes();
     }
-  }, [subjectId]);
+  }, [subjectId, loadNotes]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ru-RU', {

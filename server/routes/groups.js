@@ -1,8 +1,7 @@
 // server/routes/groups.js
-
+const { body, param, query } = require('express-validator');
 const express = require('express');
 const mongoose = require('mongoose');
-const { body, query, param } = require('express-validator');
 const Group = require('../models/Group');
 const GroupInvite = require('../models/GroupInvite');
 const Flashcard = require('../models/Flashcard');

@@ -1,8 +1,9 @@
 // server/routes/flashcards.js
-
+const { body, param, query } = require('express-validator');
 const express = require('express');
 const Flashcard = require('../models/Flashcard');
 const { auth } = require('../middleware/auth');
+const mongoose = require('mongoose');
 const { 
   flashcardValidation, 
   idValidation, 
@@ -20,7 +21,100 @@ async function getUsersGroups(userId) {
   return groups.map(g => g._id);
 }
 
-// Создание карточки
+/**
+ * @swagger
+ * tags:
+ *   name: Flashcards
+ *   description: Управление учебными карточками
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Flashcard:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         question:
+ *           type: string
+ *         answer:
+ *           type: string
+ *         hint:
+ *           type: string
+ *         subjectId:
+ *           type: string
+ *         authorId:
+ *           $ref: '#/components/schemas/User'
+ *         groupId:
+ *           type: string
+ *         difficulty:
+ *           type: string
+ *           enum: [easy, medium, hard]
+ *         knowCount:
+ *           type: number
+ *         dontKnowCount:
+ *           type: number
+ *         lastReviewed:
+ *           type: string
+ *           format: date-time
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ */
+
+/**
+ * @swagger
+ * /flashcards:
+ *   post:
+ *     summary: Создать новую карточку
+ *     tags: [Flashcards]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - question
+ *               - answer
+ *               - subjectId
+ *             properties:
+ *               question:
+ *                 type: string
+ *               answer:
+ *                 type: string
+ *               hint:
+ *                 type: string
+ *               subjectId:
+ *                 type: string
+ *               groupId:
+ *                 type: string
+ *               difficulty:
+ *                 type: string
+ *                 enum: [easy, medium, hard]
+ *                 default: medium
+ *     responses:
+ *       201:
+ *         description: Карточка создана
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 flashcard:
+ *                   $ref: '#/components/schemas/Flashcard'
+ */
 router.post('/',
   auth,
   sanitizeInput,
@@ -91,7 +185,64 @@ router.post('/',
   })
 );
 
-// Получение карточек по предмету
+/**
+ * @swagger
+ * /flashcards/subject/{subjectId}:
+ *   get:
+ *     summary: Получить карточки по предмету
+ *     tags: [Flashcards]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: subjectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID предмета
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *       - in: query
+ *         name: difficulty
+ *         schema:
+ *           type: string
+ *           enum: [easy, medium, hard, all]
+ *       - in: query
+ *         name: reviewed
+ *         schema:
+ *           type: string
+ *           enum: [true, false, all]
+ *       - in: query
+ *         name: groupId
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Список карточек
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 pagination:
+ *                   type: object
+ *                 count:
+ *                   type: integer
+ *                 flashcards:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Flashcard'
+ */
 router.get('/subject/:subjectId',
   auth,
   subjectIdValidation,
@@ -198,7 +349,48 @@ router.get('/subject/:subjectId',
   })
 );
 
-// Получение карточек для изучения
+/**
+ * @swagger
+ * /flashcards/study/{subjectId}:
+ *   get:
+ *     summary: Получить карточки для изучения
+ *     tags: [Flashcards]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: subjectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID предмета
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *       - in: query
+ *         name: difficulty
+ *         schema:
+ *           type: string
+ *           enum: [easy, medium, hard, mixed]
+ *     responses:
+ *       200:
+ *         description: Карточки для изучения
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 count:
+ *                   type: integer
+ *                 flashcards:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Flashcard'
+ */
 router.get('/study/:subjectId',
   auth,
   subjectIdValidation,
@@ -257,7 +449,48 @@ router.get('/study/:subjectId',
   })
 );
 
-// Отметить карточку как "знаю"
+/**
+ * @swagger
+ * /flashcards/{id}/know:
+ *   put:
+ *     summary: Отметить карточку как "знаю"
+ *     tags: [Flashcards]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID карточки
+ *     responses:
+ *       200:
+ *         description: Статистика обновлена
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 flashcard:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     knowCount:
+ *                       type: number
+ *                     dontKnowCount:
+ *                       type: number
+ *                     difficulty:
+ *                       type: string
+ *                     lastReviewed:
+ *                       type: string
+ *                       format: date-time
+ */
 router.put('/:id/know',
   auth,
   idValidation,
@@ -296,7 +529,48 @@ router.put('/:id/know',
   })
 );
 
-// Отметить карточку как "не знаю"
+/**
+ * @swagger
+ * /flashcards/{id}/unknown:
+ *   put:
+ *     summary: Отметить карточку как "не знаю"
+ *     tags: [Flashcards]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID карточки
+ *     responses:
+ *       200:
+ *         description: Статистика обновлена
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 flashcard:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     knowCount:
+ *                       type: number
+ *                     dontKnowCount:
+ *                       type: number
+ *                     difficulty:
+ *                       type: string
+ *                     lastReviewed:
+ *                       type: string
+ *                       format: date-time
+ */
 router.put('/:id/unknown',
   auth,
   idValidation,
@@ -330,7 +604,51 @@ router.put('/:id/unknown',
   })
 );
 
-// Обновление карточки
+/**
+ * @swagger
+ * /flashcards/{id}:
+ *   put:
+ *     summary: Обновить карточку
+ *     tags: [Flashcards]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID карточки
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               question:
+ *                 type: string
+ *               answer:
+ *                 type: string
+ *               hint:
+ *                 type: string
+ *               difficulty:
+ *                 type: string
+ *                 enum: [easy, medium, hard]
+ *     responses:
+ *       200:
+ *         description: Карточка обновлена
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 flashcard:
+ *                   $ref: '#/components/schemas/Flashcard'
+ */
 router.put('/:id',
   auth,
   idValidation,
@@ -396,7 +714,34 @@ router.put('/:id',
   })
 );
 
-// Удаление карточки
+/**
+ * @swagger
+ * /flashcards/{id}:
+ *   delete:
+ *     summary: Удалить карточку
+ *     tags: [Flashcards]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID карточки
+ *     responses:
+ *       200:
+ *         description: Карточка удалена
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
 router.delete('/:id',
   auth,
   idValidation,
@@ -417,7 +762,52 @@ router.delete('/:id',
   })
 );
 
-// Получение статистики по карточкам
+/**
+ * @swagger
+ * /flashcards/stats/{subjectId}:
+ *   get:
+ *     summary: Получить статистику по карточкам предмета
+ *     tags: [Flashcards]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: subjectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID предмета
+ *     responses:
+ *       200:
+ *         description: Статистика
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 stats:
+ *                   type: object
+ *                   properties:
+ *                     totalCards:
+ *                       type: number
+ *                     easyCards:
+ *                       type: number
+ *                     mediumCards:
+ *                       type: number
+ *                     hardCards:
+ *                       type: number
+ *                     totalKnowCount:
+ *                       type: number
+ *                     totalDontKnowCount:
+ *                       type: number
+ *                     successRate:
+ *                       type: number
+ *                     lastReviewed:
+ *                       type: string
+ *                       format: date-time
+ */
 router.get('/stats/:subjectId',
   auth,
   subjectIdValidation,
@@ -495,7 +885,36 @@ router.get('/stats/:subjectId',
   })
 );
 
-// Сброс статистики карточки
+/**
+ * @swagger
+ * /flashcards/{id}/reset:
+ *   put:
+ *     summary: Сбросить статистику карточки
+ *     tags: [Flashcards]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID карточки
+ *     responses:
+ *       200:
+ *         description: Статистика сброшена
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 flashcard:
+ *                   type: object
+ */
 router.put('/:id/reset',
   auth,
   idValidation,
@@ -531,7 +950,3 @@ router.put('/:id/reset',
 );
 
 module.exports = router;
-
-// Импортируем body и query для валидации
-const { body, query } = require('express-validator');
-const mongoose = require('mongoose');

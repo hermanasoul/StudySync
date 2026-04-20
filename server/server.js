@@ -12,18 +12,18 @@ const { generalLimiter, authLimiter } = require('./middleware/rateLimiter');
 const { cacheMiddleware, rateLimitMiddleware } = require('./middleware/cache');
 const redis = require('./config/redis');
 const WebSocketServer = require('./websocket');
-const AchievementTriggers = require('./services/achievementTriggers'); // <-- добавлено
+const AchievementTriggers = require('./services/achievementTriggers');
 
 const app = express();
 const server = http.createServer(app);
 
 // Инициализация WebSocket сервера
 const wsServer = new WebSocketServer(server);
-app.set('ws', wsServer); // Делаем доступным в маршрутах
+app.set('ws', wsServer);
 
 // Инициализация триггеров достижений
 const achievementTriggers = new AchievementTriggers(wsServer);
-app.set('achievementTriggers', achievementTriggers); // <-- добавлено
+app.set('achievementTriggers', achievementTriggers);
 
 // Безопасность: Helmet для защиты заголовков
 app.use(helmet({
@@ -59,6 +59,27 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 // Глобальное кэширование GET запросов (5 минут)
 app.use('/api/', cacheMiddleware(300));
 
+// Swagger документация
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  explorer: true,
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'StudySync API Docs',
+  swaggerOptions: {
+    docExpansion: 'list',
+    filter: true,
+    showRequestDuration: true,
+  }
+}));
+
+// JSON-версия спецификации
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
 // Маршруты
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/subjects', require('./routes/subjects'));
@@ -78,6 +99,7 @@ app.use('/api/leaderboards', require('./routes/leaderboards'));
 
 // Проверка работы сервера
 app.get('/', (req, res) => {
+  const wsClients = wsServer.io ? wsServer.io.engine.clientsCount : 0;
   res.json({
     message: 'StudySync Backend is working! 🚀',
     version: '1.4.0',
@@ -85,7 +107,7 @@ app.get('/', (req, res) => {
     environment: process.env.NODE_ENV || 'development',
     features: {
       redis: redis.isConnected,
-      websocket: wsServer.wss.clients.size,
+      websocket: wsClients,
       database: mongoose.connection.readyState === 1,
       notifications: true,
       study_sessions: true,
@@ -100,8 +122,8 @@ app.get('/', (req, res) => {
 app.get('/api/health', async (req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
   const redisStatus = redis.isConnected ? 'Connected' : 'Disconnected';
-  const websocketStatus = wsServer.wss.clients.size;
-  
+  const wsClients = wsServer.io ? wsServer.io.engine.clientsCount : 0;
+
   // Получаем статистику уведомлений
   const Notification = require('./models/Notification');
   const notificationStats = await Notification.aggregate([
@@ -113,19 +135,19 @@ app.get('/api/health', async (req, res) => {
       }
     }
   ]);
-  
+
   // Получаем количество пользователей
   const User = require('./models/User');
   const userCount = await User.countDocuments();
-  
+
   // Получаем количество групп
   const Group = require('./models/Group');
   const groupCount = await Group.countDocuments();
-  
+
   // Получаем количество учебных сессий
   const StudySession = require('./models/StudySession');
   const studySessionCount = await StudySession.countDocuments();
-  
+
   res.json({
     status: 'OK',
     message: 'Server is running smoothly',
@@ -134,8 +156,8 @@ app.get('/api/health', async (req, res) => {
       database: dbStatus,
       redis: redisStatus,
       websocket: {
-        connectedClients: websocketStatus,
-        status: websocketStatus >= 0 ? 'Running' : 'Error'
+        connectedClients: wsClients,
+        status: wsClients >= 0 ? 'Running' : 'Error'
       }
     },
     statistics: {
@@ -152,14 +174,14 @@ app.get('/api/health', async (req, res) => {
 // WebSocket connection test endpoint
 app.get('/api/ws-test', (req, res) => {
   const { userId, event = 'test', data = {} } = req.query;
-  
+
   if (userId && wsServer.isUserOnline(userId)) {
     wsServer.sendToUser(userId, {
       type: event,
       ...data,
       serverTime: new Date().toISOString()
     });
-    
+
     res.json({
       success: true,
       message: `Event "${event}" sent to user ${userId}`,
@@ -177,30 +199,30 @@ app.get('/api/ws-test', (req, res) => {
 // Study session test endpoint
 app.get('/api/study-sessions/test', async (req, res) => {
   const { userId, action = 'create', sessionId } = req.query;
-  
+
   if (!userId) {
     return res.status(400).json({
       success: false,
       message: 'User ID is required'
     });
   }
-  
+
   try {
     const StudySession = require('./models/StudySession');
     let result;
-    
+
     switch (action) {
       case 'create':
         const Subject = require('./models/Subject');
         const subject = await Subject.findOne();
-        
+
         if (!subject) {
           return res.status(404).json({
             success: false,
             message: 'No subjects found'
           });
         }
-        
+
         const newSession = new StudySession({
           name: 'Test Study Session',
           description: 'This is a test study session',
@@ -215,11 +237,11 @@ app.get('/api/study-sessions/test', async (req, res) => {
           }],
           status: 'waiting'
         });
-        
+
         await newSession.save();
         result = newSession;
         break;
-        
+
       case 'join':
         if (!sessionId) {
           return res.status(400).json({
@@ -227,7 +249,7 @@ app.get('/api/study-sessions/test', async (req, res) => {
             message: 'Session ID is required'
           });
         }
-        
+
         const session = await StudySession.findById(sessionId);
         if (!session) {
           return res.status(404).json({
@@ -235,12 +257,12 @@ app.get('/api/study-sessions/test', async (req, res) => {
             message: 'Session not found'
           });
         }
-        
+
         await session.addParticipant(userId);
         result = session;
         break;
     }
-    
+
     res.json({
       success: true,
       message: `Study session ${action} test completed`,
@@ -259,14 +281,14 @@ app.get('/api/study-sessions/test', async (req, res) => {
 // Notification test endpoint
 app.get('/api/notifications/test', async (req, res) => {
   const { userId, type = 'system', title = 'Test Notification', message = 'This is a test notification' } = req.query;
-  
+
   if (!userId) {
     return res.status(400).json({
       success: false,
       message: 'User ID is required'
     });
   }
-  
+
   try {
     const notification = await wsServer.sendNotification(userId, {
       type,
@@ -277,7 +299,7 @@ app.get('/api/notifications/test', async (req, res) => {
         timestamp: new Date().toISOString()
       }
     });
-    
+
     res.json({
       success: true,
       message: 'Test notification sent',
@@ -313,10 +335,10 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/studysync
 })
   .then(() => {
     console.log('✅ Connected to MongoDB successfully');
-    
+
     // Проверяем наличие моделей и создаем индексы
     const models = ['Notification', 'StudySession', 'User', 'Group', 'Achievement'];
-    
+
     models.forEach(modelName => {
       try {
         const model = require(`./models/${modelName}`);
@@ -338,28 +360,33 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/studysync
 // Graceful shutdown
 const gracefulShutdown = async () => {
   console.log('👋 Starting graceful shutdown...');
-  
+
   try {
     // Закрываем HTTP сервер
     server.close(() => {
       console.log('✅ HTTP server closed');
     });
-    
+
     // Закрываем WebSocket сервер
-    wsServer.wss.close(() => {
+    if (wsServer.io) {
+      wsServer.io.close(() => {
+        console.log('✅ WebSocket server closed');
+      });
+    } else if (wsServer.close) {
+      await wsServer.close();
       console.log('✅ WebSocket server closed');
-    });
-    
+    }
+
     // Закрываем Redis соединение
     if (redis && redis.disconnect) {
       await redis.disconnect();
       console.log('✅ Redis connection closed');
     }
-    
+
     // Закрываем MongoDB соединение
     await mongoose.connection.close();
     console.log('✅ MongoDB connection closed');
-    
+
     console.log('💥 Graceful shutdown completed');
     process.exit(0);
   } catch (error) {
@@ -388,13 +415,14 @@ process.on('unhandledRejection', (err) => {
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
+  const wsClients = wsServer.io ? wsServer.io.engine.clientsCount : 0;
   console.log(`🎯 StudySync Server is running on port ${PORT}`);
   console.log(`🔗 HTTP: http://localhost:${PORT}`);
   console.log(`🔗 WebSocket: ws://localhost:${PORT}`);
   console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
   console.log(`📁 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🧠 Redis: ${redis.isConnected ? 'Connected' : 'Disconnected'}`);
-  console.log(`🔄 WebSocket: ${wsServer.wss.clients.size} clients connected`);
+  console.log(`🔄 WebSocket: ${wsClients} clients connected`);
   console.log(`📚 Study Sessions: Enabled`);
   console.log(`🏆 Achievements System: Enabled`);
   console.log(`👥 Social Features: Enabled`);

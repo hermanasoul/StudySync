@@ -1,5 +1,5 @@
 // server/routes/achievements.js
-
+const { query, param } = require('express-validator');
 const express = require('express');
 const mongoose = require('mongoose');
 const Achievement = require('../models/Achievement');
@@ -535,5 +535,3 @@ router.delete('/reset/:achievementCode',
 
 module.exports = router;
 
-// Импортируем query и param для валидации
-const { query, param } = require('express-validator');

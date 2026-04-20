@@ -1,3 +1,6 @@
+// server\routes\friends.js
+
+const { body, param, query } = require('express-validator');
 const express = require('express');
 const Friendship = require('../models/Friendship');
 const User = require('../models/User');

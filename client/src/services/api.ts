@@ -271,6 +271,14 @@ export const studySessionsAPI = {
   // Запуск сессии
   start: (sessionId: string) => 
     api.post(`/study-sessions/${sessionId}/start`),
+
+  getHistory: (params?: { 
+    subjectId?: string;
+    from?: string;
+    to?: string;
+    page?: number;
+    limit?: number;
+  }) => api.get('/study-sessions/history', { params }),
 };
 
 // Существующие методы API (оставлены для совместимости)

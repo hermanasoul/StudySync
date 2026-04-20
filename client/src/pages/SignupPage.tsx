@@ -50,8 +50,9 @@ const SignupPage: React.FC = () => {
       } else {
         setError('Ошибка при регистрации');
       }
-    } catch (err) {
-      setError('Произошла ошибка при регистрации');
+    } catch (err: any) {
+      const message = err?.response?.data?.message || err?.message || 'Произошла ошибка при регистрации';
+      setError(message);
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+// client\src\components\Leaderboard.tsx
+
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { leaderboardsAPI } from '../services/api';
 import './Leaderboard.css';
@@ -38,13 +40,15 @@ interface LeaderboardData {
   totalParticipants: number;
 }
 
-const Leaderboard: React.FC<{
+interface LeaderboardProps {
   type?: 'global' | 'group' | 'subject' | 'weekly' | 'monthly';
   scopeId?: string;
   scopeName?: string;
   title?: string;
   compact?: boolean;
-}> = ({ 
+}
+
+const Leaderboard: React.FC<LeaderboardProps> = ({ 
   type = 'global', 
   scopeId, 
   scopeName, 
@@ -57,43 +61,45 @@ const Leaderboard: React.FC<{
   const [metric, setMetric] = useState<'experience' | 'level' | 'achievements' | 'streak'>('experience');
   const [timeRange, setTimeRange] = useState<'all' | 'weekly' | 'monthly'>('all');
 
-  useEffect(() => {
-    if (user) {
-      loadLeaderboard();
-    }
-  }, [user, type, scopeId, metric, timeRange]);
-
-  const loadLeaderboard = async () => {
+  const loadLeaderboard = useCallback(async () => {
     try {
       setLoading(true);
       
-      let endpoint = '';
-      let params: any = { metric };
+      let response;
+      const params: any = { metric };
       
       switch (type) {
         case 'global':
-          endpoint = '/leaderboards/global';
+          if (timeRange === 'weekly') {
+            response = await leaderboardsAPI.getWeekly(params);
+          } else if (timeRange === 'monthly') {
+            response = await leaderboardsAPI.getMonthly(params);
+          } else {
+            response = await leaderboardsAPI.getGlobal(params);
+          }
           break;
         case 'group':
-          endpoint = `/leaderboards/group/${scopeId}`;
+          if (scopeId) {
+            response = await leaderboardsAPI.getGroup(scopeId, params);
+          }
           break;
         case 'subject':
-          endpoint = `/leaderboards/subject/${scopeId}`;
+          if (scopeId) {
+            response = await leaderboardsAPI.getSubject(scopeId, params);
+          }
           break;
         case 'weekly':
-          endpoint = '/leaderboards/weekly';
+          response = await leaderboardsAPI.getWeekly(params);
           break;
         case 'monthly':
-          endpoint = '/leaderboards/monthly';
+          response = await leaderboardsAPI.getMonthly(params);
           break;
+        default:
+          console.warn('Unknown leaderboard type:', type);
+          return;
       }
       
-      if (timeRange !== 'all' && type === 'global') {
-        endpoint = `/leaderboards/${timeRange}`;
-      }
-      
-      const response = await leaderboardsAPI.get(endpoint, { params });
-      if (response.data.success) {
+      if (response?.data.success) {
         setLeaderboard(response.data.data);
       }
     } catch (error) {
@@ -101,7 +107,13 @@ const Leaderboard: React.FC<{
     } finally {
       setLoading(false);
     }
-  };
+  }, [type, scopeId, metric, timeRange]);
+
+  useEffect(() => {
+    if (user) {
+      loadLeaderboard();
+    }
+  }, [user, loadLeaderboard]);
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -114,7 +126,6 @@ const Leaderboard: React.FC<{
 
   const getRankChangeIcon = (change?: number) => {
     if (!change) return null;
-    
     if (change > 0) {
       return <span className="rank-change up">↑ {Math.abs(change)}</span>;
     } else if (change < 0) {
@@ -164,9 +175,7 @@ const Leaderboard: React.FC<{
       <div className="leaderboard-header">
         <div className="header-left">
           <h2>{title || `${getMetricLabel(metric)} Лидерборд`}</h2>
-          {scopeName && (
-            <div className="scope-name">{scopeName}</div>
-          )}
+          {scopeName && <div className="scope-name">{scopeName}</div>}
           {leaderboard && (
             <div className="leaderboard-meta">
               <span className="meta-item">
@@ -184,7 +193,6 @@ const Leaderboard: React.FC<{
             </div>
           )}
         </div>
-        
         <div className="header-right">
           {type === 'global' && (
             <div className="time-range-selector">
@@ -208,7 +216,6 @@ const Leaderboard: React.FC<{
               </button>
             </div>
           )}
-          
           <div className="metric-selector">
             <select
               value={metric}
@@ -228,7 +235,6 @@ const Leaderboard: React.FC<{
         <div className="loading">Загрузка лидерборда...</div>
       ) : leaderboard ? (
         <>
-          {/* Позиция текущего пользователя */}
           {leaderboard.userRank && (
             <div className="user-position">
               <div className="position-card">
@@ -259,7 +265,6 @@ const Leaderboard: React.FC<{
             </div>
           )}
 
-          {/* Таблица лидеров */}
           <div className="leaderboard-table">
             <div className="table-header">
               <div className="header-cell rank-cell">Место</div>
@@ -268,7 +273,6 @@ const Leaderboard: React.FC<{
               <div className="header-cell level-cell">Уровень</div>
               {!compact && <div className="header-cell change-cell">Изменение</div>}
             </div>
-            
             <div className="table-body">
               {leaderboard.leaderboard.rankings.map((ranking, index) => (
                 <div 
@@ -279,7 +283,6 @@ const Leaderboard: React.FC<{
                     <div className="rank-icon">{getRankIcon(ranking.rank)}</div>
                     <div className="rank-number">{ranking.rank}</div>
                   </div>
-                  
                   <div className="cell user-cell">
                     <div className="user-avatar">
                       {ranking.details.avatarUrl ? (
@@ -308,13 +311,11 @@ const Leaderboard: React.FC<{
                       )}
                     </div>
                   </div>
-                  
                   <div className="cell score-cell">
                     <div className="score-value">
                       {formatScore(ranking.score, metric)}
                     </div>
                   </div>
-                  
                   <div className="cell level-cell">
                     <div 
                       className="level-badge"
@@ -323,7 +324,6 @@ const Leaderboard: React.FC<{
                       {ranking.details.level}
                     </div>
                   </div>
-                  
                   {!compact && (
                     <div className="cell change-cell">
                       {getRankChangeIcon(ranking.rankChange)}
