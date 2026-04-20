@@ -1,3 +1,5 @@
+// server\scripts\seedSocialAchievements.js
+
 const mongoose = require('mongoose');
 const Achievement = require('../models/Achievement');
 require('dotenv').config();

@@ -287,6 +287,7 @@ class WebSocketServer {
         }
       });
 
+      
       // Смена карточки
       socket.on('study_session_flashcard_change', async (data) => {
         const { sessionId, flashcardIndex } = data;

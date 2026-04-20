@@ -179,7 +179,7 @@ const StudySessionRoom: React.FC = () => {
       setCurrentFlashcardIndex(data.flashcardIndex);
     };
 
-    const handleFlashcardAnswer = (data: any) => {
+    const handleSocketFlashcardAnswer = (data: any) => {
       console.log(`User ${data.userName} answered ${data.isCorrect ? 'correctly' : 'incorrectly'}`);
     };
 

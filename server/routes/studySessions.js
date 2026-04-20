@@ -12,7 +12,7 @@ const auth = require('../middleware/auth');
 const { AppError, catchAsync } = require('../middleware/errorHandler');
 const mongoose = require('mongoose');
 const AchievementTriggers = require('../services/achievementTriggers');
-const Notification = require('../models/Notification'); // <-- добавили
+const Notification = require('../models/Notification');
 
 // Создание учебной сессии
 router.post('/', 
@@ -128,8 +128,11 @@ router.post('/',
       }
     }
 
-    const triggers = new AchievementTriggers(ws);
-    triggers.onStudySessionCreated(req.user.id, session);
+    // Вызов триггера достижения за создание сессии
+    if (ws) {
+      const triggers = new AchievementTriggers(ws);
+      await triggers.onStudySessionCreated(req.user.id, session);
+    }
 
     const populatedSession = await StudySession.findById(session._id)
       .populate('host', 'name avatarUrl level')
@@ -235,8 +238,10 @@ router.post('/:id/join',
     await participantRecord.save();
 
     const ws = req.app.get('ws');
-    const triggers = new AchievementTriggers(ws);
-    triggers.onStudySessionJoined(req.user.id, session);
+    if (ws) {
+      const triggers = new AchievementTriggers(ws);
+      await triggers.onStudySessionJoined(req.user.id, session);
+    }
 
     const populatedSession = await StudySession.findById(session._id)
       .populate('host', 'name avatarUrl level')
@@ -325,8 +330,10 @@ router.post('/:id/timer',
         const newType = oldType === 'work' ? 'break' : 'work';
         if (oldType === 'break' && newType === 'work') {
           const ws = req.app.get('ws');
-          const triggers = new AchievementTriggers(ws);
-          triggers.onPomodoroComplete(req.user.id, session._id, 1);
+          if (ws) {
+            const triggers = new AchievementTriggers(ws);
+            await triggers.onPomodoroComplete(req.user.id, session._id, 1);
+          }
         }
         session.timerState = {
           active: true,
@@ -402,41 +409,49 @@ router.post('/:id/flashcards',
           }
           result.participantStats = participant.stats;
         }
-        break;
-    }
 
-    await session.save();
-
-    // Если был ответ на карточку, проверяем завершение сессии
-    if (action === 'answer' && session.status === 'active') {
-      const activeParticipants = session.participants.filter(p => p.status === 'active');
-      // Проверяем, что каждая карточка была просмотрена и правильно отвечена хотя бы одним участником
-      // (можно также требовать, чтобы все участники ответили, но для простоты используем критерий: каждая карточка имеет хотя бы один правильный ответ)
-      const allCardsReviewed = session.flashcards.every(flashcard => 
-        flashcard.reviewedBy && flashcard.reviewedBy.some(review => review.isCorrect === true)
-      );
-      if (allCardsReviewed) {
-        session.status = 'completed';
+        // Сохраняем сессию после ответа
         await session.save();
 
+        // Проверяем завершение сессии (все карточки изучены всеми активными участниками)
+        const activeParticipants = session.participants.filter(p => p.status === 'active');
+        const allFlashcardsReviewed = session.flashcards.every(flashcard => {
+          const uniqueReviewers = new Set(flashcard.reviewedBy.map(r => r.user.toString()));
+          return uniqueReviewers.size >= activeParticipants.length;
+        });
+
+        if (allFlashcardsReviewed && session.status === 'active') {
+          session.status = 'completed';
+          await session.save();
+
+          const ws = req.app.get('ws');
+          if (ws) {
+            ws.emitToStudySession(session._id, 'study_session_completed', {
+              sessionId: session._id,
+              reason: 'all_flashcards_reviewed',
+              timestamp: new Date().toISOString()
+            });
+
+            // Вызов триггера завершения сессии для всех участников
+            const triggers = new AchievementTriggers(ws);
+            for (const p of activeParticipants) {
+              await triggers.onStudySessionCompleted(p.user, { session });
+            }
+          }
+        }
+
+        // Вызов триггера ответа на карточку
         const ws = req.app.get('ws');
         if (ws) {
-          ws.emitToStudySession(session._id, 'study_session_completed', {
-            sessionId: session._id,
-            reason: 'all_flashcards_reviewed',
-            timestamp: new Date().toISOString()
-          });
+          const triggers = new AchievementTriggers(ws);
+          await triggers.onStudySessionFlashcardAnswered(
+            req.user.id,
+            session._id,
+            flashcardId,
+            answer === 'correct'
+          );
         }
-        // Триггер завершения сессии
-        const triggers = new AchievementTriggers(ws);
-        await triggers.onStudySessionCompleted(req.user.id, { session });
-      }
-    }
-
-    if (action === 'answer') {
-      const ws = req.app.get('ws');
-      const triggers = new AchievementTriggers(ws);
-      triggers.onStudySessionFlashcardAnswered(req.user.id, session._id, flashcardId, answer === 'correct');
+        break;
     }
 
     const currentFlashcard = session.flashcards[session.currentFlashcardIndex]
@@ -474,8 +489,10 @@ router.post('/:id/leave',
       await session.save();
 
       const ws = req.app.get('ws');
-      const triggers = new AchievementTriggers(ws);
-      triggers.onStudySessionCompleted(req.user.id, { session });
+      if (ws) {
+        const triggers = new AchievementTriggers(ws);
+        // Здесь нет конкретного пользователя, для которого вызывать завершение, пропускаем
+      }
     }
 
     res.json({
@@ -532,7 +549,7 @@ router.get('/:id/stats',
   })
 );
 
-// Приглашение пользователей в сессию (оставляем как есть, с использованием sendNotification)
+// Приглашение пользователей в сессию
 router.post('/:id/invite',
   auth,
   catchAsync(async (req, res, next) => {
@@ -649,7 +666,7 @@ router.post('/:id/start',
   })
 );
 
-// Завершение сессии
+// Завершение сессии (хостом)
 router.post('/:id/complete',
   auth,
   catchAsync(async (req, res, next) => {
@@ -662,8 +679,14 @@ router.post('/:id/complete',
     await session.save();
     
     const ws = req.app.get('ws');
-    const triggers = new AchievementTriggers(ws);
-    await triggers.onStudySessionCompleted(req.user.id, { session });
+    if (ws) {
+      const triggers = new AchievementTriggers(ws);
+      // Вызываем триггер завершения для всех активных участников
+      const activeParticipants = session.participants.filter(p => p.status === 'active');
+      for (const p of activeParticipants) {
+        await triggers.onStudySessionCompleted(p.user, { session });
+      }
+    }
     
     res.json({ success: true, message: 'Сессия завершена' });
   })
