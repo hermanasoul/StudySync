@@ -1,5 +1,3 @@
-// server/server.js
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -48,9 +46,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Rate limiting
-app.use('/api/', rateLimitMiddleware({ maxRequests: 100 }));
-app.use('/api/auth/login', rateLimitMiddleware({ maxRequests: 5, windowMs: 60 * 60 * 1000 }));
-app.use('/api/auth/register', rateLimitMiddleware({ maxRequests: 3, windowMs: 60 * 60 * 1000 }));
+app.use('/api/', generalLimiter);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
 
 // Парсинг JSON с лимитом
 app.use(express.json({ limit: '10kb' }));
@@ -124,7 +122,6 @@ app.get('/api/health', async (req, res) => {
   const redisStatus = redis.isConnected ? 'Connected' : 'Disconnected';
   const wsClients = wsServer.io ? wsServer.io.engine.clientsCount : 0;
 
-  // Получаем статистику уведомлений
   const Notification = require('./models/Notification');
   const notificationStats = await Notification.aggregate([
     {
@@ -136,15 +133,12 @@ app.get('/api/health', async (req, res) => {
     }
   ]);
 
-  // Получаем количество пользователей
   const User = require('./models/User');
   const userCount = await User.countDocuments();
 
-  // Получаем количество групп
   const Group = require('./models/Group');
   const groupCount = await Group.countDocuments();
 
-  // Получаем количество учебных сессий
   const StudySession = require('./models/StudySession');
   const studySessionCount = await StudySession.countDocuments();
 
@@ -336,7 +330,6 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/studysync
   .then(() => {
     console.log('✅ Connected to MongoDB successfully');
 
-    // Проверяем наличие моделей и создаем индексы
     const models = ['Notification', 'StudySession', 'User', 'Group', 'Achievement'];
 
     models.forEach(modelName => {
@@ -362,12 +355,10 @@ const gracefulShutdown = async () => {
   console.log('👋 Starting graceful shutdown...');
 
   try {
-    // Закрываем HTTP сервер
     server.close(() => {
       console.log('✅ HTTP server closed');
     });
 
-    // Закрываем WebSocket сервер
     if (wsServer.io) {
       wsServer.io.close(() => {
         console.log('✅ WebSocket server closed');
@@ -377,13 +368,11 @@ const gracefulShutdown = async () => {
       console.log('✅ WebSocket server closed');
     }
 
-    // Закрываем Redis соединение
     if (redis && redis.disconnect) {
       await redis.disconnect();
       console.log('✅ Redis connection closed');
     }
 
-    // Закрываем MongoDB соединение
     await mongoose.connection.close();
     console.log('✅ MongoDB connection closed');
 
@@ -395,18 +384,15 @@ const gracefulShutdown = async () => {
   }
 };
 
-// Обработка сигналов завершения
 process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
 
-// Обработка необработанных исключений
 process.on('uncaughtException', (err) => {
   console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
   console.error(err.name, err.message);
   gracefulShutdown();
 });
 
-// Обработка необработанных промисов
 process.on('unhandledRejection', (err) => {
   console.error('UNHANDLED REJECTION! 💥 Shutting down...');
   console.error(err.name, err.message);

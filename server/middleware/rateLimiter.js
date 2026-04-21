@@ -1,35 +1,28 @@
-// server/middleware/rateLimiter.js
-
 const rateLimit = require('express-rate-limit');
 
-// Общий лимитер для всех запросов
+const isDev = process.env.NODE_ENV === 'development';
+
+// Общий лимитер для API
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 минут
-  max: 100, // максимум 100 запросов с одного IP
-  message: {
-    success: false,
-    error: 'Слишком много запросов с этого IP. Пожалуйста, попробуйте позже.'
-  },
-  standardHeaders: true, // Возвращает заголовки RateLimit-*
-  legacyHeaders: false, // Отключает X-RateLimit-* заголовки
-  skipSuccessfulRequests: false // учитываем все запросы
+  max: isDev ? 1000 : 100,
+  message: 'Слишком много запросов. Пожалуйста, попробуйте позже.',
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
-// Лимитер для авторизации
+// Строгий лимитер для аутентификации
 const authLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 час
-  max: 5, // максимум 5 попыток входа
-  message: {
-    success: false,
-    error: 'Слишком много попыток входа. Пожалуйста, попробуйте через час.'
-  },
-  skipSuccessfulRequests: true // не учитываем успешные попытки
+  max: isDev ? 100 : 5,
+  message: 'Слишком много попыток входа. Пожалуйста, попробуйте позже.',
+  skipSuccessfulRequests: true,
 });
 
 // Лимитер для создания контента
 const createContentLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 час
-  max: 50, // максимум 50 созданий контента
+  windowMs: 60 * 60 * 1000,
+  max: 50,
   message: {
     success: false,
     error: 'Слишком много созданий контента. Пожалуйста, замедлите темп.'
@@ -38,8 +31,8 @@ const createContentLimiter = rateLimit({
 
 // Лимитер для API (более строгий)
 const apiLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 минута
-  max: 30, // максимум 30 запросов в минуту
+  windowMs: 60 * 1000,
+  max: 30,
   message: {
     success: false,
     error: 'Слишком много запросов к API. Пожалуйста, замедлите темп.'

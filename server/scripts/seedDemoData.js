@@ -18,11 +18,11 @@ const Friendship = require('../models/Friendship');
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/studysync';
 
 const demoUsers = [
-  { name: 'Анна Смирнова', email: 'anna@studysync.demo', password: 'demo123', level: 15, experiencePoints: 4500, avatarUrl: 'https://i.pravatar.cc/150?img=1' },
-  { name: 'Максим Петров', email: 'max@studysync.demo', password: 'demo123', level: 22, experiencePoints: 12000, avatarUrl: 'https://i.pravatar.cc/150?img=2' },
-  { name: 'Елена Волкова', email: 'elena@studysync.demo', password: 'demo123', level: 8, experiencePoints: 1800, avatarUrl: 'https://i.pravatar.cc/150?img=3' },
-  { name: 'Дмитрий Соколов', email: 'dmitry@studysync.demo', password: 'demo123', level: 30, experiencePoints: 35000, avatarUrl: 'https://i.pravatar.cc/150?img=4' },
-  { name: 'Ольга Морозова', email: 'olga@studysync.demo', password: 'demo123', level: 12, experiencePoints: 3200, avatarUrl: 'https://i.pravatar.cc/150?img=5' },
+  { name: 'Анна Смирнова', email: 'anna@studysync.demo', password: 'Demo123!', level: 15, experiencePoints: 4500, avatarUrl: 'https://i.pravatar.cc/150?img=1' },
+  { name: 'Максим Петров', email: 'max@studysync.demo', password: 'Demo123!', level: 22, experiencePoints: 12000, avatarUrl: 'https://i.pravatar.cc/150?img=2' },
+  { name: 'Елена Волкова', email: 'elena@studysync.demo', password: 'Demo123!', level: 8, experiencePoints: 1800, avatarUrl: 'https://i.pravatar.cc/150?img=3' },
+  { name: 'Дмитрий Соколов', email: 'dmitry@studysync.demo', password: 'Demo123!', level: 30, experiencePoints: 35000, avatarUrl: 'https://i.pravatar.cc/150?img=4' },
+  { name: 'Ольга Морозова', email: 'olga@studysync.demo', password: 'Demo123!', level: 12, experiencePoints: 3200, avatarUrl: 'https://i.pravatar.cc/150?img=5' },
 ];
 
 const subjectsData = [
@@ -49,21 +49,20 @@ async function seed() {
     console.log('🧹 Старые демо-данные удалены');
 
     // 1. Создаём пользователей
-    const createdUsers = [];
-    for (const u of demoUsers) {
-      const hashedPassword = await bcrypt.hash(u.password, 10);
-      const user = await User.create({
-        name: u.name,
-        email: u.email,
-        password: hashedPassword,
-        level: u.level,
-        experiencePoints: u.experiencePoints,
-        avatarUrl: u.avatarUrl,
-        isActive: true,
-      });
-      createdUsers.push(user);
-      console.log(`👤 Создан пользователь: ${user.name} (${user.email})`);
-    }
+const createdUsers = [];
+for (const u of demoUsers) {
+  const user = await User.create({
+    name: u.name,
+    email: u.email,
+    password: u.password,
+    level: u.level,
+    experiencePoints: u.experiencePoints,
+    avatarUrl: u.avatarUrl,
+    isActive: true,
+  });
+  createdUsers.push(user);
+  console.log(`👤 Создан пользователь: ${user.name} (${user.email})`);
+}
 
     const [anna, max, elena, dmitry, olga] = createdUsers;
 

@@ -97,6 +97,19 @@ const achievements = [
     isActive: true,
     sortOrder: 7
   },
+  {
+    code: 'FIRST_FRIEND',
+    name: 'Первый друг',
+    description: 'Добавьте первого друга в StudySync',
+    icon: '🤝',
+    category: 'social',
+    difficulty: 'bronze',
+    points: 50,
+    requirements: { type: 'friends_count', target: 1 },
+    secret: false,
+    isActive: true,
+    sortOrder: 28
+  },
 
   // === ГРУППОВЫЕ ДОСТИЖЕНИЯ ===
   {
