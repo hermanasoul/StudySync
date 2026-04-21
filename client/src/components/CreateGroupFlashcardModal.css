@@ -1,3 +1,5 @@
+/* client\src\components\CreateGroupFlashcardModal.css */
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -195,4 +197,12 @@
     padding: 16px;
     padding-top: 32px;
   }
+}
+
+.group-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.group-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
 }

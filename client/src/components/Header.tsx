@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Button from './Button';
 import Notifications from './Notifications';
 import ChatNotification from './ChatNotification';
+import ThemeToggle from './ThemeToggle';
 import './Header.css';
 
 const Header: React.FC = () => {
@@ -57,6 +58,7 @@ const Header: React.FC = () => {
                 </Button>
               </>
             )}
+            <ThemeToggle />
           </div>
         </div>
       </div>

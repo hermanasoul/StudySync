@@ -8,7 +8,7 @@ import './AchievementsPage.css';
 const AchievementsPage: React.FC = () => {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [userAchievements, setUserAchievements] = useState<any[]>([]);
-  const [progress, setProgress] = useState<any>(null);   // <-- убрали несуществующий тип
+  const [progress, setProgress] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'all' | 'my' | 'progress' | 'leaderboard'>('all');
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
@@ -87,33 +87,20 @@ const AchievementsPage: React.FC = () => {
 
   const handleAchievementClick = (achievement: Achievement) => {
     console.log('Achievement clicked:', achievement);
-    // Можно открыть модальное окно с деталями достижения
   };
 
   const renderTabs = () => (
     <div className="achievements-tabs">
-      <button
-        className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
-        onClick={() => setActiveTab('all')}
-      >
+      <button className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>
         Все достижения
       </button>
-      <button
-        className={`tab-btn ${activeTab === 'my' ? 'active' : ''}`}
-        onClick={() => setActiveTab('my')}
-      >
+      <button className={`tab-btn ${activeTab === 'my' ? 'active' : ''}`} onClick={() => setActiveTab('my')}>
         Мои достижения
       </button>
-      <button
-        className={`tab-btn ${activeTab === 'progress' ? 'active' : ''}`}
-        onClick={() => setActiveTab('progress')}
-      >
+      <button className={`tab-btn ${activeTab === 'progress' ? 'active' : ''}`} onClick={() => setActiveTab('progress')}>
         Прогресс
       </button>
-      <button
-        className={`tab-btn ${activeTab === 'leaderboard' ? 'active' : ''}`}
-        onClick={() => setActiveTab('leaderboard')}
-      >
+      <button className={`tab-btn ${activeTab === 'leaderboard' ? 'active' : ''}`} onClick={() => setActiveTab('leaderboard')}>
         Рейтинг
       </button>
     </div>
@@ -135,7 +122,7 @@ const AchievementsPage: React.FC = () => {
   );
 
   const renderMyAchievements = () => {
-    const myAchievementsList = userAchievements.map(ua => ({
+    const myAchievementsList = userAchievements.map((ua: any) => ({
       ...ua.achievement,
       progress: ua.progress,
       isUnlocked: ua.isUnlocked,
@@ -179,7 +166,7 @@ const AchievementsPage: React.FC = () => {
         <h2>Рейтинг пользователей</h2>
         <p>Топ пользователей по количеству очков за достижения</p>
       </div>
-      
+
       {myPosition && (
         <div className="my-position-card">
           <div className="my-position-header">
@@ -197,17 +184,16 @@ const AchievementsPage: React.FC = () => {
             </div>
             <div className="position-stat">
               <div className="stat-value">
-                {myPosition.userStats.lastUnlock 
+                {myPosition.userStats.lastUnlock
                   ? new Date(myPosition.userStats.lastUnlock).toLocaleDateString('ru-RU')
-                  : 'Нет'
-                }
+                  : 'Нет'}
               </div>
               <div className="stat-label">Последнее</div>
             </div>
           </div>
         </div>
       )}
-      
+
       <div className="leaderboard-container">
         <div className="leaderboard-header">
           <div className="leaderboard-col rank">Ранг</div>
@@ -216,7 +202,7 @@ const AchievementsPage: React.FC = () => {
           <div className="leaderboard-col achievements">Достижений</div>
           <div className="leaderboard-col last">Последнее</div>
         </div>
-        
+
         <div className="leaderboard-list">
           {leaderboard.length === 0 ? (
             <div className="no-leaderboard">Рейтинг пуст</div>
@@ -224,9 +210,7 @@ const AchievementsPage: React.FC = () => {
             leaderboard.map(user => (
               <div key={user.userId} className="leaderboard-row">
                 <div className="leaderboard-col rank">
-                  <span className={`rank-badge rank-${user.rank}`}>
-                    {user.rank}
-                  </span>
+                  <span className={`rank-badge rank-${user.rank}`}>{user.rank}</span>
                 </div>
                 <div className="leaderboard-col user">
                   <div className="user-info">
@@ -243,14 +227,9 @@ const AchievementsPage: React.FC = () => {
                 <div className="leaderboard-col points">
                   <span className="points-value">{user.totalPoints}</span>
                 </div>
-                <div className="leaderboard-col achievements">
-                  {user.unlockedCount}
-                </div>
+                <div className="leaderboard-col achievements">{user.unlockedCount}</div>
                 <div className="leaderboard-col last">
-                  {user.lastUnlock 
-                    ? new Date(user.lastUnlock).toLocaleDateString('ru-RU')
-                    : '-'
-                  }
+                  {user.lastUnlock ? new Date(user.lastUnlock).toLocaleDateString('ru-RU') : '-'}
                 </div>
               </div>
             ))
@@ -268,9 +247,9 @@ const AchievementsPage: React.FC = () => {
           <h1>🏆 Достижения</h1>
           <p>Собирайте достижения, зарабатывайте очки и соревнуйтесь с другими пользователями</p>
         </div>
-        
+
         {renderTabs()}
-        
+
         <div className="achievements-content">
           {activeTab === 'all' && renderAllAchievements()}
           {activeTab === 'my' && renderMyAchievements()}

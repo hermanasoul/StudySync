@@ -117,3 +117,8 @@
     text-align: center;
     padding: 48px;
   }
+
+  .export-buttons {
+    display: flex;
+    gap: 10px;
+  }

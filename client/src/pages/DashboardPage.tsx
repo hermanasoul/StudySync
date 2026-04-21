@@ -1,5 +1,3 @@
-// client/src/pages/DashboardPage.tsx
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
@@ -183,7 +181,7 @@ const DashboardPage: React.FC = () => {
     <div className="dashboard-page">
       <Header />
       <div className="page-with-header">
-        <div className="dashboard-container">
+        <div className="dashboard-container animate-fade-in-up">
           <div className="dashboard-header">
             <h1>Личный кабинет</h1>
             <p>Ваш прогресс по предметам</p>
@@ -239,8 +237,11 @@ const DashboardPage: React.FC = () => {
           )}
 
           <div className="subjects-grid">
-            {subjects.map((subject) => (
-              <div key={subject.id} className="subject-card">
+            {subjects.map((subject, index) => (
+              <div 
+                key={subject.id} 
+                className={`subject-card animate-fade-in-up delay-${index * 100}`}
+              >
                 <div className="subject-header">
                   <h3 className={`subject-title ${subject.color}`}>{subject.name}</h3>
                   <span className="progress-percent">{subject.progress}%</span>

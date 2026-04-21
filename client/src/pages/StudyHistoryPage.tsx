@@ -1,8 +1,13 @@
-// client\src\pages\StudyHistoryPage.tsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { studySessionsAPI, subjectsAPI } from '../services/api';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import './StudyHistoryPage.css';
+
+// Расширение типа для поддержки autoTable
+interface jsPDFWithAutoTable extends jsPDF {
+  autoTable: (options: any) => void;
+}
 
 interface Subject {
   _id: string;
@@ -45,7 +50,6 @@ const StudyHistoryPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, pages: 1 });
 
-  // Фильтры
   const [subjectId, setSubjectId] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -106,7 +110,6 @@ const StudyHistoryPage: React.FC = () => {
     return Math.round((session.userStats.correctAnswers / session.userStats.cardsReviewed) * 100) + '%';
   };
 
-  // Экспорт в CSV
   const exportToCSV = () => {
     if (sessions.length === 0) return;
 
@@ -143,6 +146,41 @@ const StudyHistoryPage: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  const exportToPDF = () => {
+    if (sessions.length === 0) return;
+
+    const doc = new jsPDF() as jsPDFWithAutoTable;
+    
+    doc.setFontSize(18);
+    doc.text('История учебных сессий', 14, 22);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Сгенерировано: ${new Date().toLocaleDateString('ru-RU')}`, 14, 30);
+    
+    const tableColumn = ["Название", "Предмет", "Дата", "Режим", "Изучено", "Правильно", "Успеваемость", "Время"];
+    const tableRows = sessions.map(s => [
+      s.name.length > 25 ? s.name.substring(0, 22) + '...' : s.name,
+      s.subjectId.name,
+      formatDate(s.createdAt),
+      s.studyMode === 'collaborative' ? 'Совм.' : s.studyMode === 'individual' ? 'Инд.' : 'Ведущ.',
+      s.userStats?.cardsReviewed || 0,
+      s.userStats?.correctAnswers || 0,
+      getSuccessRate(s),
+      s.userStats ? formatTime(s.userStats.timeSpent) : '0:00'
+    ]);
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 35,
+      styles: { fontSize: 9, cellPadding: 3 },
+      headStyles: { fillColor: [59, 130, 246] },
+      alternateRowStyles: { fillColor: [245, 247, 250] },
+    });
+
+    doc.save(`study_history_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
   const clearFilters = () => {
     setSubjectId('');
     setFromDate('');
@@ -153,9 +191,14 @@ const StudyHistoryPage: React.FC = () => {
     <div className="page-container">
       <div className="page-header">
         <h1>История учебных сессий</h1>
-        <button className="btn btn-outline" onClick={exportToCSV} disabled={sessions.length === 0}>
-          📥 Экспорт CSV
-        </button>
+        <div className="export-buttons">
+          <button className="btn btn-outline" onClick={exportToCSV} disabled={sessions.length === 0}>
+            📥 CSV
+          </button>
+          <button className="btn btn-outline" onClick={exportToPDF} disabled={sessions.length === 0}>
+            📄 PDF
+          </button>
+        </div>
       </div>
 
       <div className="filters-panel">

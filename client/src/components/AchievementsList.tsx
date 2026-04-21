@@ -1,169 +1,91 @@
-// client/src/components/AchievementsList.tsx
-import React, { useState } from 'react';
+import React from 'react';
 import AchievementCard from './AchievementCard';
+import { Achievement } from '../services/api';
 import './AchievementsList.css';
 
 interface AchievementsListProps {
-  achievements: any[];
+  achievements: Achievement[];
   loading?: boolean;
   emptyMessage?: string;
   showFilters?: boolean;
-  onAchievementClick?: (achievement: any) => void;
+  onAchievementClick?: (achievement: Achievement) => void;
 }
 
 const AchievementsList: React.FC<AchievementsListProps> = ({
   achievements,
   loading = false,
-  emptyMessage = 'Достижения не найдены',
+  emptyMessage = 'Нет достижений',
   showFilters = false,
   onAchievementClick
 }) => {
-  const [filter, setFilter] = useState({
-    category: 'all',
-    difficulty: 'all',
-    unlocked: 'all'
-  });
+  const [filterCategory, setFilterCategory] = React.useState('all');
+  const [filterDifficulty, setFilterDifficulty] = React.useState('all');
+  const [filterUnlocked, setFilterUnlocked] = React.useState('all');
 
-  const categories = [
-    { value: 'all', label: 'Все категории' },
-    { value: 'study', label: 'Учёба' },
-    { value: 'group', label: 'Группы' },
-    { value: 'flashcard', label: 'Карточки' },
-    { value: 'note', label: 'Заметки' },
-    { value: 'social', label: 'Социальное' },
-    { value: 'system', label: 'Системное' }
-  ];
+  const categories = ['all', 'study', 'group', 'flashcard', 'note', 'social', 'system'];
+  const difficulties = ['all', 'bronze', 'silver', 'gold', 'platinum'];
 
-  const difficulties = [
-    { value: 'all', label: 'Все уровни' },
-    { value: 'bronze', label: 'Бронза' },
-    { value: 'silver', label: 'Серебро' },
-    { value: 'gold', label: 'Золото' },
-    { value: 'platinum', label: 'Платина' }
-  ];
-
-  const unlockedOptions = [
-    { value: 'all', label: 'Все' },
-    { value: 'true', label: 'Разблокированные' },
-    { value: 'false', label: 'Неразблокированные' }
-  ];
-
-  const handleFilterChange = (key: string, value: string) => {
-    setFilter(prev => ({ ...prev, [key]: value }));
-  };
-
-  const filteredAchievements = achievements.filter(achievement => {
-    if (filter.category !== 'all' && achievement.category !== filter.category) return false;
-    if (filter.difficulty !== 'all' && achievement.difficulty !== filter.difficulty) return false;
-    if (filter.unlocked !== 'all') {
-      const isUnlocked = achievement.isUnlocked === true;
-      if (filter.unlocked === 'true' && !isUnlocked) return false;
-      if (filter.unlocked === 'false' && isUnlocked) return false;
-    }
+  const filteredAchievements = achievements.filter(a => {
+    if (filterCategory !== 'all' && a.category !== filterCategory) return false;
+    if (filterDifficulty !== 'all' && a.difficulty !== filterDifficulty) return false;
+    if (filterUnlocked === 'unlocked' && !a.isUnlocked) return false;
+    if (filterUnlocked === 'locked' && a.isUnlocked) return false;
     return true;
   });
 
   if (loading) {
-    return (
-      <div className="achievements-loading">
-        <div className="loading-spinner"></div>
-        <p>Загрузка достижений...</p>
-      </div>
-    );
+    return <div className="loading">Загрузка достижений...</div>;
   }
 
   if (achievements.length === 0) {
-    return (
-      <div className="achievements-empty">
-        <div className="empty-icon">🏆</div>
-        <h3>{emptyMessage}</h3>
-        <p>Здесь будут отображаться ваши достижения</p>
-      </div>
-    );
+    return <div className="empty-state">{emptyMessage}</div>;
   }
 
   return (
-    <div className="achievements-list">
+    <div className="achievements-list-container">
       {showFilters && (
         <div className="achievements-filters">
-          <div className="filter-group">
-            <label htmlFor="category-filter">Категория:</label>
-            <select
-              id="category-filter"
-              value={filter.category}
-              onChange={(e) => handleFilterChange('category', e.target.value)}
-              className="filter-select"
-            >
-              {categories.map(cat => (
-                <option key={cat.value} value={cat.value}>
-                  {cat.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          <div className="filter-group">
-            <label htmlFor="difficulty-filter">Сложность:</label>
-            <select
-              id="difficulty-filter"
-              value={filter.difficulty}
-              onChange={(e) => handleFilterChange('difficulty', e.target.value)}
-              className="filter-select"
-            >
-              {difficulties.map(diff => (
-                <option key={diff.value} value={diff.value}>
-                  {diff.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          <div className="filter-group">
-            <label htmlFor="unlocked-filter">Статус:</label>
-            <select
-              id="unlocked-filter"
-              value={filter.unlocked}
-              onChange={(e) => handleFilterChange('unlocked', e.target.value)}
-              className="filter-select"
-            >
-              {unlockedOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          <div className="filter-stats">
-            <span className="filter-count">
-              Показано: {filteredAchievements.length} из {achievements.length}
-            </span>
-          </div>
+          <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
+            {categories.map(cat => (
+              <option key={cat} value={cat}>
+                {cat === 'all' ? 'Все категории' : cat}
+              </option>
+            ))}
+          </select>
+          <select value={filterDifficulty} onChange={e => setFilterDifficulty(e.target.value)}>
+            {difficulties.map(diff => (
+              <option key={diff} value={diff}>
+                {diff === 'all' ? 'Все сложности' : diff}
+              </option>
+            ))}
+          </select>
+          <select value={filterUnlocked} onChange={e => setFilterUnlocked(e.target.value)}>
+            <option value="all">Все</option>
+            <option value="unlocked">Разблокированные</option>
+            <option value="locked">Заблокированные</option>
+          </select>
         </div>
       )}
-      
+
       <div className="achievements-grid">
         {filteredAchievements.map(achievement => (
           <AchievementCard
             key={achievement.id}
-            achievement={achievement}
-            showProgress={true}
+            id={achievement.id}
+            name={achievement.name}
+            description={achievement.description}
+            icon={achievement.icon}
+            difficulty={achievement.difficulty as 'bronze' | 'silver' | 'gold' | 'platinum'}
+            difficultyColor={achievement.difficultyColor}
+            category={achievement.category}
+            points={achievement.points}
+            progress={achievement.progress}
+            isUnlocked={achievement.isUnlocked}
+            unlockedAt={achievement.unlockedAt}
             onClick={() => onAchievementClick && onAchievementClick(achievement)}
           />
         ))}
       </div>
-      
-      {filteredAchievements.length === 0 && achievements.length > 0 && (
-        <div className="no-results">
-          <p>Нет достижений, соответствующих выбранным фильтрам</p>
-          <button 
-            className="btn-outline"
-            onClick={() => setFilter({ category: 'all', difficulty: 'all', unlocked: 'all' })}
-          >
-            Сбросить фильтры
-          </button>
-        </div>
-      )}
     </div>
   );
 };

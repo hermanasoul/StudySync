@@ -19,6 +19,7 @@
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
+  animation: scaleIn 0.25s ease-out;
 }
 
 .modal-header {
