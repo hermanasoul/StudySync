@@ -30,7 +30,102 @@ const sendWebSocketEvent = (req, event, data) => {
   }
 };
 
-// Создание группы
+/**
+ * @swagger
+ * tags:
+ *   name: Groups
+ *   description: Управление учебными группами
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Group:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *         subjectId:
+ *           $ref: '#/components/schemas/Subject'
+ *         createdBy:
+ *           $ref: '#/components/schemas/User'
+ *         members:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               user:
+ *                 $ref: '#/components/schemas/User'
+ *               role:
+ *                 type: string
+ *                 enum: [owner, admin, member]
+ *               joinedAt:
+ *                 type: string
+ *                 format: date-time
+ *         isPublic:
+ *           type: boolean
+ *         inviteCode:
+ *           type: string
+ *         settings:
+ *           type: object
+ *         memberCount:
+ *           type: number
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ */
+
+/**
+ * @swagger
+ * /groups:
+ *   post:
+ *     summary: Создать новую группу
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - subjectId
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               subjectId:
+ *                 type: string
+ *               isPublic:
+ *                 type: boolean
+ *               settings:
+ *                 type: object
+ *     responses:
+ *       201:
+ *         description: Группа создана
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 group:
+ *                   $ref: '#/components/schemas/Group'
+ */
 router.post('/',
   auth,
   sanitizeInput,
@@ -123,25 +218,61 @@ router.post('/',
   })
 );
 
-// Получение групп пользователя
+/**
+ * @swagger
+ * /groups/my:
+ *   get:
+ *     summary: Получить группы текущего пользователя
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: [owner, admin, member, all]
+ *       - in: query
+ *         name: public
+ *         schema:
+ *           type: string
+ *           enum: [true, false, all]
+ *     responses:
+ *       200:
+ *         description: Список групп
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 pagination:
+ *                   type: object
+ *                 count:
+ *                   type: integer
+ *                 groups:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Group'
+ */
 router.get('/my',
   auth,
   [
-    query('page')
-      .optional()
-      .isInt({ min: 1 }).withMessage('Номер страницы должен быть положительным числом'),
-    
-    query('limit')
-      .optional()
-      .isInt({ min: 1, max: 50 }).withMessage('Лимит должен быть от 1 до 50'),
-    
-    query('role')
-      .optional()
-      .isIn(['owner', 'admin', 'member', 'all']).withMessage('Роль должна быть: owner, admin, member или all'),
-    
-    query('public')
-      .optional()
-      .isIn(['true', 'false', 'all']).withMessage('Публичность должна быть: true, false или all')
+    query('page').optional().isInt({ min: 1 }),
+    query('limit').optional().isInt({ min: 1, max: 50 }),
+    query('role').optional().isIn(['owner', 'admin', 'member', 'all']),
+    query('public').optional().isIn(['true', 'false', 'all'])
   ],
   catchAsync(async (req, res) => {
     const { 
@@ -224,7 +355,34 @@ router.get('/my',
   })
 );
 
-// Получение группы по ID
+/**
+ * @swagger
+ * /groups/{id}:
+ *   get:
+ *     summary: Получить информацию о группе по ID
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID группы
+ *     responses:
+ *       200:
+ *         description: Информация о группе
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 group:
+ *                   $ref: '#/components/schemas/Group'
+ */
 router.get('/:id',
   auth,
   idValidation,
@@ -291,41 +449,51 @@ router.get('/:id',
   })
 );
 
-// Обновление группы
+/**
+ * @swagger
+ * /groups/{id}:
+ *   put:
+ *     summary: Обновить группу
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID группы
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               isPublic:
+ *                 type: boolean
+ *               settings:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Группа обновлена
+ */
 router.put('/:id',
   auth,
   idValidation,
   sanitizeInput,
   [
-    body('name')
-      .optional()
-      .trim()
-      .isLength({ min: 3, max: 50 }).withMessage('Название должно быть от 3 до 50 символов'),
-    
-    body('description')
-      .optional()
-      .trim()
-      .isLength({ max: 500 }).withMessage('Описание не должно превышать 500 символов'),
-    
-    body('isPublic')
-      .optional()
-      .isBoolean().withMessage('Публичность должна быть true или false'),
-    
-    body('settings')
-      .optional()
-      .isObject().withMessage('Настройки должны быть объектом'),
-    
-    body('settings.allowMemberInvites')
-      .optional()
-      .isBoolean().withMessage('allowMemberInvites должно быть true или false'),
-    
-    body('settings.allowMemberCreateCards')
-      .optional()
-      .isBoolean().withMessage('allowMemberCreateCards должно быть true или false'),
-    
-    body('settings.allowMemberCreateNotes')
-      .optional()
-      .isBoolean().withMessage('allowMemberCreateNotes должно быть true или false')
+    body('name').optional().trim().isLength({ min: 3, max: 50 }),
+    body('description').optional().trim().isLength({ max: 500 }),
+    body('isPublic').optional().isBoolean(),
+    body('settings').optional().isObject(),
+    body('settings.allowMemberInvites').optional().isBoolean(),
+    body('settings.allowMemberCreateCards').optional().isBoolean(),
+    body('settings.allowMemberCreateNotes').optional().isBoolean()
   ],
   catchAsync(async (req, res) => {
     const { name, description, isPublic, settings } = req.body;
@@ -374,7 +542,25 @@ router.put('/:id',
   })
 );
 
-// Удаление группы
+/**
+ * @swagger
+ * /groups/{id}:
+ *   delete:
+ *     summary: Удалить группу
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID группы
+ *     responses:
+ *       200:
+ *         description: Группа удалена
+ */
 router.delete('/:id',
   auth,
   idValidation,
@@ -422,7 +608,36 @@ router.delete('/:id',
   })
 );
 
-// Приглашение участников
+/**
+ * @swagger
+ * /groups/{id}/invite:
+ *   post:
+ *     summary: Пригласить участника в группу
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID группы
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Приглашение отправлено
+ */
 router.post('/:id/invite',
   auth,
   idValidation,
@@ -512,7 +727,25 @@ router.post('/:id/invite',
   })
 );
 
-// Присоединение к группе по коду
+/**
+ * @swagger
+ * /groups/join/{inviteCode}:
+ *   post:
+ *     summary: Присоединиться к группе по коду приглашения
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: inviteCode
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Код приглашения
+ *     responses:
+ *       200:
+ *         description: Успешное присоединение
+ */
 router.post('/join/:inviteCode',
   auth,
   [
@@ -650,7 +883,25 @@ router.post('/join/:inviteCode',
   })
 );
 
-// Получение участников группы
+/**
+ * @swagger
+ * /groups/{id}/members:
+ *   get:
+ *     summary: Получить список участников группы
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID группы
+ *     responses:
+ *       200:
+ *         description: Список участников
+ */
 router.get('/:id/members',
   auth,
   idValidation,
@@ -683,18 +934,41 @@ router.get('/:id/members',
   })
 );
 
-// Получение карточек группы
+/**
+ * @swagger
+ * /groups/{id}/flashcards:
+ *   get:
+ *     summary: Получить карточки группы
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID группы
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *     responses:
+ *       200:
+ *         description: Список карточек
+ */
 router.get('/:id/flashcards',
   auth,
   idValidation,
   [
-    query('page')
-      .optional()
-      .isInt({ min: 1 }).withMessage('Номер страницы должен быть положительным числом'),
-    
-    query('limit')
-      .optional()
-      .isInt({ min: 1, max: 100 }).withMessage('Лимит должен быть от 1 до 100')
+    query('page').optional().isInt({ min: 1 }),
+    query('limit').optional().isInt({ min: 1, max: 100 })
   ],
   catchAsync(async (req, res) => {
     const { page = 1, limit = 20 } = req.query;
@@ -749,30 +1023,52 @@ router.get('/:id/flashcards',
   })
 );
 
-// Создание карточки в группе
+/**
+ * @swagger
+ * /groups/{id}/flashcards:
+ *   post:
+ *     summary: Создать карточку в группе
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID группы
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - question
+ *               - answer
+ *             properties:
+ *               question:
+ *                 type: string
+ *               answer:
+ *                 type: string
+ *               hint:
+ *                 type: string
+ *               subjectId:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Карточка создана
+ */
 router.post('/:id/flashcards',
   auth,
   idValidation,
   sanitizeInput,
   [
-    body('question')
-      .trim()
-      .notEmpty().withMessage('Вопрос обязателен')
-      .isLength({ min: 3, max: 500 }).withMessage('Вопрос должен быть от 3 до 500 символов'),
-    
-    body('answer')
-      .trim()
-      .notEmpty().withMessage('Ответ обязателен')
-      .isLength({ min: 1, max: 1000 }).withMessage('Ответ должен быть от 1 до 1000 символов'),
-    
-    body('hint')
-      .optional()
-      .trim()
-      .isLength({ max: 200 }).withMessage('Подсказка не должна превышать 200 символов'),
-    
-    body('subjectId')
-      .optional()
-      .isMongoId().withMessage('Некорректный ID предмета')
+    body('question').trim().notEmpty().isLength({ min: 3, max: 500 }),
+    body('answer').trim().notEmpty().isLength({ min: 1, max: 1000 }),
+    body('hint').optional().trim().isLength({ max: 200 }),
+    body('subjectId').optional().isMongoId()
   ],
   catchAsync(async (req, res) => {
     const { question, answer, hint, subjectId } = req.body;
@@ -872,18 +1168,41 @@ router.post('/:id/flashcards',
   })
 );
 
-// Получение заметок группы
+/**
+ * @swagger
+ * /groups/{id}/notes:
+ *   get:
+ *     summary: Получить заметки группы
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID группы
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *     responses:
+ *       200:
+ *         description: Список заметок
+ */
 router.get('/:id/notes',
   auth,
   idValidation,
   [
-    query('page')
-      .optional()
-      .isInt({ min: 1 }).withMessage('Номер страницы должен быть положительным числом'),
-    
-    query('limit')
-      .optional()
-      .isInt({ min: 1, max: 100 }).withMessage('Лимит должен быть от 1 до 100')
+    query('page').optional().isInt({ min: 1 }),
+    query('limit').optional().isInt({ min: 1, max: 100 })
   ],
   catchAsync(async (req, res) => {
     const { page = 1, limit = 20 } = req.query;
@@ -935,31 +1254,52 @@ router.get('/:id/notes',
   })
 );
 
-// Создание заметки в группе
+/**
+ * @swagger
+ * /groups/{id}/notes:
+ *   post:
+ *     summary: Создать заметку в группе
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID группы
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - content
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       201:
+ *         description: Заметка создана
+ */
 router.post('/:id/notes',
   auth,
   idValidation,
   sanitizeInput,
   [
-    body('title')
-      .trim()
-      .notEmpty().withMessage('Заголовок обязателен')
-      .isLength({ min: 3, max: 100 }).withMessage('Заголовок должен быть от 3 до 100 символов'),
-    
-    body('content')
-      .trim()
-      .notEmpty().withMessage('Содержание обязательно')
-      .isLength({ min: 10, max: 10000 }).withMessage('Содержание должно быть от 10 до 10000 символов'),
-    
-    body('tags')
-      .optional()
-      .isArray().withMessage('Теги должны быть массивом'),
-    
-    body('tags.*')
-      .optional()
-      .isString().withMessage('Тег должен быть строкой')
-      .trim()
-      .isLength({ max: 20 }).withMessage('Тег не должен превышать 20 символов')
+    body('title').trim().notEmpty().isLength({ min: 3, max: 100 }),
+    body('content').trim().notEmpty().isLength({ min: 10, max: 10000 }),
+    body('tags').optional().isArray(),
+    body('tags.*').optional().isString().trim().isLength({ max: 20 })
   ],
   catchAsync(async (req, res) => {
     const { title, content, tags } = req.body;
@@ -1052,30 +1392,56 @@ router.post('/:id/notes',
   })
 );
 
-// Обновление заметки в группе
+/**
+ * @swagger
+ * /groups/{groupId}/notes/{noteId}:
+ *   put:
+ *     summary: Обновить заметку в группе
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID группы
+ *       - in: path
+ *         name: noteId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID заметки
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Заметка обновлена
+ */
 router.put('/:groupId/notes/:noteId',
   auth,
   groupIdValidation,
   [
-    param('noteId')
-      .notEmpty().withMessage('ID заметки обязателен')
-      .isMongoId().withMessage('Некорректный ID заметки')
+    param('noteId').notEmpty().isMongoId()
   ],
   sanitizeInput,
   [
-    body('title')
-      .optional()
-      .trim()
-      .isLength({ min: 3, max: 100 }).withMessage('Заголовок должен быть от 3 до 100 символов'),
-    
-    body('content')
-      .optional()
-      .trim()
-      .isLength({ min: 10, max: 10000 }).withMessage('Содержание должно быть от 10 до 10000 символов'),
-    
-    body('tags')
-      .optional()
-      .isArray().withMessage('Теги должны быть массивом')
+    body('title').optional().trim().isLength({ min: 3, max: 100 }),
+    body('content').optional().trim().isLength({ min: 10, max: 10000 }),
+    body('tags').optional().isArray()
   ],
   catchAsync(async (req, res) => {
     const { title, content, tags } = req.body;
@@ -1083,7 +1449,7 @@ router.put('/:groupId/notes/:noteId',
     const note = await Note.findOne({
       _id: req.params.noteId,
       groupId: req.params.groupId,
-      authorId: req.user.id // Только автор может редактировать
+      authorId: req.user.id
     }).populate('authorId', 'name email avatarUrl');
 
     if (!note) {
@@ -1116,20 +1482,42 @@ router.put('/:groupId/notes/:noteId',
   })
 );
 
-// Удаление заметки из группы
+/**
+ * @swagger
+ * /groups/{groupId}/notes/{noteId}:
+ *   delete:
+ *     summary: Удалить заметку из группы
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID группы
+ *       - in: path
+ *         name: noteId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID заметки
+ *     responses:
+ *       200:
+ *         description: Заметка удалена
+ */
 router.delete('/:groupId/notes/:noteId',
   auth,
   groupIdValidation,
   [
-    param('noteId')
-      .notEmpty().withMessage('ID заметки обязателен')
-      .isMongoId().withMessage('Некорректный ID заметки')
+    param('noteId').notEmpty().isMongoId()
   ],
   catchAsync(async (req, res) => {
     const note = await Note.findOne({
       _id: req.params.noteId,
       groupId: req.params.groupId,
-      authorId: req.user.id // Только автор может удалять
+      authorId: req.user.id
     });
 
     if (!note) {
@@ -1145,26 +1533,44 @@ router.delete('/:groupId/notes/:noteId',
   })
 );
 
-// Получение публичных групп
+/**
+ * @swagger
+ * /groups/public/all:
+ *   get:
+ *     summary: Получить список публичных групп
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *       - in: query
+ *         name: subjectId
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Список публичных групп
+ */
 router.get('/public/all',
   auth,
   [
-    query('page')
-      .optional()
-      .isInt({ min: 1 }).withMessage('Номер страницы должен быть положительным числом'),
-    
-    query('limit')
-      .optional()
-      .isInt({ min: 1, max: 50 }).withMessage('Лимит должен быть от 1 до 50'),
-    
-    query('subjectId')
-      .optional()
-      .isMongoId().withMessage('Некорректный ID предмета'),
-    
-    query('search')
-      .optional()
-      .trim()
-      .isLength({ min: 2 }).withMessage('Поисковый запрос должен быть не менее 2 символов')
+    query('page').optional().isInt({ min: 1 }),
+    query('limit').optional().isInt({ min: 1, max: 50 }),
+    query('subjectId').optional().isMongoId(),
+    query('search').optional().trim().isLength({ min: 2 })
   ],
   catchAsync(async (req, res) => {
     const { 

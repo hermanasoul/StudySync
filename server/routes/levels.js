@@ -9,88 +9,169 @@ const { catchAsync } = require('../middleware/errorHandler');
 
 const router = express.Router();
 
-// Получение всех уровней
+/**
+ * @swagger
+ * tags:
+ *   name: Levels
+ *   description: Система уровней и опыта
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     UserLevel:
+ *       type: object
+ *       properties:
+ *         level:
+ *           type: number
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *         requiredPoints:
+ *           type: number
+ *         icon:
+ *           type: string
+ *         color:
+ *           type: string
+ *         unlocks:
+ *           type: object
+ *         isActive:
+ *           type: boolean
+ *     LevelProgress:
+ *       type: object
+ *       properties:
+ *         level:
+ *           type: number
+ *         experiencePoints:
+ *           type: number
+ *         totalAchievementPoints:
+ *           type: number
+ *         currentLevel:
+ *           $ref: '#/components/schemas/UserLevel'
+ *         nextLevel:
+ *           $ref: '#/components/schemas/UserLevel'
+ *         progressPercentage:
+ *           type: number
+ *         pointsToNextLevel:
+ *           type: number
+ *         rank:
+ *           type: number
+ *         percentile:
+ *           type: number
+ */
+
+/**
+ * @swagger
+ * /levels:
+ *   get:
+ *     summary: Получить список всех уровней
+ *     tags: [Levels]
+ *     responses:
+ *       200:
+ *         description: Список уровней
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 count:
+ *                   type: integer
+ *                 levels:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/UserLevel'
+ */
 router.get('/',
   catchAsync(async (req, res) => {
     const levels = await UserLevel.find({ isActive: true })
       .sort({ level: 1 })
       .select('-__v -isActive');
-    
-    res.json({
-      success: true,
-      count: levels.length,
-      levels
-    });
+    res.json({ success: true, count: levels.length, levels });
   })
 );
 
-// Получение уровня по номеру
+/**
+ * @swagger
+ * /levels/{level}:
+ *   get:
+ *     summary: Получить информацию о конкретном уровне
+ *     tags: [Levels]
+ *     parameters:
+ *       - in: path
+ *         name: level
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Номер уровня
+ *     responses:
+ *       200:
+ *         description: Информация об уровне
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 level:
+ *                   $ref: '#/components/schemas/UserLevel'
+ */
 router.get('/:level',
   catchAsync(async (req, res) => {
     const level = await UserLevel.findOne({ 
       level: req.params.level,
       isActive: true 
     }).select('-__v -isActive');
-    
-    if (!level) {
-      return res.status(404).json({
-        success: false,
-        error: 'Уровень не найден'
-      });
-    }
-    
-    res.json({
-      success: true,
-      level
-    });
+    if (!level) return res.status(404).json({ success: false, error: 'Уровень не найден' });
+    res.json({ success: true, level });
   })
 );
 
-// Получение прогресса текущего пользователя
+/**
+ * @swagger
+ * /levels/progress/my:
+ *   get:
+ *     summary: Получить прогресс текущего пользователя
+ *     tags: [Levels]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Прогресс пользователя
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 progress:
+ *                   $ref: '#/components/schemas/LevelProgress'
+ */
 router.get('/progress/my',
   auth,
   catchAsync(async (req, res) => {
-    const user = await User.findById(req.user.id)
-      .select('level experiencePoints totalAchievementPoints levelProgress');
-    
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: 'Пользователь не найден'
-      });
-    }
-    
-    // Получаем детали текущего уровня
-    const currentLevel = await UserLevel.findOne({ 
-      level: user.level,
-      isActive: true 
-    }).select('name description icon color unlocks');
-    
-    // Получаем детали следующего уровня
-    const nextLevel = await UserLevel.findOne({ 
-      level: user.level + 1,
-      isActive: true 
-    }).select('name description requiredPoints icon color');
-    
-    // Получаем историю последних повышений уровня
+    const user = await User.findById(req.user.id).select('level experiencePoints totalAchievementPoints levelProgress');
+    if (!user) return res.status(404).json({ success: false, error: 'Пользователь не найден' });
+
+    const currentLevel = await UserLevel.findOne({ level: user.level, isActive: true })
+      .select('name description icon color unlocks');
+    const nextLevel = await UserLevel.findOne({ level: user.level + 1, isActive: true })
+      .select('name description requiredPoints icon color');
+
     const ExperienceHistory = require('../models/ExperienceHistory');
-    const recentLevelUps = await ExperienceHistory.find({
-      userId: user._id,
-      reason: 'level_up'
-    })
-    .sort({ createdAt: -1 })
-    .limit(5)
-    .select('points details createdAt');
-    
-    // Рассчитываем ранг пользователя
-    const usersWithMorePoints = await User.countDocuments({
-      experiencePoints: { $gt: user.experiencePoints }
-    });
-    
+    const recentLevelUps = await ExperienceHistory.find({ userId: user._id, reason: 'level_up' })
+      .sort({ createdAt: -1 }).limit(5).select('points details createdAt');
+
+    const usersWithMorePoints = await User.countDocuments({ experiencePoints: { $gt: user.experiencePoints } });
     const totalUsers = await User.countDocuments();
     const rank = usersWithMorePoints + 1;
     const percentile = totalUsers > 0 ? Math.round((rank / totalUsers) * 100) : 100;
-    
+
     res.json({
       success: true,
       progress: {
@@ -102,96 +183,111 @@ router.get('/progress/my',
         progressPercentage: user.levelProgress.progressPercentage,
         pointsToNextLevel: user.levelProgress.pointsToNextLevel,
         lastLevelUp: user.levelProgress.lastLevelUp,
-        rank,
-        totalUsers,
-        percentile,
+        rank, totalUsers, percentile,
         recentLevelUps
       }
     });
   })
 );
 
-// Получение истории опыта пользователя
+/**
+ * @swagger
+ * /levels/experience/history:
+ *   get:
+ *     summary: Получить историю получения опыта
+ *     tags: [Levels]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *     responses:
+ *       200:
+ *         description: История опыта
+ */
 router.get('/experience/history',
   auth,
   catchAsync(async (req, res) => {
     const { page = 1, limit = 20 } = req.query;
     const skip = (page - 1) * limit;
-    
     const ExperienceHistory = require('../models/ExperienceHistory');
-    
     const [history, total] = await Promise.all([
-      ExperienceHistory.find({ userId: req.user.id })
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(parseInt(limit))
-        .select('-__v'),
+      ExperienceHistory.find({ userId: req.user.id }).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)).select('-__v'),
       ExperienceHistory.countDocuments({ userId: req.user.id })
     ]);
-    
     res.json({
       success: true,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / limit)
-      },
+      pagination: { page: parseInt(page), limit: parseInt(limit), total, pages: Math.ceil(total / limit) },
       history
     });
   })
 );
 
-// Получение лидерборда по уровням
+/**
+ * @swagger
+ * /levels/leaderboard/top:
+ *   get:
+ *     summary: Получить топ пользователей по уровню/опыту
+ *     tags: [Levels]
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [level, experience]
+ *           default: level
+ *     responses:
+ *       200:
+ *         description: Лидерборд
+ */
 router.get('/leaderboard/top',
   catchAsync(async (req, res) => {
     const { limit = 10, sortBy = 'level' } = req.query;
-    
     const sortField = sortBy === 'experience' ? 'experiencePoints' : 'level';
-    
     const leaderboard = await User.find()
       .sort({ [sortField]: -1, experiencePoints: -1, createdAt: 1 })
       .limit(parseInt(limit))
       .select('name email level experiencePoints totalAchievementPoints createdAt');
-    
-    // Добавляем ранг
-    const leaderboardWithRank = leaderboard.map((user, index) => ({
-      rank: index + 1,
-      ...user.toObject()
-    }));
-    
-    res.json({
-      success: true,
-      leaderboard: leaderboardWithRank
-    });
+    const leaderboardWithRank = leaderboard.map((user, index) => ({ rank: index + 1, ...user.toObject() }));
+    res.json({ success: true, leaderboard: leaderboardWithRank });
   })
 );
 
-// Получение позиции текущего пользователя в лидерборде
+/**
+ * @swagger
+ * /levels/leaderboard/my-position:
+ *   get:
+ *     summary: Получить позицию текущего пользователя в лидерборде
+ *     tags: [Levels]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Позиция пользователя
+ */
 router.get('/leaderboard/my-position',
   auth,
   catchAsync(async (req, res) => {
-    const user = await User.findById(req.user.id)
-      .select('level experiencePoints');
-    
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: 'Пользователь не найден'
-      });
-    }
-    
-    // Количество пользователей с более высоким уровнем/опытом
-    const usersAboveByLevel = await User.countDocuments({
-      level: { $gt: user.level }
-    });
-    
-    const usersAboveByExperience = await User.countDocuments({
-      experiencePoints: { $gt: user.experiencePoints }
-    });
-    
+    const user = await User.findById(req.user.id).select('level experiencePoints');
+    if (!user) return res.status(404).json({ success: false, error: 'Пользователь не найден' });
+
+    const usersAboveByLevel = await User.countDocuments({ level: { $gt: user.level } });
+    const usersAboveByExperience = await User.countDocuments({ experiencePoints: { $gt: user.experiencePoints } });
     const totalUsers = await User.countDocuments();
-    
+
     res.json({
       success: true,
       position: {
@@ -209,46 +305,37 @@ router.get('/leaderboard/my-position',
   })
 );
 
-// Получение статистики по уровням
+/**
+ * @swagger
+ * /levels/stats/overview:
+ *   get:
+ *     summary: Получить общую статистику по уровням
+ *     tags: [Levels]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Статистика
+ */
 router.get('/stats/overview',
   auth,
   catchAsync(async (req, res) => {
-    // Общая статистика по уровням
     const totalUsers = await User.countDocuments();
-    const averageLevel = await User.aggregate([
-      { $group: { _id: null, avgLevel: { $avg: '$level' } } }
-    ]);
-    
-    const averageExperience = await User.aggregate([
-      { $group: { _id: null, avgExperience: { $avg: '$experiencePoints' } } }
-    ]);
-    
-    // Распределение по уровням
-    const levelDistribution = await User.aggregate([
-      { $group: { _id: '$level', count: { $sum: 1 } } },
-      { $sort: { _id: 1 } },
-      { $limit: 10 }
-    ]);
-    
-    // Самый высокий уровень
-    const topLevelUser = await User.findOne()
-      .sort({ level: -1, experiencePoints: -1 })
-      .select('name level experiencePoints');
-    
-    // Самый опытный пользователь
-    const topExperienceUser = await User.findOne()
-      .sort({ experiencePoints: -1, level: -1 })
-      .select('name level experiencePoints');
-    
+    const avgLevel = await User.aggregate([{ $group: { _id: null, avg: { $avg: '$level' } } }]);
+    const avgExp = await User.aggregate([{ $group: { _id: null, avg: { $avg: '$experiencePoints' } } }]);
+    const distribution = await User.aggregate([{ $group: { _id: '$level', count: { $sum: 1 } } }, { $sort: { _id: 1 } }, { $limit: 10 }]);
+    const topLevelUser = await User.findOne().sort({ level: -1, experiencePoints: -1 }).select('name level experiencePoints');
+    const topExpUser = await User.findOne().sort({ experiencePoints: -1, level: -1 }).select('name level experiencePoints');
+
     res.json({
       success: true,
       stats: {
         totalUsers,
-        averageLevel: averageLevel[0]?.avgLevel || 0,
-        averageExperience: averageExperience[0]?.avgExperience || 0,
-        levelDistribution,
+        averageLevel: avgLevel[0]?.avg || 0,
+        averageExperience: avgExp[0]?.avg || 0,
+        levelDistribution: distribution,
         topLevelUser: topLevelUser || null,
-        topExperienceUser: topExperienceUser || null
+        topExperienceUser: topExpUser || null
       }
     });
   })

@@ -12,26 +12,100 @@ const { AppError, catchAsync } = require('../middleware/errorHandler');
 
 const router = express.Router();
 
-// Получение всех уведомлений пользователя
+/**
+ * @swagger
+ * tags:
+ *   name: Notifications
+ *   description: Управление уведомлениями пользователя
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Notification:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         userId:
+ *           type: string
+ *         type:
+ *           type: string
+ *           enum: [group_invitation, group_join, flashcard_created, note_created, study_reminder, achievement, system]
+ *         title:
+ *           type: string
+ *         message:
+ *           type: string
+ *         data:
+ *           type: object
+ *         isRead:
+ *           type: boolean
+ *         isArchived:
+ *           type: boolean
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ */
+
+/**
+ * @swagger
+ * /notifications:
+ *   get:
+ *     summary: Получить все уведомления пользователя
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [group_invitation, group_join, flashcard_created, note_created, study_reminder, achievement, system, all]
+ *       - in: query
+ *         name: read
+ *         schema:
+ *           type: string
+ *           enum: [true, false, all]
+ *     responses:
+ *       200:
+ *         description: Список уведомлений
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 pagination:
+ *                   type: object
+ *                 count:
+ *                   type: integer
+ *                 notifications:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Notification'
+ */
 router.get('/',
   auth,
   [
-    query('page')
-      .optional()
-      .isInt({ min: 1 }).withMessage('Номер страницы должен быть положительным числом'),
-    
-    query('limit')
-      .optional()
-      .isInt({ min: 1, max: 100 }).withMessage('Лимит должен быть от 1 до 100'),
-    
-    query('type')
-      .optional()
-      .isIn(['group_invitation', 'group_join', 'flashcard_created', 'note_created', 'study_reminder', 'achievement', 'system', 'all'])
-      .withMessage('Недопустимый тип уведомления'),
-    
-    query('read')
-      .optional()
-      .isIn(['true', 'false', 'all']).withMessage('Параметр read должен быть: true, false или all')
+    query('page').optional().isInt({ min: 1 }),
+    query('limit').optional().isInt({ min: 1, max: 100 }),
+    query('type').optional().isIn(['group_invitation', 'group_join', 'flashcard_created', 'note_created', 'study_reminder', 'achievement', 'system', 'all']),
+    query('read').optional().isIn(['true', 'false', 'all'])
   ],
   catchAsync(async (req, res) => {
     const { 
@@ -88,7 +162,27 @@ router.get('/',
   })
 );
 
-// Получение количества непрочитанных уведомлений
+/**
+ * @swagger
+ * /notifications/unread-count:
+ *   get:
+ *     summary: Получить количество непрочитанных уведомлений
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Количество непрочитанных уведомлений
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 count:
+ *                   type: integer
+ */
 router.get('/unread-count',
   auth,
   catchAsync(async (req, res) => {
@@ -101,7 +195,36 @@ router.get('/unread-count',
   })
 );
 
-// Получение конкретного уведомления
+/**
+ * @swagger
+ * /notifications/{id}:
+ *   get:
+ *     summary: Получить уведомление по ID
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID уведомления
+ *     responses:
+ *       200:
+ *         description: Информация об уведомлении
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 notification:
+ *                   $ref: '#/components/schemas/Notification'
+ *       404:
+ *         description: Уведомление не найдено
+ */
 router.get('/:id',
   auth,
   idValidation,
@@ -131,7 +254,41 @@ router.get('/:id',
   })
 );
 
-// Пометить уведомление как прочитанное
+/**
+ * @swagger
+ * /notifications/{id}/read:
+ *   put:
+ *     summary: Пометить уведомление как прочитанное
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID уведомления
+ *     responses:
+ *       200:
+ *         description: Уведомление помечено как прочитанное
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 notification:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     isRead:
+ *                       type: boolean
+ */
 router.put('/:id/read',
   auth,
   idValidation,
@@ -158,7 +315,29 @@ router.put('/:id/read',
   })
 );
 
-// Пометить все уведомления как прочитанные
+/**
+ * @swagger
+ * /notifications/read-all:
+ *   put:
+ *     summary: Пометить все уведомления как прочитанные
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Все уведомления помечены как прочитанные
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 updatedCount:
+ *                   type: integer
+ */
 router.put('/read-all',
   auth,
   catchAsync(async (req, res) => {
@@ -172,7 +351,41 @@ router.put('/read-all',
   })
 );
 
-// Архивация уведомления
+/**
+ * @swagger
+ * /notifications/{id}/archive:
+ *   put:
+ *     summary: Архивировать уведомление
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID уведомления
+ *     responses:
+ *       200:
+ *         description: Уведомление перемещено в архив
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 notification:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     isArchived:
+ *                       type: boolean
+ */
 router.put('/:id/archive',
   auth,
   idValidation,
@@ -199,7 +412,34 @@ router.put('/:id/archive',
   })
 );
 
-// Удаление уведомления
+/**
+ * @swagger
+ * /notifications/{id}:
+ *   delete:
+ *     summary: Удалить уведомление
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID уведомления
+ *     responses:
+ *       200:
+ *         description: Уведомление удалено
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
 router.delete('/:id',
   auth,
   idValidation,
@@ -220,7 +460,29 @@ router.delete('/:id',
   })
 );
 
-// Массовое удаление прочитанных уведомлений
+/**
+ * @swagger
+ * /notifications/cleanup/read:
+ *   delete:
+ *     summary: Удалить старые прочитанные уведомления
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Уведомления удалены
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 deletedCount:
+ *                   type: integer
+ */
 router.delete('/cleanup/read',
   auth,
   catchAsync(async (req, res) => {
@@ -228,7 +490,7 @@ router.delete('/cleanup/read',
       userId: req.user.id,
       isRead: true,
       isArchived: false,
-      createdAt: { $lt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } // Старше 7 дней
+      createdAt: { $lt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
     });
 
     res.json({
@@ -239,23 +501,55 @@ router.delete('/cleanup/read',
   })
 );
 
-// Создание тестового уведомления (для разработки)
+/**
+ * @swagger
+ * /notifications/test:
+ *   post:
+ *     summary: Создать тестовое уведомление (для разработки)
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - type
+ *               - title
+ *               - message
+ *             properties:
+ *               type:
+ *                 type: string
+ *                 enum: [group_invitation, group_join, flashcard_created, note_created, study_reminder, achievement, system]
+ *               title:
+ *                 type: string
+ *               message:
+ *                 type: string
+ *               data:
+ *                 type: object
+ *     responses:
+ *       201:
+ *         description: Тестовое уведомление создано
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 notification:
+ *                   $ref: '#/components/schemas/Notification'
+ */
 router.post('/test',
   auth,
   [
-    body('type')
-      .isIn(['group_invitation', 'group_join', 'flashcard_created', 'note_created', 'study_reminder', 'achievement', 'system'])
-      .withMessage('Недопустимый тип уведомления'),
-    
-    body('title')
-      .trim()
-      .notEmpty().withMessage('Заголовок обязателен')
-      .isLength({ max: 200 }).withMessage('Заголовок не должен превышать 200 символов'),
-    
-    body('message')
-      .trim()
-      .notEmpty().withMessage('Сообщение обязательно')
-      .isLength({ max: 500 }).withMessage('Сообщение не должно превышать 500 символов')
+    body('type').isIn(['group_invitation', 'group_join', 'flashcard_created', 'note_created', 'study_reminder', 'achievement', 'system']),
+    body('title').trim().notEmpty().isLength({ max: 200 }),
+    body('message').trim().notEmpty().isLength({ max: 500 })
   ],
   catchAsync(async (req, res) => {
     const { type, title, message, data } = req.body;
@@ -269,7 +563,6 @@ router.post('/test',
       isRead: false
     });
 
-    // Отправляем WebSocket уведомление
     const ws = req.app.get('ws');
     if (ws && ws.isUserOnline(req.user.id)) {
       ws.emitToUser(req.user.id, 'notification', {
@@ -298,7 +591,36 @@ router.post('/test',
   })
 );
 
-// Статистика по уведомлениям
+/**
+ * @swagger
+ * /notifications/stats/overview:
+ *   get:
+ *     summary: Получить статистику по уведомлениям
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Статистика уведомлений
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 stats:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: number
+ *                     unread:
+ *                       type: number
+ *                     read:
+ *                       type: number
+ *                     byType:
+ *                       type: array
+ */
 router.get('/stats/overview',
   auth,
   catchAsync(async (req, res) => {
@@ -313,15 +635,8 @@ router.get('/stats/overview',
         $group: {
           _id: null,
           total: { $sum: 1 },
-          unread: {
-            $sum: { $cond: [{ $eq: ["$isRead", false] }, 1, 0] }
-          },
-          byType: {
-            $push: {
-              type: "$type",
-              isRead: "$isRead"
-            }
-          }
+          unread: { $sum: { $cond: [{ $eq: ["$isRead", false] }, 1, 0] } },
+          byType: { $push: { type: "$type", isRead: "$isRead" } }
         }
       },
       {
