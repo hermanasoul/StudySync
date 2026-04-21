@@ -2,7 +2,7 @@
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-require('dotenv').config({ path: '../.env' }); // путь к .env в корне сервера
+require('dotenv').config({ path: '../.env' });
 
 // Модели
 const User = require('../models/User');
@@ -37,11 +37,9 @@ async function seed() {
     await mongoose.connect(MONGODB_URI);
     console.log('✅ Подключено к MongoDB');
 
-    // Очистка существующих демо-данных (по email)
     const demoEmails = demoUsers.map(u => u.email);
     await User.deleteMany({ email: { $in: demoEmails } });
     await Subject.deleteMany({ name: { $in: subjectsData.map(s => s.name) } });
-    // Удаляем связанные данные, чтобы не было мусора
     await Group.deleteMany({});
     await Flashcard.deleteMany({});
     await Note.deleteMany({});
@@ -69,15 +67,15 @@ async function seed() {
 
     const [anna, max, elena, dmitry, olga] = createdUsers;
 
-    // 2. Дружеские связи
-    await Friendship.sendFriendRequest(anna._id, max._id);
-    await Friendship.acceptFriendRequest(anna._id, max._id);
-    await Friendship.sendFriendRequest(anna._id, elena._id);
-    await Friendship.acceptFriendRequest(anna._id, elena._id);
-    await Friendship.sendFriendRequest(max._id, dmitry._id);
-    await Friendship.acceptFriendRequest(max._id, dmitry._id);
-    await Friendship.sendFriendRequest(dmitry._id, olga._id);
-    await Friendship.acceptFriendRequest(dmitry._id, olga._id);
+    // 2. Дружеские связи (исправлено: сохраняем запрос, потом принимаем)
+    const request1 = await Friendship.sendFriendRequest(anna._id, max._id);
+    await Friendship.acceptFriendRequest(request1._id, max._id);
+    const request2 = await Friendship.sendFriendRequest(anna._id, elena._id);
+    await Friendship.acceptFriendRequest(request2._id, elena._id);
+    const request3 = await Friendship.sendFriendRequest(max._id, dmitry._id);
+    await Friendship.acceptFriendRequest(request3._id, dmitry._id);
+    const request4 = await Friendship.sendFriendRequest(dmitry._id, olga._id);
+    await Friendship.acceptFriendRequest(request4._id, olga._id);
     console.log('🤝 Дружеские связи созданы');
 
     // 3. Предметы
