@@ -1,9 +1,10 @@
 // server/routes/notes.js
+
 const { body, param, query } = require('express-validator');
 const express = require('express');
 const mongoose = require('mongoose');
 const Note = require('../models/Note');
-const { auth, checkOwnership } = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 const { 
   noteValidation, 
   idValidation, 
@@ -14,55 +15,27 @@ const { AppError, catchAsync } = require('../middleware/errorHandler');
 
 const router = express.Router();
 
-// Получение всех заметок по предмету
+// Получение заметок по предмету
 router.get('/subject/:subjectId',
   auth,
   subjectIdValidation,
   [
-    query('page')
-      .optional()
-      .isInt({ min: 1 }).withMessage('Номер страницы должен быть положительным числом'),
-    
-    query('limit')
-      .optional()
-      .isInt({ min: 1, max: 100 }).withMessage('Лимит должен быть от 1 до 100'),
-    
-    query('sort')
-      .optional()
-      .isIn(['createdAt', 'updatedAt', 'title']).withMessage('Недопустимое поле сортировки'),
-    
-    query('order')
-      .optional()
-      .isIn(['asc', 'desc']).withMessage('Порядок сортировки должен быть asc или desc'),
-    
-    query('tag')
-      .optional()
-      .trim()
-      .isLength({ max: 20 }).withMessage('Тег не должен превышать 20 символов')
+    query('page').optional().isInt({ min: 1 }),
+    query('limit').optional().isInt({ min: 1, max: 100 }),
+    query('sort').optional().isIn(['createdAt', 'updatedAt', 'title']),
+    query('order').optional().isIn(['asc', 'desc']),
+    query('tag').optional().trim().isLength({ max: 20 })
   ],
   catchAsync(async (req, res) => {
-    const { 
-      page = 1, 
-      limit = 20, 
-      sort = 'updatedAt', 
-      order = 'desc',
-      tag 
-    } = req.query;
-    
+    const { page = 1, limit = 20, sort = 'updatedAt', order = 'desc', tag } = req.query;
     const skip = (page - 1) * limit;
     const sortOrder = order === 'asc' ? 1 : -1;
 
     const filter = {
       subjectId: req.params.subjectId,
-      $or: [
-        { authorId: req.user.id },
-        { isPublic: true }
-      ]
+      $or: [{ authorId: req.user.id }, { isPublic: true }]
     };
-
-    if (tag) {
-      filter.tags = { $in: [tag] };
-    }
+    if (tag) filter.tags = { $in: [tag] };
 
     const [notes, total] = await Promise.all([
       Note.find(filter)
@@ -76,29 +49,17 @@ router.get('/subject/:subjectId',
 
     res.json({
       success: true,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / limit)
-      },
+      pagination: { page: parseInt(page), limit: parseInt(limit), total, pages: Math.ceil(total / limit) },
       count: notes.length,
       notes: notes.map(note => ({
-        id: note._id,
+        _id: note._id,
         title: note.title,
         content: note.content,
         tags: note.tags,
-        authorId: {
-          id: note.authorId._id,
-          name: note.authorId.name,
-          email: note.authorId.email,
-          avatarUrl: note.authorId.avatarUrl
-        },
+        authorId: { _id: note.authorId._id, name: note.authorId.name, email: note.authorId.email, avatarUrl: note.authorId.avatarUrl },
         subjectId: note.subjectId,
         groupId: note.groupId,
         isPublic: note.isPublic,
-        fileUrl: note.fileUrl,
-        fileName: note.fileName,
         createdAt: note.createdAt,
         updatedAt: note.updatedAt
       }))
@@ -106,18 +67,10 @@ router.get('/subject/:subjectId',
   })
 );
 
-// Получение всех заметок пользователя
+// Получение заметок текущего пользователя
 router.get('/my',
   auth,
-  [
-    query('page')
-      .optional()
-      .isInt({ min: 1 }).withMessage('Номер страницы должен быть положительным числом'),
-    
-    query('limit')
-      .optional()
-      .isInt({ min: 1, max: 50 }).withMessage('Лимит должен быть от 1 до 50')
-  ],
+  [query('page').optional().isInt({ min: 1 }), query('limit').optional().isInt({ min: 1, max: 50 })],
   catchAsync(async (req, res) => {
     const { page = 1, limit = 20 } = req.query;
     const skip = (page - 1) * limit;
@@ -134,23 +87,14 @@ router.get('/my',
 
     res.json({
       success: true,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / limit)
-      },
+      pagination: { page: parseInt(page), limit: parseInt(limit), total, pages: Math.ceil(total / limit) },
       count: notes.length,
       notes: notes.map(note => ({
-        id: note._id,
+        _id: note._id,
         title: note.title,
         content: note.content,
         tags: note.tags,
-        subjectId: note.subjectId ? {
-          id: note.subjectId._id,
-          name: note.subjectId.name,
-          color: note.subjectId.color
-        } : null,
+        subjectId: note.subjectId ? { _id: note.subjectId._id, name: note.subjectId.name, color: note.subjectId.color } : null,
         groupId: note.groupId,
         isPublic: note.isPublic,
         createdAt: note.createdAt,
@@ -164,28 +108,21 @@ router.get('/my',
 router.post('/',
   auth,
   sanitizeInput,
-  noteValidation,
   catchAsync(async (req, res) => {
     const { title, content, subjectId, tags, isPublic, groupId } = req.body;
 
-    // Проверяем существование предмета
+    if (!title || !title.trim()) throw new AppError('Заголовок обязателен', 400);
+    if (!content || !content.trim()) throw new AppError('Содержание обязательно', 400);
+    if (!subjectId) throw new AppError('ID предмета обязателен', 400);
+
     const Subject = require('../models/Subject');
     const subject = await Subject.findById(subjectId);
-    if (!subject) {
-      throw new AppError('Предмет не найден', 404);
-    }
+    if (!subject) throw new AppError('Предмет не найден', 404);
 
-    // Если заметка для группы, проверяем доступ
     if (groupId) {
       const Group = require('../models/Group');
-      const group = await Group.findOne({
-        _id: groupId,
-        'members.user': req.user.id
-      });
-
-      if (!group) {
-        throw new AppError('Группа не найдена или доступ запрещен', 404);
-      }
+      const group = await Group.findOne({ _id: groupId, 'members.user': req.user.id });
+      if (!group) throw new AppError('Группа не найдена или доступ запрещен', 404);
     }
 
     const note = await Note.create({
@@ -206,16 +143,11 @@ router.post('/',
       success: true,
       message: 'Заметка успешно создана',
       note: {
-        id: populatedNote._id,
+        _id: populatedNote._id,
         title: populatedNote.title,
         content: populatedNote.content,
         tags: populatedNote.tags,
-        authorId: {
-          id: populatedNote.authorId._id,
-          name: populatedNote.authorId.name,
-          email: populatedNote.authorId.email,
-          avatarUrl: populatedNote.authorId.avatarUrl
-        },
+        authorId: { _id: populatedNote.authorId._id, name: populatedNote.authorId.name, email: populatedNote.authorId.email, avatarUrl: populatedNote.authorId.avatarUrl },
         subjectId: populatedNote.subjectId,
         groupId: populatedNote.groupId,
         isPublic: populatedNote.isPublic,
@@ -226,48 +158,28 @@ router.post('/',
   })
 );
 
-// Получение конкретной заметки
+// Получение заметки по ID
 router.get('/:id',
   auth,
   idValidation,
   catchAsync(async (req, res) => {
-    const note = await Note.findOne({
-      _id: req.params.id,
-      $or: [
-        { authorId: req.user.id },
-        { isPublic: true }
-      ]
-    })
-    .populate('authorId', 'name email avatarUrl')
-    .populate('subjectId', 'name color')
-    .select('-__v');
-
-    if (!note) {
-      throw new AppError('Заметка не найдена или доступ запрещен', 404);
-    }
+    const note = await Note.findOne({ _id: req.params.id, $or: [{ authorId: req.user.id }, { isPublic: true }] })
+      .populate('authorId', 'name email avatarUrl')
+      .populate('subjectId', 'name color')
+      .select('-__v');
+    if (!note) throw new AppError('Заметка не найдена или доступ запрещен', 404);
 
     res.json({
       success: true,
       note: {
-        id: note._id,
+        _id: note._id,
         title: note.title,
         content: note.content,
         tags: note.tags,
-        authorId: {
-          id: note.authorId._id,
-          name: note.authorId.name,
-          email: note.authorId.email,
-          avatarUrl: note.authorId.avatarUrl
-        },
-        subjectId: note.subjectId ? {
-          id: note.subjectId._id,
-          name: note.subjectId.name,
-          color: note.subjectId.color
-        } : null,
+        authorId: { _id: note.authorId._id, name: note.authorId.name, email: note.authorId.email, avatarUrl: note.authorId.avatarUrl },
+        subjectId: note.subjectId ? { _id: note.subjectId._id, name: note.subjectId.name, color: note.subjectId.color } : null,
         groupId: note.groupId,
         isPublic: note.isPublic,
-        fileUrl: note.fileUrl,
-        fileName: note.fileName,
         createdAt: note.createdAt,
         updatedAt: note.updatedAt
       }
@@ -281,47 +193,22 @@ router.put('/:id',
   idValidation,
   sanitizeInput,
   [
-    body('title')
-      .optional()
-      .trim()
-      .isLength({ min: 3, max: 100 }).withMessage('Заголовок должен быть от 3 до 100 символов'),
-    
-    body('content')
-      .optional()
-      .trim()
-      .isLength({ min: 10, max: 10000 }).withMessage('Содержание должно быть от 10 до 10000 символов'),
-    
-    body('tags')
-      .optional()
-      .isArray().withMessage('Теги должны быть массивом'),
-    
-    body('tags.*')
-      .optional()
-      .isString().withMessage('Тег должен быть строкой')
-      .trim()
-      .isLength({ max: 20 }).withMessage('Тег не должен превышать 20 символов'),
-    
-    body('isPublic')
-      .optional()
-      .isBoolean().withMessage('Публичность должна быть true или false')
+    body('title').optional().trim().isLength({ min: 3, max: 100 }).withMessage('Заголовок должен быть от 3 до 100 символов'),
+    body('content').optional().trim().isLength({ min: 10, max: 10000 }).withMessage('Содержание должно быть от 10 до 10000 символов'),
+    body('tags').optional().isArray().withMessage('Теги должны быть массивом'),
+    body('tags.*').optional().isString().trim().isLength({ max: 20 }).withMessage('Тег не должен превышать 20 символов'),
+    body('isPublic').optional().isBoolean().withMessage('Публичность должна быть true или false')
   ],
   catchAsync(async (req, res) => {
     const { title, content, tags, isPublic } = req.body;
 
-    const note = await Note.findOne({
-      _id: req.params.id,
-      authorId: req.user.id
-    });
-
-    if (!note) {
-      throw new AppError('Заметка не найдена или доступ запрещен', 404);
-    }
+    const note = await Note.findById(req.params.id);
+    if (!note) throw new AppError('Заметка не найдена', 404);
 
     if (title !== undefined) note.title = title.trim();
     if (content !== undefined) note.content = content.trim();
     if (tags !== undefined) note.tags = tags;
     if (isPublic !== undefined) note.isPublic = isPublic;
-
     await note.save();
 
     const updatedNote = await Note.findById(note._id)
@@ -333,21 +220,12 @@ router.put('/:id',
       success: true,
       message: 'Заметка успешно обновлена',
       note: {
-        id: updatedNote._id,
+        _id: updatedNote._id,
         title: updatedNote.title,
         content: updatedNote.content,
         tags: updatedNote.tags,
-        authorId: {
-          id: updatedNote.authorId._id,
-          name: updatedNote.authorId.name,
-          email: updatedNote.authorId.email,
-          avatarUrl: updatedNote.authorId.avatarUrl
-        },
-        subjectId: updatedNote.subjectId ? {
-          id: updatedNote.subjectId._id,
-          name: updatedNote.subjectId.name,
-          color: updatedNote.subjectId.color
-        } : null,
+        authorId: { _id: updatedNote.authorId._id, name: updatedNote.authorId.name, email: updatedNote.authorId.email, avatarUrl: updatedNote.authorId.avatarUrl },
+        subjectId: updatedNote.subjectId ? { _id: updatedNote.subjectId._id, name: updatedNote.subjectId.name, color: updatedNote.subjectId.color } : null,
         groupId: updatedNote.groupId,
         isPublic: updatedNote.isPublic,
         updatedAt: updatedNote.updatedAt
@@ -361,21 +239,9 @@ router.delete('/:id',
   auth,
   idValidation,
   catchAsync(async (req, res) => {
-    const note = await Note.findOneAndDelete({
-      _id: req.params.id,
-      authorId: req.user.id
-    });
-
-    if (!note) {
-      throw new AppError('Заметка не найдена или доступ запрещен', 404);
-    }
-
-    // TODO: Удалить связанные файлы, если они есть
-
-    res.json({
-      success: true,
-      message: 'Заметка успешно удалена'
-    });
+    const note = await Note.findByIdAndDelete(req.params.id);
+    if (!note) throw new AppError('Заметка не найдена', 404);
+    res.json({ success: true, message: 'Заметка успешно удалена' });
   })
 );
 
@@ -383,42 +249,26 @@ router.delete('/:id',
 router.get('/search',
   auth,
   [
-    query('q')
-      .trim()
-      .notEmpty().withMessage('Поисковый запрос обязателен')
-      .isLength({ min: 2 }).withMessage('Поисковый запрос должен быть не менее 2 символов'),
-    
-    query('subjectId')
-      .optional()
-      .isMongoId().withMessage('Некорректный ID предмета'),
-    
-    query('page')
-      .optional()
-      .isInt({ min: 1 }).withMessage('Номер страницы должен быть положительным числом'),
-    
-    query('limit')
-      .optional()
-      .isInt({ min: 1, max: 50 }).withMessage('Лимит должен быть от 1 до 50')
+    query('q').trim().notEmpty().isLength({ min: 2 }),
+    query('subjectId').optional().isMongoId(),
+    query('page').optional().isInt({ min: 1 }),
+    query('limit').optional().isInt({ min: 1, max: 50 })
   ],
   catchAsync(async (req, res) => {
     const { q: searchQuery, subjectId, page = 1, limit = 20 } = req.query;
     const skip = (page - 1) * limit;
 
     const filter = {
-      $or: [
-        { authorId: req.user.id },
-        { isPublic: true }
-      ],
-      $or: [
-        { title: { $regex: searchQuery, $options: 'i' } },
-        { content: { $regex: searchQuery, $options: 'i' } },
-        { tags: { $in: [new RegExp(searchQuery, 'i')] } }
-      ]
+      $or: [{ authorId: req.user.id }, { isPublic: true }],
+      $and: [{
+        $or: [
+          { title: { $regex: searchQuery, $options: 'i' } },
+          { content: { $regex: searchQuery, $options: 'i' } },
+          { tags: { $in: [new RegExp(searchQuery, 'i')] } }
+        ]
+      }]
     };
-
-    if (subjectId) {
-      filter.subjectId = subjectId;
-    }
+    if (subjectId) filter.subjectId = subjectId;
 
     const [notes, total] = await Promise.all([
       Note.find(filter)
@@ -433,43 +283,27 @@ router.get('/search',
 
     res.json({
       success: true,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / limit)
-      },
+      pagination: { page: parseInt(page), limit: parseInt(limit), total, pages: Math.ceil(total / limit) },
       count: notes.length,
       notes: notes.map(note => ({
-        id: note._id,
+        _id: note._id,
         title: note.title,
         content: note.content.substring(0, 200) + (note.content.length > 200 ? '...' : ''),
         tags: note.tags,
-        authorId: {
-          id: note.authorId._id,
-          name: note.authorId.name
-        },
-        subjectId: note.subjectId ? {
-          id: note.subjectId._id,
-          name: note.subjectId.name,
-          color: note.subjectId.color
-        } : null,
+        authorId: { _id: note.authorId._id, name: note.authorId.name },
+        subjectId: note.subjectId ? { _id: note.subjectId._id, name: note.subjectId.name, color: note.subjectId.color } : null,
         updatedAt: note.updatedAt
       }))
     });
   })
 );
 
-// Получение статистики по заметкам
+// Статистика заметок
 router.get('/stats/overview',
   auth,
   catchAsync(async (req, res) => {
     const stats = await Note.aggregate([
-      {
-        $match: {
-          authorId: new mongoose.Types.ObjectId(req.user.id)
-        }
-      },
+      { $match: { authorId: new mongoose.Types.ObjectId(req.user.id) } },
       {
         $group: {
           _id: null,
@@ -484,29 +318,15 @@ router.get('/stats/overview',
         $project: {
           totalNotes: 1,
           totalSubjects: { $size: "$totalSubjects" },
-          totalTags: { $size: { $reduce: {
-            input: "$totalTags",
-            initialValue: [],
-            in: { $setUnion: ["$$value", "$$this"] }
-          }}},
+          totalTags: { $size: { $reduce: { input: "$totalTags", initialValue: [], in: { $setUnion: ["$$value", "$$this"] } } } },
           lastCreated: 1,
           lastUpdated: 1
         }
       }
     ]);
 
-    const result = stats[0] || {
-      totalNotes: 0,
-      totalSubjects: 0,
-      totalTags: 0,
-      lastCreated: null,
-      lastUpdated: null
-    };
-
-    res.json({
-      success: true,
-      stats: result
-    });
+    const result = stats[0] || { totalNotes: 0, totalSubjects: 0, totalTags: 0, lastCreated: null, lastUpdated: null };
+    res.json({ success: true, stats: result });
   })
 );
 

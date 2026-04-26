@@ -9,7 +9,7 @@ import './SubjectsPage.css';
 import '../App.css';
 
 interface Subject {
-  _id: string;
+  id: string;  // теперь используем id (как отдаёт сервер)
   name: string;
   description: string;
   color: string;
@@ -31,9 +31,8 @@ const SubjectsPage: React.FC = () => {
       setError('');
       const response = await subjectsAPI.getAll();
       if (response.data.success) {
-        // Сервер возвращает _id, используем его как есть
         const serverSubjects = response.data.subjects.map((s: any) => ({
-          _id: s._id,
+          id: s.id || s._id,   // id в приоритете, так как сервер даёт id
           name: s.name,
           description: s.description || '',
           color: s.color || 'blue',
@@ -101,7 +100,7 @@ const SubjectsPage: React.FC = () => {
           ) : (
             <div className="subjects-grid">
               {subjects.map((subject) => (
-                <div key={subject._id} className="subject-card">
+                <div key={subject.id} className="subject-card">
                   <div className="subject-header">
                     <h3 className={`subject-title ${subject.color}`}>{subject.name}</h3>
                     <span className="progress-percent">{subject.progress}%</span>
@@ -109,11 +108,10 @@ const SubjectsPage: React.FC = () => {
                   <p className="subject-description">{subject.description}</p>
                   <ProgressBar progress={subject.progress} color={subject.color} />
                   <div className="subject-actions button-group">
-                    {/* ВАЖНО: используем реальный _id */}
-                    <Button variant="outline" href={`/subjects/${subject._id}`}>
+                    <Button variant="outline" href={`/subjects/${subject.id}`}>
                       Заметки
                     </Button>
-                    <Button variant="primary" href={`/subjects/${subject._id}/flashcards`}>
+                    <Button variant="primary" href={`/subjects/${subject.id}/flashcards`}>
                       Карточки
                     </Button>
                   </div>

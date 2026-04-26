@@ -50,57 +50,36 @@ const DashboardPage: React.FC = () => {
   const loadDashboardData = useCallback(async () => {
     try {
       setLoading(true);
-      
-      // Загружаем предметы
       const response = await fetchWithAuth('/subjects');
       const data = await response.json();
       if (data.success) {
-        // Преобразуем _id серверного ответа в id для фронта
-        const mappedSubjects: Subject[] = data.subjects.map((s: any) => ({
-          id: s._id,
-          name: s.name,
-          description: s.description,
-          color: s.color || 'blue',
-          progress: s.progress || 0
-        }));
-        setSubjects(mappedSubjects);
+        const rawSubjects = data.subjects || [];
+        console.log('Первый предмет (raw):', rawSubjects[0]); // <-- ключевой лог
+        const mapped = rawSubjects.map((s: any) => {
+          // Приоритет _id, иначе id, иначе пустая строка (чтобы избежать undefined)
+          const id = s._id || s.id || '';
+          return {
+            id,
+            name: s.name || 'Без названия',
+            description: s.description || '',
+            color: s.color || 'blue',
+            progress: s.progress || 0,
+          };
+        });
+        console.log('ID предметов:', mapped.map((s: any) => s.id));
+        setSubjects(mapped);
       } else {
-        // Fallback (демо)
-        const mockSubjects: Subject[] = [
-          { id: '1', name: 'Биология', description: 'Изучение живых организмов', color: 'green', progress: 75 },
-          { id: '2', name: 'Химия', description: 'Изучение веществ и их свойств', color: 'blue', progress: 40 },
-          { id: '3', name: 'Математика', description: 'Изучение чисел и вычислений', color: 'purple', progress: 20 }
-        ];
-        setSubjects(mockSubjects);
+        setSubjects([]);
       }
-      
-      // Загружаем прогресс уровня
+
       const levelResponse = await levelsAPI.getMyProgress();
       if (levelResponse.data.success) {
         setLevelProgress(levelResponse.data.progress);
       }
-      
-      // Загружаем последние достижения
-      await loadRecentAchievements();
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
-      // Fallback
-      const mockSubjects: Subject[] = [
-        { id: '1', name: 'Биология', description: 'Изучение живых организмов', color: 'green', progress: 75 },
-        { id: '2', name: 'Химия', description: 'Изучение веществ и их свойств', color: 'blue', progress: 40 },
-        { id: '3', name: 'Математика', description: 'Изучение чисел и вычислений', color: 'purple', progress: 20 }
-      ];
-      setSubjects(mockSubjects);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
-  const loadRecentAchievements = async () => {
-    try {
-      const response = await achievementsAPI.getMy();
-      if (response.data.success) {
-        const unlocked = response.data.achievements
+      const achievResponse = await achievementsAPI.getMy();
+      if (achievResponse.data.success) {
+        const unlocked = achievResponse.data.achievements
           .filter((ua: any) => ua.isUnlocked)
           .sort((a: any, b: any) => new Date(b.unlockedAt).getTime() - new Date(a.unlockedAt).getTime())
           .slice(0, 4)
@@ -110,16 +89,18 @@ const DashboardPage: React.FC = () => {
               name: ua.achievement.name,
               icon: ua.achievement.icon,
               difficultyColor: ua.achievement.difficultyColor,
-              points: ua.achievement.points
+              points: ua.achievement.points,
             },
-            unlockedAt: ua.unlockedAt
+            unlockedAt: ua.unlockedAt,
           }));
         setRecentAchievements(unlocked);
       }
     } catch (error) {
-      console.error('Error loading recent achievements:', error);
+      console.error('Error loading dashboard data:', error);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadDashboardData();
@@ -172,24 +153,14 @@ const DashboardPage: React.FC = () => {
               <div className="achievements-preview">
                 {recentAchievements.map((ua) => (
                   <div key={ua.id} className="achievement-preview-item">
-                    <div 
-                      className="achievement-preview-icon"
-                      style={{ 
-                        backgroundColor: ua.achievement.difficultyColor + '20',
-                        borderColor: ua.achievement.difficultyColor 
-                      }}
-                    >
+                    <div className="achievement-preview-icon" style={{ backgroundColor: ua.achievement.difficultyColor + '20', borderColor: ua.achievement.difficultyColor }}>
                       {ua.achievement.icon}
                     </div>
                     <div className="achievement-preview-info">
                       <h4>{ua.achievement.name}</h4>
-                      <p className="achievement-date">
-                        {new Date(ua.unlockedAt).toLocaleDateString('ru-RU')}
-                      </p>
+                      <p className="achievement-date">{new Date(ua.unlockedAt).toLocaleDateString('ru-RU')}</p>
                     </div>
-                    <div className="achievement-points-badge">
-                      +{ua.achievement.points}
-                    </div>
+                    <div className="achievement-points-badge">+{ua.achievement.points}</div>
                   </div>
                 ))}
               </div>
@@ -198,10 +169,7 @@ const DashboardPage: React.FC = () => {
 
           <div className="subjects-grid">
             {subjects.map((subject, index) => (
-              <div 
-                key={subject.id} 
-                className={`subject-card animate-fade-in-up delay-${index * 100}`}
-              >
+              <div key={subject.id} className={`subject-card animate-fade-in-up delay-${index * 100}`}>
                 <div className="subject-header">
                   <h3 className={`subject-title ${subject.color}`}>{subject.name}</h3>
                   <span className="progress-percent">{subject.progress}%</span>
@@ -219,6 +187,7 @@ const DashboardPage: React.FC = () => {
               </div>
             ))}
           </div>
+
           <div className="quick-stats">
             <h2>Быстрая статистика</h2>
             <div className="stats-grid">
@@ -233,7 +202,7 @@ const DashboardPage: React.FC = () => {
                 <div className="stat-icon">🎯</div>
                 <div className="stat-info">
                   <div className="stat-number">
-                    {Math.round(subjects.reduce((acc, subject) => acc + subject.progress, 0) / subjects.length || 0)}%
+                    {Math.round(subjects.reduce((acc, s) => acc + s.progress, 0) / subjects.length || 0)}%
                   </div>
                   <div className="stat-label">Общий прогресс</div>
                 </div>
@@ -241,9 +210,7 @@ const DashboardPage: React.FC = () => {
               <div className="stat-card">
                 <div className="stat-icon">⭐</div>
                 <div className="stat-info">
-                  <div className="stat-number">
-                    {levelProgress ? levelProgress.level : '1'}
-                  </div>
+                  <div className="stat-number">{levelProgress ? levelProgress.level : '1'}</div>
                   <div className="stat-label">Уровень</div>
                 </div>
               </div>

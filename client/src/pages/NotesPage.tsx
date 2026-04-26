@@ -30,7 +30,7 @@ const NotesPage: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const validSubjectId = subjectId && subjectId !== 'undefined' ? subjectId : null;
 
@@ -46,89 +46,118 @@ const NotesPage: React.FC = () => {
     });
   };
 
+  // Надёжное извлечение текста ошибки
+  const extractError = (data: any): string => {
+    if (typeof data === 'string') return data;
+    if (data?.error) {
+      if (typeof data.error === 'string') return data.error;
+      if (data.error.message) return data.error.message;
+      if (data.error.errors) {
+        return Object.values(data.error.errors).map((e: any) => e.message).join('; ');
+      }
+      return JSON.stringify(data.error);
+    }
+    if (data?.message) return data.message;
+    return 'Неизвестная ошибка';
+  };
+
   const loadNotes = useCallback(async () => {
     if (!validSubjectId) return;
     try {
       setLoading(true);
-      setError('');
+      setError(null);
       const response = await fetchWithAuth(`/notes/subject/${validSubjectId}`);
       const data = await response.json();
       if (data.success) {
-        setNotes(data.notes);
+        const normalized = (data.notes || []).map((n: any) => ({
+          ...n,
+          _id: n._id || n.id,
+        }));
+        setNotes(normalized);
       } else {
-        setError(data.error || 'Failed to load notes');
+        setError(extractError(data));
       }
-    } catch (error) {
-      console.error('Error loading notes:', error);
-      setError('Network error while loading notes');
+    } catch (err) {
+      console.error('Error loading notes:', err);
+      setError('Сетевая ошибка при загрузке заметок');
     } finally {
       setLoading(false);
     }
   }, [validSubjectId]);
 
   useEffect(() => {
-    if (validSubjectId) {
-      loadNotes();
-    } else {
-      setLoading(false);
-    }
+    if (validSubjectId) loadNotes();
+    else setLoading(false);
   }, [validSubjectId, loadNotes]);
 
+  // Создание с мгновенным добавлением
   const handleCreateNote = async (noteData: { title: string; content: string; tags: string[] }) => {
     if (!validSubjectId) return;
     try {
+      setError(null);
       const response = await fetchWithAuth('/notes', {
         method: 'POST',
         body: JSON.stringify({ ...noteData, subjectId: validSubjectId }),
       });
       const data = await response.json();
-      if (data.success) {
+      if (data.success && data.note) {
+        const newNote: Note = {
+          ...data.note,
+          _id: data.note._id,
+        };
+        setNotes(prev => [newNote, ...prev]);
         setShowCreateModal(false);
-        await loadNotes();
       } else {
-        setError(data.error || 'Failed to create note');
+        setError(extractError(data));
       }
-    } catch (error) {
-      console.error('Error creating note:', error);
-      setError('Network error while creating note');
+    } catch (err) {
+      console.error('Error creating note:', err);
+      setError('Сетевая ошибка при создании заметки');
     }
   };
 
+  // Редактирование с ожиданием ответа и локальным обновлением
   const handleEditNote = async (noteId: string, noteData: { title: string; content: string; tags: string[] }) => {
     try {
-      const response = await fetchWithAuth(`/notes/${noteId}`, {
+      setError(null);
+      if (!noteId || noteId === 'undefined') { setError('Некорректный ID заметки'); return; }
+      const cleanId = String(noteId).trim();
+      const response = await fetchWithAuth(`/notes/${cleanId}`, {
         method: 'PUT',
         body: JSON.stringify(noteData),
       });
       const data = await response.json();
-      if (data.success) {
+      if (data.success && data.note) {
+        setNotes(prev => prev.map(n => n._id === data.note._id ? { ...data.note, _id: data.note._id } : n));
         setShowEditModal(false);
         setSelectedNote(null);
-        await loadNotes();
       } else {
-        setError(data.error || 'Failed to update note');
+        setError(extractError(data));
       }
-    } catch (error) {
-      console.error('Error updating note:', error);
-      setError('Network error while updating note');
+    } catch (err) {
+      console.error('Error updating note:', err);
+      setError('Сетевая ошибка при обновлении заметки');
     }
   };
 
+  // Удаление с ожиданием ответа и локальным удалением
   const handleDeleteNote = async () => {
-    if (!selectedNote) return;
+    if (!selectedNote?._id) { setError('Не выбрана заметка для удаления'); return; }
     try {
-      const response = await fetchWithAuth(`/notes/${selectedNote._id}`, { method: 'DELETE' });
+      setError(null);
+      const cleanId = String(selectedNote._id).trim();
+      const response = await fetchWithAuth(`/notes/${cleanId}`, { method: 'DELETE' });
       const data = await response.json();
       if (data.success) {
+        setNotes(prev => prev.filter(n => n._id !== selectedNote._id));
         setShowDeleteModal(false);
         setSelectedNote(null);
-        await loadNotes();
       } else {
-        setError(data.error || 'Failed to delete note');
+        setError(extractError(data));
       }
-    } catch (error) {
-      console.error('Error deleting note:', error);
-      setError('Network error while deleting note');
+    } catch (err) {
+      console.error('Error deleting note:', err);
+      setError('Сетевая ошибка при удалении заметки');
     }
   };
 
@@ -144,10 +173,7 @@ const NotesPage: React.FC = () => {
         <Header />
         <div className="page-with-header">
           <div className="error-message">
-            Предмет не указан.
-            <Link to="/subjects" className="btn btn-primary" style={{ marginLeft: '1rem' }}>
-              Выбрать предмет
-            </Link>
+            Предмет не указан. <Link to="/subjects" className="btn btn-primary" style={{ marginLeft: '1rem' }}>Выбрать предмет</Link>
           </div>
         </div>
       </div>
@@ -174,7 +200,7 @@ const NotesPage: React.FC = () => {
         {error && (
           <div className="error-message">
             {error}
-            <button onClick={() => setError('')} className="error-close">×</button>
+            <button onClick={() => setError(null)} className="error-close">×</button>
           </div>
         )}
         <div className="notes-actions">
@@ -188,9 +214,7 @@ const NotesPage: React.FC = () => {
               <div className="empty-icon">📝</div>
               <h3>Заметок пока нет</h3>
               <p>Создайте свою первую заметку для этого предмета</p>
-              <button className="btn-primary" onClick={() => setShowCreateModal(true)}>
-                Создать заметку
-              </button>
+              <button className="btn-primary" onClick={() => setShowCreateModal(true)}>Создать заметку</button>
             </div>
           ) : (
             <div className="notes-grid">
@@ -224,6 +248,7 @@ const NotesPage: React.FC = () => {
           <Link to="/dashboard" className="btn-outline">← Назад к предметам</Link>
         </div>
       </div>
+
       {showCreateModal && (
         <CreateNoteModal
           isOpen={showCreateModal}
@@ -238,6 +263,7 @@ const NotesPage: React.FC = () => {
           onClose={() => { setShowEditModal(false); setSelectedNote(null); }}
           onSubmit={handleEditNote}
           note={selectedNote}
+          onDelete={handleDeleteNote}
         />
       )}
       {selectedNote && showDeleteModal && (

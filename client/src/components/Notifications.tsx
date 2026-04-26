@@ -1,6 +1,6 @@
 // client/src/components/Notifications.tsx
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { notificationsAPI } from '../services/api';
 import webSocketService from '../services/websocket';
@@ -24,17 +24,19 @@ const Notifications: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const notificationRef = useRef<HTMLDivElement>(null);
 
+  const requestNotificationStats = useCallback(() => {
+    if (webSocketService.isConnected) {
+      webSocketService.send('get-notification-stats');
+    }
+  }, []);
+
   useEffect(() => {
     loadNotifications();
     loadUnreadCount();
-    
-    // Подписываемся на WebSocket события
+
     const handleNewNotification = (notification: Notification) => {
-      console.log('New notification received:', notification);
       setNotifications(prev => [notification, ...prev]);
       setUnreadCount(prev => prev + 1);
-      
-      // Показываем всплывающее уведомление (опционально)
       if (Notification.permission === 'granted') {
         new Notification(notification.title, {
           body: notification.message,
@@ -42,44 +44,44 @@ const Notifications: React.FC = () => {
         });
       }
     };
-    
+
     const handleNotificationStats = (data: { unreadCount: number }) => {
-      console.log('Notification stats updated:', data.unreadCount);
       setUnreadCount(data.unreadCount);
+    };
+
+    const handleWsConnected = () => {
+      requestNotificationStats();
     };
 
     webSocketService.on('notification', handleNewNotification);
     webSocketService.on('notification-stats', handleNotificationStats);
-    
-    // Запрашиваем разрешение на уведомления
+    webSocketService.on('connected', handleWsConnected);
+
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
-    
-    // Запрашиваем статистику уведомлений через WebSocket
-    webSocketService.send('get-notification-stats');
-    
-    // Закрытие при клике вне компонента
+
+    requestNotificationStats();
+
     const handleClickOutside = (event: MouseEvent) => {
       if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
-    
     document.addEventListener('mousedown', handleClickOutside);
-    
-    // Обновляем уведомления каждые 30 секунд
+
     const interval = setInterval(() => {
       loadUnreadCount();
     }, 30000);
-    
+
     return () => {
       webSocketService.off('notification', handleNewNotification);
       webSocketService.off('notification-stats', handleNotificationStats);
+      webSocketService.off('connected', handleWsConnected);
       document.removeEventListener('mousedown', handleClickOutside);
       clearInterval(interval);
     };
-  }, []);
+  }, [requestNotificationStats]);
 
   const loadNotifications = async () => {
     try {
@@ -109,11 +111,7 @@ const Notifications: React.FC = () => {
   const handleMarkAsRead = async (id: string) => {
     try {
       await notificationsAPI.markAsRead(id);
-      setNotifications(prev =>
-        prev.map(notif =>
-          notif.id === id ? { ...notif, isRead: true } : notif
-        )
-      );
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -123,9 +121,7 @@ const Notifications: React.FC = () => {
   const handleMarkAllAsRead = async () => {
     try {
       await notificationsAPI.markAllAsRead();
-      setNotifications(prev =>
-        prev.map(notif => ({ ...notif, isRead: true }))
-      );
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
       setIsOpen(false);
     } catch (error) {
@@ -137,8 +133,6 @@ const Notifications: React.FC = () => {
     if (!notification.isRead) {
       handleMarkAsRead(notification.id);
     }
-    
-    // Навигация в зависимости от типа уведомления
     if (notification.data?.groupId) {
       window.location.href = `/groups/${notification.data.groupId}`;
     }
@@ -146,53 +140,33 @@ const Notifications: React.FC = () => {
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'group_invitation':
-        return '👥';
-      case 'group_join':
-        return '🎉';
-      case 'flashcard_created':
-        return '📚';
-      case 'note_created':
-        return '📝';
-      case 'study_reminder':
-        return '⏰';
-      case 'achievement':
-        return '🏆';
-      case 'system':
-        return '⚙️';
-      default:
-        return '🔔';
+      case 'group_invitation': return '👥';
+      case 'group_join': return '🎉';
+      case 'flashcard_created': return '📚';
+      case 'note_created': return '📝';
+      case 'study_reminder': return '⏰';
+      case 'achievement': return '🏆';
+      case 'system': return '⚙️';
+      default: return '🔔';
     }
   };
 
   const getNotificationClass = (type: string) => {
     switch (type) {
-      case 'group_invitation':
-        return 'notification-group-invitation';
-      case 'group_join':
-        return 'notification-group-join';
-      case 'flashcard_created':
-        return 'notification-flashcard-created';
-      case 'note_created':
-        return 'notification-note-created';
-      case 'study_reminder':
-        return 'notification-study-reminder';
-      case 'achievement':
-        return 'notification-achievement';
-      case 'system':
-        return 'notification-system';
-      default:
-        return '';
+      case 'group_invitation': return 'notification-group-invitation';
+      case 'group_join': return 'notification-group-join';
+      case 'flashcard_created': return 'notification-flashcard-created';
+      case 'note_created': return 'notification-note-created';
+      case 'study_reminder': return 'notification-study-reminder';
+      case 'achievement': return 'notification-achievement';
+      case 'system': return 'notification-system';
+      default: return '';
     }
   };
 
   return (
     <div className="notifications-container" ref={notificationRef}>
-      <button
-        className="notifications-button"
-        onClick={() => setIsOpen(!isOpen)}
-        title="Уведомления"
-      >
+      <button className="notifications-button" onClick={() => setIsOpen(!isOpen)} title="Уведомления">
         <span className="notification-icon">🔔</span>
         {unreadCount > 0 && (
           <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
@@ -205,17 +179,11 @@ const Notifications: React.FC = () => {
             <h3>Уведомления</h3>
             <div className="notifications-actions">
               {unreadCount > 0 && (
-                <button
-                  className="mark-all-read-btn"
-                  onClick={handleMarkAllAsRead}
-                  title="Отметить все как прочитанные"
-                >
+                <button className="mark-all-read-btn" onClick={handleMarkAllAsRead}>
                   Отметить все как прочитанные
                 </button>
               )}
-              <Link to="/notifications" onClick={() => setIsOpen(false)}>
-                Все уведомления
-              </Link>
+              <Link to="/notifications" onClick={() => setIsOpen(false)}>Все уведомления</Link>
             </div>
           </div>
 
@@ -237,30 +205,17 @@ const Notifications: React.FC = () => {
                   className={`notification-item ${getNotificationClass(notification.type)} ${!notification.isRead ? 'unread' : ''}`}
                   onClick={() => handleNotificationClick(notification)}
                 >
-                  <div className="notification-icon">
-                    {getNotificationIcon(notification.type)}
-                  </div>
+                  <div className="notification-icon">{getNotificationIcon(notification.type)}</div>
                   <div className="notification-content">
                     <div className="notification-header">
                       <h4 className="notification-title">{notification.title}</h4>
-                      {!notification.isRead && (
-                        <span className="unread-dot"></span>
-                      )}
+                      {!notification.isRead && <span className="unread-dot"></span>}
                     </div>
                     <p className="notification-message">{notification.message}</p>
                     <div className="notification-footer">
                       <span className="notification-time">{notification.formattedDate}</span>
                       {!notification.isRead && (
-                        <button
-                          className="mark-read-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleMarkAsRead(notification.id);
-                          }}
-                          title="Отметить как прочитанное"
-                        >
-                          ✓
-                        </button>
+                        <button className="mark-read-btn" onClick={(e) => { e.stopPropagation(); handleMarkAsRead(notification.id); }}>✓</button>
                       )}
                     </div>
                   </div>
@@ -270,12 +225,8 @@ const Notifications: React.FC = () => {
           </div>
 
           <div className="notifications-footer">
-            <Link to="/notifications" onClick={() => setIsOpen(false)}>
-              Показать все уведомления
-            </Link>
-            <Link to="/notifications?settings" onClick={() => setIsOpen(false)}>
-              Настройки уведомлений
-            </Link>
+            <Link to="/notifications" onClick={() => setIsOpen(false)}>Показать все уведомления</Link>
+            <Link to="/notifications?settings" onClick={() => setIsOpen(false)}>Настройки уведомлений</Link>
           </div>
         </div>
       )}

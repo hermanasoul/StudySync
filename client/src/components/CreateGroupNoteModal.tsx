@@ -23,11 +23,17 @@ const CreateGroupNoteModal: React.FC<CreateGroupNoteModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  if (!isOpen) return null;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!title.trim()) {
       setError('Введите заголовок заметки');
+      return;
+    }
+    if (!groupId || groupId === 'undefined') {
+      setError('Не указан идентификатор группы');
       return;
     }
 
@@ -43,14 +49,13 @@ const CreateGroupNoteModal: React.FC<CreateGroupNoteModalProps> = ({
 
       const response = await groupsAPI.createNote(groupId, noteData);
       
-      // Отправляем WebSocket событие
       if (response.data.note) {
         webSocketService.sendNoteCreated(groupId, {
-          id: response.data.note._id,
+          id: response.data.note._id || response.data.note.id,
           title: response.data.note.title,
           content: response.data.note.content,
           authorId: {
-            id: response.data.note.authorId?._id || '',
+            id: response.data.note.authorId?._id || response.data.note.authorId?.id || '',
             name: response.data.note.authorId?.name || 'Пользователь'
           }
         });
@@ -62,7 +67,8 @@ const CreateGroupNoteModal: React.FC<CreateGroupNoteModalProps> = ({
       onClose();
     } catch (err: any) {
       console.error('Create note error:', err);
-      setError(err.response?.data?.error || 'Ошибка при создании заметки');
+      const msg = err.response?.data?.error || err.response?.data?.errors?.[0]?.msg || 'Ошибка при создании заметки';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -74,8 +80,6 @@ const CreateGroupNoteModal: React.FC<CreateGroupNoteModalProps> = ({
     setError('');
     onClose();
   };
-
-  if (!isOpen) return null;
 
   return (
     <div className="modal-overlay" onClick={handleClose}>
@@ -116,19 +120,10 @@ const CreateGroupNoteModal: React.FC<CreateGroupNoteModalProps> = ({
           </div>
 
           <div className="form-actions">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="btn-outline"
-              disabled={loading}
-            >
+            <button type="button" onClick={handleClose} className="btn-outline" disabled={loading}>
               Отмена
             </button>
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={loading || !title.trim()}
-            >
+            <button type="submit" className="btn-primary" disabled={loading || !title.trim()}>
               {loading ? 'Создание...' : 'Создать заметку'}
             </button>
           </div>

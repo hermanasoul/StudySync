@@ -17,23 +17,9 @@ interface Group {
   _id: string;
   name: string;
   description: string;
-  subjectId: {
-    _id: string;
-    name: string;
-    color?: string;
-  } | null;
-  createdBy: {
-    _id: string;
-    name: string;
-  };
-  members: Array<{
-    user: {
-      _id: string;
-      name: string;
-      email: string;
-    };
-    role: string;
-  }>;
+  subjectId: { id?: string; _id?: string; name: string; color?: string } | null;
+  createdBy: { _id: string; name: string };
+  members: Array<{ user: { _id: string; name: string; email: string }; role: string }>;
   isPublic: boolean;
   inviteCode: string;
 }
@@ -43,10 +29,7 @@ interface Note {
   title: string;
   content: string;
   createdAt: string;
-  authorId: {
-    _id: string;
-    name: string;
-  };
+  authorId: { _id: string; name: string };
   groupId: string;
 }
 
@@ -75,7 +58,6 @@ const GroupPage: React.FC = () => {
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [members, setMembers] = useState<Group['members']>([]);
 
-  // Проверка валидности groupId
   const isValidGroupId = groupId && groupId !== 'undefined';
 
   const loadGroup = useCallback(async () => {
@@ -84,11 +66,27 @@ const GroupPage: React.FC = () => {
       setLoading(true);
       const response = await groupsAPI.getById(groupId!);
       if (response.data.success) {
-        setGroup(response.data.group);
-        setMembers(response.data.group.members || []);
+        const g = response.data.group;
+        const normalizedGroup: Group = {
+          _id: g._id || g.id,
+          name: g.name,
+          description: g.description,
+          subjectId: g.subjectId ? {
+            id: g.subjectId.id || g.subjectId._id,
+            _id: g.subjectId._id || g.subjectId.id,
+            name: g.subjectId.name,
+            color: g.subjectId.color
+          } : null,
+          createdBy: g.createdBy,
+          members: g.members || [],
+          isPublic: g.isPublic,
+          inviteCode: g.inviteCode
+        };
+        setGroup(normalizedGroup);
+        setMembers(normalizedGroup.members);
       }
     } catch (error) {
-      console.error('Error loading group:', error);
+      console.error(error);
       setGroup(null);
     } finally {
       setLoading(false);
@@ -96,46 +94,41 @@ const GroupPage: React.FC = () => {
   }, [groupId, isValidGroupId]);
 
   const loadMembers = useCallback(async () => {
-    if (!isValidGroupId) return;
+    if (!isValidGroupId || !group?._id) return;
     try {
-      const response = await groupsAPI.getMembers(groupId!);
-      if (response.data.success) {
-        setMembers(response.data.members);
-      }
-    } catch (error) {
-      console.error('Error loading members:', error);
-    }
-  }, [groupId, isValidGroupId]);
+      const response = await groupsAPI.getMembers(group._id);
+      if (response.data.success) setMembers(response.data.members);
+    } catch (error) { console.error(error); }
+  }, [isValidGroupId, group]);
 
   const loadNotes = useCallback(async () => {
-    if (!isValidGroupId) return;
+    if (!isValidGroupId || !group?._id) return;
     try {
-      const response = await groupsAPI.getNotes(groupId!);
+      const response = await groupsAPI.getNotes(group._id);
       if (response.data.success) {
-        setNotes(response.data.notes || []);
-      } else {
-        setNotes([]);
-      }
-    } catch (error) {
-      console.error('Error loading notes:', error);
-      setNotes([]);
-    }
-  }, [groupId, isValidGroupId]);
+        const normalizedNotes = (response.data.notes || []).map((n: any) => ({
+          ...n,
+          _id: n._id || n.id,
+          authorId: n.authorId ? { ...n.authorId, _id: n.authorId._id || n.authorId.id } : n.authorId
+        }));
+        setNotes(normalizedNotes);
+      } else setNotes([]);
+    } catch (error) { console.error(error); setNotes([]); }
+  }, [isValidGroupId, group]);
 
   const loadFlashcards = useCallback(async () => {
-    if (!isValidGroupId) return;
+    if (!isValidGroupId || !group?._id) return;
     try {
-      const response = await groupsAPI.getFlashcards(groupId!);
+      const response = await groupsAPI.getFlashcards(group._id);
       if (response.data.success) {
-        setFlashcards(response.data.flashcards || []);
-      } else {
-        setFlashcards([]);
-      }
-    } catch (error) {
-      console.error('Error loading flashcards:', error);
-      setFlashcards([]);
-    }
-  }, [groupId, isValidGroupId]);
+        const normalizedCards = (response.data.flashcards || []).map((f: any) => ({
+          ...f,
+          _id: f._id || f.id,
+        }));
+        setFlashcards(normalizedCards);
+      } else setFlashcards([]);
+    } catch (error) { console.error(error); setFlashcards([]); }
+  }, [isValidGroupId, group]);
 
   useEffect(() => {
     if (isValidGroupId) {
@@ -143,312 +136,156 @@ const GroupPage: React.FC = () => {
       loadNotes();
       loadMembers();
       loadFlashcards();
-    } else {
-      setLoading(false);
-    }
-  }, [isValidGroupId, loadGroup, loadMembers, loadNotes, loadFlashcards]);
+    } else setLoading(false);
+  }, [isValidGroupId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // WebSocket эффекты
   useEffect(() => {
-    if (group && isValidGroupId) {
-      webSocketService.joinGroup(group._id);
-      
-      const handleNewFlashcard = (data: any) => {
-        if (data.groupId === group._id) {
-          loadFlashcards();
-        }
-      };
-      
-      const handleNewNote = (data: any) => {
-        if (data.groupId === group._id) {
-          loadNotes();
-        }
-      };
-      
-      const handleMemberJoined = (data: any) => {
-        if (data.groupId === group._id) {
-          loadMembers();
-        }
-      };
-      
-      webSocketService.on('new-flashcard', handleNewFlashcard);
-      webSocketService.on('new-note', handleNewNote);
-      webSocketService.on('member-joined', handleMemberJoined);
-      
-      webSocketService.sendUserActivity(null, group._id, 'viewing_group');
-      
-      return () => {
-        webSocketService.leaveGroup(group._id);
-        webSocketService.off('new-flashcard', handleNewFlashcard);
-        webSocketService.off('new-note', handleNewNote);
-        webSocketService.off('member-joined', handleMemberJoined);
-      };
-    }
-  }, [group, isValidGroupId, loadFlashcards, loadNotes, loadMembers]);
+    if (!group?._id) return;
+    webSocketService.joinGroup(group._id);
+    const handleNewFlashcard = (data: any) => { if (data.groupId === group._id) loadFlashcards(); };
+    const handleNewNote = (data: any) => { if (data.groupId === group._id) loadNotes(); };
+    const handleMemberJoined = (data: any) => { if (data.groupId === group._id) loadMembers(); };
+    webSocketService.on('new-flashcard', handleNewFlashcard);
+    webSocketService.on('new-note', handleNewNote);
+    webSocketService.on('member-joined', handleMemberJoined);
+    return () => {
+      webSocketService.off('new-flashcard', handleNewFlashcard);
+      webSocketService.off('new-note', handleNewNote);
+      webSocketService.off('member-joined', handleMemberJoined);
+      webSocketService.leaveGroup(group._id);
+    };
+  }, [group, loadFlashcards, loadNotes, loadMembers]);
 
   const getRoleBadge = (role: string) => {
-    const roleConfig = {
-      owner: { label: 'Владелец', color: '#ef4444' },
-      admin: { label: 'Админ', color: '#f59e0b' },
-      member: { label: 'Участник', color: '#3b82f6' }
-    };
-    const config = roleConfig[role as keyof typeof roleConfig] || roleConfig.member;
-    return (
-      <span className="role-badge" style={{ backgroundColor: config.color }}>
-        {config.label}
-      </span>
-    );
+    const cfg = { owner: { label: 'Владелец', color: '#ef4444' }, admin: { label: 'Админ', color: '#f59e0b' }, member: { label: 'Участник', color: '#3b82f6' } };
+    const c = cfg[role as keyof typeof cfg] || cfg.member;
+    return <span className="role-badge" style={{ backgroundColor: c.color }}>{c.label}</span>;
   };
 
   const handleDeleteGroup = async () => {
     if (!group) return;
-    try {
-      await groupsAPI.delete(group._id);
-      alert('Группа удалена!');
-      navigate('/groups');
-    } catch (error) {
-      console.error('Error deleting group:', error);
-      alert('Ошибка удаления группы');
-    }
-  };
-
-  const handleEditNote = (note: Note) => {
-    setEditingNote(note);
-    setShowEditNoteModal(true);
+    try { await groupsAPI.delete(group._id); alert('Группа удалена!'); navigate('/groups'); }
+    catch (error) { alert('Ошибка удаления группы'); }
   };
 
   const isUserOwner = () => {
-    const currentUser = JSON.parse(localStorage.getItem('studysync_user') || '{}');
-    return group?.createdBy._id === currentUser.id;
+    const u = JSON.parse(localStorage.getItem('studysync_user') || '{}');
+    return group?.createdBy._id === u.id;
   };
 
-  if (loading) {
-    return (
-      <div className="group-page">
-        <Header />
-        <div className="page-with-header">
-          <div className="loading">Загрузка группы...</div>
-        </div>
-      </div>
-    );
-  }
+  const handleNoteCreated = (newNoteData?: any) => {
+    if (newNoteData && (newNoteData.id || newNoteData._id)) {
+      const newNote: Note = {
+        _id: newNoteData._id || newNoteData.id,
+        title: newNoteData.title || '',
+        content: newNoteData.content || '',
+        createdAt: new Date().toISOString(),
+        authorId: newNoteData.authorId || { _id: '', name: 'Вы' },
+        groupId: group?._id || ''
+      };
+      setNotes(prev => [newNote, ...prev]);
+    } else {
+      loadNotes();
+    }
+  };
 
-  if (!group) {
-    return (
-      <div className="group-page">
-        <Header />
-        <div className="page-with-header">
-          <div className="error-page">
-            <h2>Группа не найдена</h2>
-            <p>Группа не существует или у вас нет доступа.</p>
-            <Button variant="primary" href="/groups">Вернуться к группам</Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleFlashcardCreated = (newCardData?: any) => {
+    if (newCardData && (newCardData.id || newCardData._id)) {
+      const newCard: Flashcard = {
+        _id: newCardData._id || newCardData.id,
+        question: newCardData.question || '',
+        answer: newCardData.answer || '',
+        hint: newCardData.hint,
+        subjectId: newCardData.subjectId || '',
+        groupId: group?._id || ''
+      };
+      setFlashcards(prev => [newCard, ...prev]);
+    } else {
+      loadFlashcards();
+    }
+  };
+
+  if (loading) return <div className="group-page"><Header /><div className="page-with-header"><div className="loading">Загрузка группы...</div></div></div>;
+  if (!group) return <div className="group-page"><Header /><div className="page-with-header"><div className="error-page"><h2>Группа не найдена</h2><p>Группа не существует или у вас нет доступа.</p><Button variant="primary" href="/groups">Вернуться к группам</Button></div></div></div>;
+
+  const subjectIdUnified = group.subjectId?.id || group.subjectId?._id;
 
   return (
     <div className="group-page">
       <Header />
       <div className="page-with-header">
         <div className="group-container">
-          <div className="breadcrumb">
-            <Link to="/groups">Группы</Link> / <span>{group.name}</span>
-          </div>
+          <div className="breadcrumb"><Link to="/groups">Группы</Link> / <span>{group.name}</span></div>
           <div className="group-header">
             <div className="group-title-section">
               <div className="group-info">
                 <h1>{group.name}</h1>
                 <div className="group-meta">
-                  <span className={`subject-tag ${group.subjectId?.color || 'blue'}`}>
-                    {group.subjectId?.name || 'Без предмета'}
-                  </span>
+                  <span className={`subject-tag ${group.subjectId?.color || 'blue'}`}>{group.subjectId?.name || 'Без предмета'}</span>
                   {group.isPublic && <span className="public-badge">Публичная</span>}
                   <span className="member-count">{members.length} участников</span>
                 </div>
               </div>
               <div className="group-actions-header">
-                <div className="invite-section">
-                  <div className="invite-label">Код приглашения:</div>
-                  <div className="invite-code-display">{group.inviteCode}</div>
-                </div>
-                {isUserOwner() && (
-                  <Button variant="danger" onClick={() => setShowDeleteConfirm(true)}>
-                    Удалить группу
-                  </Button>
-                )}
+                <div className="invite-section"><div className="invite-label">Код приглашения:</div><div className="invite-code-display">{group.inviteCode}</div></div>
+                {isUserOwner() && <Button variant="danger" onClick={() => setShowDeleteConfirm(true)}>Удалить группу</Button>}
               </div>
             </div>
-            {group.description && (
-              <div className="group-description-section">
-                <p className="group-description">{group.description}</p>
-              </div>
-            )}
+            {group.description && <div className="group-description-section"><p className="group-description">{group.description}</p></div>}
           </div>
           <div className="group-content">
             <div className="tabs">
-              <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
-                Обзор
-              </button>
-              <button className={`tab ${activeTab === 'members' ? 'active' : ''}`} onClick={() => setActiveTab('members')}>
-                Участники ({members.length})
-              </button>
-              <button className={`tab ${activeTab === 'flashcards' ? 'active' : ''}`} onClick={() => setActiveTab('flashcards')}>
-                Карточки ({flashcards.length})
-              </button>
-              <button className={`tab ${activeTab === 'notes' ? 'active' : ''}`} onClick={() => setActiveTab('notes')}>
-                Заметки ({notes.length})
-              </button>
+              <button className={`tab ${activeTab==='overview'?'active':''}`} onClick={()=>setActiveTab('overview')}>Обзор</button>
+              <button className={`tab ${activeTab==='members'?'active':''}`} onClick={()=>setActiveTab('members')}>Участники ({members.length})</button>
+              <button className={`tab ${activeTab==='flashcards'?'active':''}`} onClick={()=>setActiveTab('flashcards')}>Карточки ({flashcards.length})</button>
+              <button className={`tab ${activeTab==='notes'?'active':''}`} onClick={()=>setActiveTab('notes')}>Заметки ({notes.length})</button>
             </div>
             <div className="tab-content">
-              {activeTab === 'overview' && (
+              {activeTab==='overview' && (
                 <div className="overview-tab">
                   <div className="stats-grid">
-                    <div className="stat-card">
-                      <div className="stat-icon">👥</div>
-                      <div className="stat-info">
-                        <div className="stat-number">{members.length}</div>
-                        <div className="stat-label">Участников</div>
-                      </div>
-                    </div>
-                    <div className="stat-card">
-                      <div className="stat-icon">📚</div>
-                      <div className="stat-info">
-                        <div className="stat-number">{flashcards.length}</div>
-                        <div className="stat-label">Карточек</div>
-                      </div>
-                    </div>
-                    <div className="stat-card">
-                      <div className="stat-icon">📝</div>
-                      <div className="stat-info">
-                        <div className="stat-number">{notes.length}</div>
-                        <div className="stat-label">Заметок</div>
-                      </div>
-                    </div>
+                    <div className="stat-card"><div className="stat-icon">👥</div><div className="stat-info"><div className="stat-number">{members.length}</div><div className="stat-label">Участников</div></div></div>
+                    <div className="stat-card"><div className="stat-icon">📚</div><div className="stat-info"><div className="stat-number">{flashcards.length}</div><div className="stat-label">Карточек</div></div></div>
+                    <div className="stat-card"><div className="stat-icon">📝</div><div className="stat-info"><div className="stat-number">{notes.length}</div><div className="stat-label">Заметок</div></div></div>
                   </div>
                   <div className="quick-actions">
                     <h3>Быстрые действия</h3>
                     <div className="action-buttons">
-                      <Button variant="primary" onClick={() => setShowCreateFlashcardModal(true)}>
-                        Создать карточку
-                      </Button>
-                      <Button variant="success" onClick={() => setShowInviteModal(true)}>
-                        Пригласить участников
-                      </Button>
-                      {/* Кнопка «Изучать карточки» только если есть предмет */}
-                      {group.subjectId?._id && (
-                        <Button variant="outline" href={`/subjects/${group.subjectId._id}/flashcards`}>
-                          Изучать карточки
-                        </Button>
-                      )}
+                      <Button variant="primary" onClick={()=>setShowCreateFlashcardModal(true)}>Создать карточку</Button>
+                      <Button variant="success" onClick={()=>setShowInviteModal(true)}>Пригласить участников</Button>
+                      {subjectIdUnified && <Button variant="outline" href={`/subjects/${subjectIdUnified}/flashcards`}>Изучать карточки</Button>}
                     </div>
                   </div>
                 </div>
               )}
-              {/* Остальные вкладки остаются без изменений */}
-              {activeTab === 'members' && (
+              {activeTab==='members' && (
                 <div className="members-tab">
                   <h3>Участники группы</h3>
                   <div className="members-list">
-                    {members.map((member, index) => (
-                      <div key={index} className="member-card">
-                        <div className="member-info">
-                          <div className="member-avatar">
-                            {member.user.name?.charAt(0)?.toUpperCase() || 'U'}
-                          </div>
-                          <div className="member-details">
-                            <div className="member-name">{member.user.name}</div>
-                            <div className="member-email">{member.user.email}</div>
-                          </div>
-                        </div>
-                        <div className="member-role">
-                          {getRoleBadge(member.role)}
-                          <span className="join-date">
-                            присоединился {new Date().toLocaleDateString('ru-RU')}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                    {members.map((m,i)=><div key={i} className="member-card"><div className="member-info"><div className="member-avatar">{m.user.name?.charAt(0)?.toUpperCase()||'U'}</div><div className="member-details"><div className="member-name">{m.user.name}</div><div className="member-email">{m.user.email}</div></div></div><div className="member-role">{getRoleBadge(m.role)}<span className="join-date">присоединился {new Date().toLocaleDateString('ru-RU')}</span></div></div>)}
                   </div>
                 </div>
               )}
-              {activeTab === 'flashcards' && (
+              {activeTab==='flashcards' && (
                 <div className="flashcards-tab">
-                  <div className="flashcards-header">
-                    <h3>Карточки группы ({flashcards.length})</h3>
-                    <Button variant="primary" onClick={() => setShowCreateFlashcardModal(true)}>
-                      + Создать карточку
-                    </Button>
-                  </div>
-                  {flashcards.length === 0 ? (
-                    <div className="empty-state">
-                      <div className="empty-icon">📚</div>
-                      <h4>Пока нет карточек</h4>
-                      <p>Создайте первую карточку для совместного изучения</p>
-                      <Button variant="primary" onClick={() => setShowCreateFlashcardModal(true)}>
-                        Создать карточку
-                      </Button>
-                    </div>
+                  <div className="flashcards-header"><h3>Карточки группы ({flashcards.length})</h3><Button variant="primary" onClick={()=>setShowCreateFlashcardModal(true)}>+ Создать карточку</Button></div>
+                  {flashcards.length===0 ? (
+                    <div className="empty-state"><div className="empty-icon">📚</div><h4>Пока нет карточек</h4><p>Создайте первую карточку для совместного изучения</p><Button variant="primary" onClick={()=>setShowCreateFlashcardModal(true)}>Создать карточку</Button></div>
                   ) : (
                     <div className="flashcards-list">
-                      {flashcards.map((flashcard) => (
-                        <div key={flashcard._id} className="flashcard-card">
-                          <div className="flashcard-content">
-                            <div className="flashcard-question">
-                              <h4>{flashcard.question}</h4>
-                              {flashcard.hint && (
-                                <div className="flashcard-hint">💡 {flashcard.hint}</div>
-                              )}
-                            </div>
-                            <div className="flashcard-answer">
-                              <p>{flashcard.answer}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                      {flashcards.map(f=><div key={f._id} className="flashcard-card"><div className="flashcard-content"><div className="flashcard-question"><h4>{f.question}</h4>{f.hint&&<div className="flashcard-hint">💡 {f.hint}</div>}</div><div className="flashcard-answer"><p>{f.answer}</p></div></div></div>)}
                     </div>
                   )}
                 </div>
               )}
-              {activeTab === 'notes' && (
+              {activeTab==='notes' && (
                 <div className="notes-tab">
-                  <div className="notes-header">
-                    <h3>Заметки группы ({notes.length})</h3>
-                    <Button variant="primary" onClick={() => setShowCreateNoteModal(true)}>
-                      + Создать заметку
-                    </Button>
-                  </div>
-                  {notes.length === 0 ? (
-                    <div className="empty-state">
-                      <div className="empty-icon">📝</div>
-                      <h4>Пока нет заметок</h4>
-                      <p>Создайте первую заметку для совместной работы</p>
-                      <Button variant="primary" onClick={() => setShowCreateNoteModal(true)}>
-                        Создать заметку
-                      </Button>
-                    </div>
+                  <div className="notes-header"><h3>Заметки группы ({notes.length})</h3><Button variant="primary" onClick={()=>setShowCreateNoteModal(true)}>+ Создать заметку</Button></div>
+                  {notes.length===0 ? (
+                    <div className="empty-state"><div className="empty-icon">📝</div><h4>Пока нет заметок</h4><p>Создайте первую заметку для совместной работы</p><Button variant="primary" onClick={()=>setShowCreateNoteModal(true)}>Создать заметку</Button></div>
                   ) : (
                     <div className="notes-list">
-                      {notes.map((note) => (
-                        <div key={note._id} className="note-card">
-                          <div className="note-header">
-                            <div className="note-title">{note.title}</div>
-                            <div className="note-actions">
-                              <button className="edit-btn" onClick={() => handleEditNote(note)} title="Редактировать">
-                                ✏️
-                              </button>
-                            </div>
-                          </div>
-                          <div className="note-meta">
-                            <span className="note-author">Автор: {note.authorId.name}</span>
-                            <span className="note-date">
-                              {new Date(note.createdAt).toLocaleDateString('ru-RU')}
-                            </span>
-                          </div>
-                          <div className="note-content">{note.content}</div>
-                        </div>
-                      ))}
+                      {notes.map(n=><div key={n._id} className="note-card"><div className="note-header"><div className="note-title">{n.title}</div><div className="note-actions"><button className="edit-btn" onClick={()=>{ setEditingNote(n); setShowEditNoteModal(true); }}>✏️</button></div></div><div className="note-meta"><span className="note-author">Автор: {n.authorId.name}</span><span className="note-date">{new Date(n.createdAt).toLocaleDateString('ru-RU')}</span></div><div className="note-content">{n.content}</div></div>)}
                     </div>
                   )}
                 </div>
@@ -458,22 +295,7 @@ const GroupPage: React.FC = () => {
         </div>
       </div>
       {showDeleteConfirm && (
-        <div className="modal-overlay">
-          <div className="modal-content delete-modal">
-            <div className="modal-header">
-              <h2>Удалить группу</h2>
-              <button className="close-button" onClick={() => setShowDeleteConfirm(false)}>×</button>
-            </div>
-            <div className="modal-body">
-              <p>Вы уверены, что хотите удалить группу <strong>"{group.name}"</strong>?</p>
-              <p>Это действие нельзя отменить.</p>
-            </div>
-            <div className="modal-actions">
-              <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>Отмена</Button>
-              <Button variant="danger" onClick={handleDeleteGroup}>Удалить группу</Button>
-            </div>
-          </div>
-        </div>
+        <div className="modal-overlay"><div className="modal-content delete-modal"><div className="modal-header"><h2>Удалить группу</h2><button className="close-button" onClick={()=>setShowDeleteConfirm(false)}>×</button></div><div className="modal-body"><p>Вы уверены, что хотите удалить группу <strong>"{group.name}"</strong>?</p><p>Это действие нельзя отменить.</p></div><div className="modal-actions"><Button variant="outline" onClick={()=>setShowDeleteConfirm(false)}>Отмена</Button><Button variant="danger" onClick={handleDeleteGroup}>Удалить группу</Button></div></div></div>
       )}
       {group && (
         <>
@@ -481,24 +303,18 @@ const GroupPage: React.FC = () => {
             isOpen={showCreateFlashcardModal}
             onClose={() => setShowCreateFlashcardModal(false)}
             groupId={group._id}
-            subjectId={group.subjectId?._id || ''}
-            onFlashcardCreated={() => {
-              loadFlashcards();
-              loadGroup();
-            }}
+            subjectId={subjectIdUnified || ''}
+            onFlashcardCreated={handleFlashcardCreated}
           />
           <CreateGroupNoteModal
             isOpen={showCreateNoteModal}
             onClose={() => setShowCreateNoteModal(false)}
             groupId={group._id}
-            onNoteCreated={loadNotes}
+            onNoteCreated={handleNoteCreated}
           />
           <EditGroupNoteModal
             isOpen={showEditNoteModal}
-            onClose={() => {
-              setShowEditNoteModal(false);
-              setEditingNote(null);
-            }}
+            onClose={() => { setShowEditNoteModal(false); setEditingNote(null); }}
             note={editingNote}
             groupId={group._id}
             onNoteUpdated={loadNotes}
