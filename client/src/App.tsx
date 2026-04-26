@@ -1,7 +1,7 @@
-// client\src\App.tsx
+// client/src/App.tsx
 
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import WebSocketStatus from './components/WebSocketStatus';
@@ -24,12 +24,13 @@ import AchievementsPage from './pages/AchievementsPage';
 import LevelsPage from './pages/LevelsPage';
 import FriendsPage from './pages/FriendsPage';
 import ChatsPage from './pages/ChatsPage';
-import './App.css';
-import './styles/buttons.css';
-import webSocketService from './services/websocket';
 import StudySessionsPage from './pages/StudySessionsPage';
 import StudySessionRoom from './pages/StudySessionRoom';
 import StudyHistoryPage from './pages/StudyHistoryPage';
+import './App.css';
+import './styles/buttons.css';
+import webSocketService from './services/websocket';
+
 
 function App() {
   const [achievementNotification, setAchievementNotification] = useState<any>(null);
@@ -117,9 +118,9 @@ function App() {
             } />
             <Route path="/flashcards" element={
               <ProtectedRoute>
-                <FlashcardsPage />
-              </ProtectedRoute>
-            } />
+                <Navigate to="/subjects" replace />
+                </ProtectedRoute>
+              } />
             <Route path="/notifications" element={
               <ProtectedRoute>
                 <NotificationsPage />
@@ -171,16 +172,20 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="/study-sessions" element={
-              <StudySessionsPage />
-              } />
-              <Route path="/study-session/:sessionId" element={
+              <ProtectedRoute>
+                <StudySessionsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/study-session/:sessionId" element={
+              <ProtectedRoute>
                 <StudySessionRoom />
-              } />
-              <Route path="/study-history" element={
-                <ProtectedRoute>
-                  <StudyHistoryPage />
-                  </ProtectedRoute>
-                } />
+              </ProtectedRoute>
+            } />
+            <Route path="/study-history" element={
+              <ProtectedRoute>
+                <StudyHistoryPage />
+              </ProtectedRoute>
+            } />
           </Routes>
           
           {/* Компонент статуса WebSocket */}

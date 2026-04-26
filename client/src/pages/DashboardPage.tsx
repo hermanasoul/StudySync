@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+// client/src/pages/DashboardPage.tsx
+
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import LevelProgress from '../components/LevelProgress';
 import './DashboardPage.css';
 import '../App.css';
-import { subjectsAPI, achievementsAPI, levelsAPI } from '../services/api';
+import { achievementsAPI, levelsAPI } from '../services/api';
 
 interface Subject {
   id: string;
@@ -31,7 +33,6 @@ const DashboardPage: React.FC = () => {
   const [recentAchievements, setRecentAchievements] = useState<RecentAchievement[]>([]);
   const [levelProgress, setLevelProgress] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [achievementLoading, setAchievementLoading] = useState(false);
 
   const fetchWithAuth = async (endpoint: string, options: RequestInit = {}): Promise<Response> => {
     const token = localStorage.getItem('studysync_token');
@@ -46,11 +47,7 @@ const DashboardPage: React.FC = () => {
     return await fetch(`http://localhost:5000/api${endpoint}`, config);
   };
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -58,30 +55,21 @@ const DashboardPage: React.FC = () => {
       const response = await fetchWithAuth('/subjects');
       const data = await response.json();
       if (data.success) {
-        setSubjects(data.subjects);
+        // Преобразуем _id серверного ответа в id для фронта
+        const mappedSubjects: Subject[] = data.subjects.map((s: any) => ({
+          id: s._id,
+          name: s.name,
+          description: s.description,
+          color: s.color || 'blue',
+          progress: s.progress || 0
+        }));
+        setSubjects(mappedSubjects);
       } else {
+        // Fallback (демо)
         const mockSubjects: Subject[] = [
-          {
-            id: '1',
-            name: 'Биология',
-            description: 'Изучение живых организмов',
-            color: 'green',
-            progress: 75
-          },
-          {
-            id: '2',
-            name: 'Химия',
-            description: 'Изучение веществ и их свойств',
-            color: 'blue',
-            progress: 40
-          },
-          {
-            id: '3',
-            name: 'Математика',
-            description: 'Изучение чисел и вычислений',
-            color: 'purple',
-            progress: 20
-          }
+          { id: '1', name: 'Биология', description: 'Изучение живых организмов', color: 'green', progress: 75 },
+          { id: '2', name: 'Химия', description: 'Изучение веществ и их свойств', color: 'blue', progress: 40 },
+          { id: '3', name: 'Математика', description: 'Изучение чисел и вычислений', color: 'purple', progress: 20 }
         ];
         setSubjects(mockSubjects);
       }
@@ -96,46 +84,25 @@ const DashboardPage: React.FC = () => {
       await loadRecentAchievements();
     } catch (error) {
       console.error('Error loading dashboard data:', error);
+      // Fallback
       const mockSubjects: Subject[] = [
-        {
-          id: '1',
-          name: 'Биология',
-          description: 'Изучение живых организмов',
-          color: 'green',
-          progress: 75
-        },
-        {
-          id: '2',
-          name: 'Химия',
-          description: 'Изучение веществ и их свойств',
-          color: 'blue',
-          progress: 40
-        },
-        {
-          id: '3',
-          name: 'Математика',
-          description: 'Изучение чисел и вычислений',
-          color: 'purple',
-          progress: 20
-        }
+        { id: '1', name: 'Биология', description: 'Изучение живых организмов', color: 'green', progress: 75 },
+        { id: '2', name: 'Химия', description: 'Изучение веществ и их свойств', color: 'blue', progress: 40 },
+        { id: '3', name: 'Математика', description: 'Изучение чисел и вычислений', color: 'purple', progress: 20 }
       ];
       setSubjects(mockSubjects);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const loadRecentAchievements = async () => {
     try {
-      setAchievementLoading(true);
       const response = await achievementsAPI.getMy();
       if (response.data.success) {
-        // Берем 4 последних разблокированных достижения
         const unlocked = response.data.achievements
           .filter((ua: any) => ua.isUnlocked)
-          .sort((a: any, b: any) => 
-            new Date(b.unlockedAt).getTime() - new Date(a.unlockedAt).getTime()
-          )
+          .sort((a: any, b: any) => new Date(b.unlockedAt).getTime() - new Date(a.unlockedAt).getTime())
           .slice(0, 4)
           .map((ua: any) => ({
             id: ua.id,
@@ -151,17 +118,16 @@ const DashboardPage: React.FC = () => {
       }
     } catch (error) {
       console.error('Error loading recent achievements:', error);
-    } finally {
-      setAchievementLoading(false);
     }
   };
 
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
+
   const ProgressBar: React.FC<{ progress: number; color: string }> = ({ progress, color }) => (
     <div className="progress-container">
-      <div
-        className={`progress-bar ${color}`}
-        style={{ width: `${progress}%` }}
-      ></div>
+      <div className={`progress-bar ${color}`} style={{ width: `${progress}%` }}></div>
       <span className="progress-text">{progress}%</span>
     </div>
   );
@@ -187,27 +153,21 @@ const DashboardPage: React.FC = () => {
             <p>Ваш прогресс по предметам</p>
           </div>
 
-          {/* Секция уровня */}
           {levelProgress && (
             <div className="dashboard-section">
               <div className="section-header">
                 <h2>⭐ Мой уровень</h2>
-                <a href="/levels" className="view-all-link">
-                  Подробнее →
-                </a>
+                <a href="/levels" className="view-all-link">Подробнее →</a>
               </div>
               <LevelProgress compact={true} />
             </div>
           )}
 
-          {/* Секция последних достижений */}
           {recentAchievements.length > 0 && (
             <div className="dashboard-section">
               <div className="section-header">
                 <h2>🏆 Последние достижения</h2>
-                <Link to="/achievements" className="view-all-link">
-                  Все достижения →
-                </Link>
+                <Link to="/achievements" className="view-all-link">Все достижения →</Link>
               </div>
               <div className="achievements-preview">
                 {recentAchievements.map((ua) => (

@@ -31,6 +31,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
   const [webSocketConnected, setWebSocketConnected] = useState(false);
 
+  // Единственное определение функции проверки ежедневного входа
+  const checkDailyLoginAchievement = async (userId: string) => {
+    try {
+      // Проверяем, не разблокировано ли уже достижение
+      const myAchievements = await achievementsAPI.getMy();
+      const dailyLogin = myAchievements.data.achievements.find(
+        (ua: any) => ua.achievement.code === 'DAILY_LOGIN_3'
+      );
+      if (dailyLogin && dailyLogin.progress >= 100 && dailyLogin.isUnlocked) {
+        console.log('DAILY_LOGIN_3 already unlocked');
+        return;
+      }
+      // Если нет - проверяем
+      await achievementsAPI.check('DAILY_LOGIN_3');
+    } catch (error) {
+      console.error('Error checking daily login achievement:', error);
+    }
+  };
+
   useEffect(() => {
     const savedUser = localStorage.getItem('studysync_user');
     const token = localStorage.getItem('studysync_token');
@@ -69,21 +88,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return () => {
       webSocketService.disconnect();
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // пустой массив зависимостей, так как connectWebSocket и checkDailyLoginAchievement стабильны
 
   const connectWebSocket = (token: string) => {
     webSocketService.connect(token);
-  };
-
-  const checkDailyLoginAchievement = async (userId: string) => {
-    try {
-      // Проверяем достижение для ежедневного входа
-      // В реальном приложении нужно проверять серию входов
-      // Для демонстрации просто проверяем достижение
-      await achievementsAPI.check('DAILY_LOGIN_3');
-    } catch (error) {
-      console.error('Error checking daily login achievement:', error);
-    }
   };
 
   const login = async (email: string, password: string): Promise<LoginResult> => {
@@ -112,11 +121,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         connectWebSocket(data.token);
         
         // Проверяем достижения при входе
-        try {
-          await achievementsAPI.check('DAILY_LOGIN_3');
-        } catch (achievementError) {
-          console.error('Error checking achievements on login:', achievementError);
-        }
+        await checkDailyLoginAchievement(loggedUser.id);
         
         return { success: true };
       } else {

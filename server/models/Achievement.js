@@ -1,5 +1,3 @@
-// server/models/Achievement.js
-
 const mongoose = require('mongoose');
 
 const achievementSchema = new mongoose.Schema({
@@ -111,7 +109,7 @@ achievementSchema.virtual('difficultyColor').get(function() {
   return colors[this.difficulty] || '#cd7f32';
 });
 
-// Статический метод для проверки достижения
+// Статический метод для проверки достижения с защитой от дубликатов
 achievementSchema.statics.checkAchievement = async function(userId, achievementCode, progress = 1) {
   try {
     const UserAchievement = require('./UserAchievement');
@@ -121,14 +119,14 @@ achievementSchema.statics.checkAchievement = async function(userId, achievementC
       throw new Error(`Achievement ${achievementCode} not found`);
     }
     
-    // Проверяем, есть ли уже это достижение у пользователя
-    const userAchievement = await UserAchievement.findOne({
+    // Сначала попытаемся найти существующую запись
+    let userAchievement = await UserAchievement.findOne({
       userId,
       achievementId: achievement._id
     });
     
     if (userAchievement) {
-      // Если достижение уже получено, обновляем прогресс если нужно
+      // Если достижение уже существует, обновляем прогресс при необходимости
       if (progress > userAchievement.progress) {
         userAchievement.progress = progress;
         await userAchievement.save();
@@ -136,19 +134,40 @@ achievementSchema.statics.checkAchievement = async function(userId, achievementC
       return userAchievement;
     }
     
-    // Создаем новое достижение пользователя
-    const newUserAchievement = new UserAchievement({
-      userId,
-      achievementId: achievement._id,
-      progress,
-      isUnlocked: false
-    });
-    
-    await newUserAchievement.save();
-    return newUserAchievement;
+    // Пытаемся создать новую запись
+    try {
+      const newUserAchievement = new UserAchievement({
+        userId,
+        achievementId: achievement._id,
+        progress,
+        isUnlocked: false
+      });
+      await newUserAchievement.save();
+      return newUserAchievement;
+    } catch (createError) {
+      // Если возник дубликат (код 11000), значит другой поток уже создал запись
+      if (createError.code === 11000) {
+        // Повторно ищем и возвращаем существующую
+        userAchievement = await UserAchievement.findOne({
+          userId,
+          achievementId: achievement._id
+        });
+        if (userAchievement) {
+          // Могло обновиться за время ожидания, проверяем прогресс
+          if (progress > userAchievement.progress) {
+            userAchievement.progress = progress;
+            await userAchievement.save();
+          }
+          return userAchievement;
+        }
+        // Если по какой-то причине не нашли (маловероятно), пробрасываем ошибку
+        throw new Error('Concurrent achievement creation conflict');
+      }
+      throw createError; // Пробрасываем другие ошибки
+    }
   } catch (error) {
     console.error('Error checking achievement:', error);
-    throw error;
+    throw error; // Пробрасываем для обработки выше (но теперь без дубликатов)
   }
 };
 

@@ -1,3 +1,5 @@
+// client/src/components/ChatNotification.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { chatsAPI } from '../services/api';
@@ -25,11 +27,13 @@ const ChatNotification: React.FC = () => {
     try {
       const response = await chatsAPI.getUserChats({ limit: 50 });
       if (response.data.success) {
-        const totalUnread = response.data.data.reduce(
+        // Защита: убедимся, что data — массив
+        const chats = Array.isArray(response.data.data) ? response.data.data : [];
+        const totalUnread = chats.reduce(
           (sum: number, chat: any) => sum + (chat.unreadCount || 0), 0
         );
         setUnreadCount(totalUnread);
-        setRecentChats(response.data.data.slice(0, 5));
+        setRecentChats(chats.slice(0, 5));
       }
     } catch (error) {
       console.error('Error loading unread count:', error);
@@ -40,13 +44,11 @@ const ChatNotification: React.FC = () => {
     const handleNewMessage = (data: any) => {
       setUnreadCount(prev => prev + 1);
       
-      // Обновляем список чатов
       setRecentChats(prev => {
         const updatedChats = [...prev];
         const chatIndex = updatedChats.findIndex(chat => chat._id === data.chatId);
         
         if (chatIndex !== -1) {
-          // Обновляем существующий чат
           const chat = updatedChats[chatIndex];
           updatedChats.splice(chatIndex, 1);
           updatedChats.unshift({
@@ -56,18 +58,13 @@ const ChatNotification: React.FC = () => {
             updatedAt: new Date().toISOString()
           });
         } else {
-          // Добавляем новый чат (загрузим детали позже)
           updatedChats.unshift({
             _id: data.chatId,
             lastMessage: data.message,
             unreadCount: 1,
             updatedAt: new Date().toISOString()
           });
-          
-          // Ограничиваем до 5 чатов
-          if (updatedChats.length > 5) {
-            updatedChats.pop();
-          }
+          if (updatedChats.length > 5) updatedChats.pop();
         }
         
         return updatedChats;
@@ -75,19 +72,14 @@ const ChatNotification: React.FC = () => {
     };
 
     webSocketService.on('chat:new_message', handleNewMessage);
-
-    return () => {
-      webSocketService.off('chat:new_message', handleNewMessage);
-    };
   };
 
   const cleanupWebSocketListeners = () => {
-    // Очистка будет выполнена в setupWebSocketListeners
+    // Очистка будет выполнена при размонтировании
   };
 
   const handleMarkAllAsRead = async () => {
     try {
-      // Помечаем все чаты как прочитанные
       await Promise.all(
         recentChats
           .filter(chat => chat.unreadCount > 0)
@@ -112,16 +104,11 @@ const ChatNotification: React.FC = () => {
 
   const getChatName = (chat: any) => {
     if (chat.name) return chat.name;
-    
-    // Для личных чатов пытаемся получить имя участника
-    if (chat.participants && chat.participants.length > 0) {
-      const otherParticipant = chat.participants.find(
-        (p: any) => p.userId._id !== user?.id
-      );
-      return otherParticipant?.userId.name || 'Чат';
+    if (chat.participants?.length > 0) {
+      const other = chat.participants.find((p: any) => p.userId?._id !== user?.id);
+      return other?.userId?.name || 'Чат';
     }
-    
-    return 'Загрузка...';
+    return 'Чат';
   };
 
   if (!user) return null;
@@ -172,9 +159,7 @@ const ChatNotification: React.FC = () => {
                     onClick={() => setShowDropdown(false)}
                   >
                     <div className="chat-avatar">
-                      {chat.unreadCount > 0 && (
-                        <span className="unread-dot"></span>
-                      )}
+                      {chat.unreadCount > 0 && <span className="unread-dot"></span>}
                     </div>
                     <div className="chat-info">
                       <div className="chat-name">{getChatName(chat)}</div>

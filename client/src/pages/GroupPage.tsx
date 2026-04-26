@@ -75,72 +75,42 @@ const GroupPage: React.FC = () => {
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [members, setMembers] = useState<Group['members']>([]);
 
+  // Проверка валидности groupId
+  const isValidGroupId = groupId && groupId !== 'undefined';
+
   const loadGroup = useCallback(async () => {
+    if (!isValidGroupId) return;
     try {
       setLoading(true);
       const response = await groupsAPI.getById(groupId!);
       if (response.data.success) {
         setGroup(response.data.group);
-      } else {
-        console.error('API error, using fallback');
-        const currentUser = JSON.parse(localStorage.getItem('studysync_user') || '{}');
-        const userData = {
-          _id: currentUser.id || '1',
-          name: currentUser.name || 'Вы'
-        };
-        const demoMembers = [
-          { user: { _id: '1', name: userData.name, email: 'user@example.com' }, role: 'owner' },
-          {
-            user: { _id: '2', name: 'Иван Петров', email: 'ivan.petrov@example.com' },
-            role: 'member'
-          }
-        ];
-        setGroup({
-          _id: groupId!,
-          name: 'Демо группа',
-          description: 'Описание демо группы для изучения биологии.',
-          subjectId: { _id: '1', name: 'Биология', color: 'green' },
-          createdBy: userData,
-          members: demoMembers,
-          isPublic: true,
-          inviteCode: 'DEMO123'
-        });
-        setMembers(demoMembers);
+        setMembers(response.data.group.members || []);
       }
     } catch (error) {
       console.error('Error loading group:', error);
-      const currentUser = JSON.parse(localStorage.getItem('studysync_user') || '{}');
-      setGroup({
-        _id: groupId!,
-        name: 'Демо группа',
-        description: 'Описание демо группы для изучения биологии.',
-        subjectId: { _id: '1', name: 'Биология', color: 'green' },
-        createdBy: { _id: currentUser.id || '1', name: currentUser.name || 'Вы' },
-        members: [],
-        isPublic: true,
-        inviteCode: 'DEMO123'
-      });
+      setGroup(null);
     } finally {
       setLoading(false);
     }
-  }, [groupId]);
+  }, [groupId, isValidGroupId]);
 
   const loadMembers = useCallback(async () => {
-    if (!groupId) return;
+    if (!isValidGroupId) return;
     try {
-      const response = await groupsAPI.getMembers(groupId);
+      const response = await groupsAPI.getMembers(groupId!);
       if (response.data.success) {
         setMembers(response.data.members);
       }
     } catch (error) {
       console.error('Error loading members:', error);
     }
-  }, [groupId]);
+  }, [groupId, isValidGroupId]);
 
   const loadNotes = useCallback(async () => {
-    if (!groupId) return;
+    if (!isValidGroupId) return;
     try {
-      const response = await groupsAPI.getNotes(groupId);
+      const response = await groupsAPI.getNotes(groupId!);
       if (response.data.success) {
         setNotes(response.data.notes || []);
       } else {
@@ -150,12 +120,12 @@ const GroupPage: React.FC = () => {
       console.error('Error loading notes:', error);
       setNotes([]);
     }
-  }, [groupId]);
+  }, [groupId, isValidGroupId]);
 
   const loadFlashcards = useCallback(async () => {
-    if (!groupId) return;
+    if (!isValidGroupId) return;
     try {
-      const response = await groupsAPI.getFlashcards(groupId);
+      const response = await groupsAPI.getFlashcards(groupId!);
       if (response.data.success) {
         setFlashcards(response.data.flashcards || []);
       } else {
@@ -165,24 +135,24 @@ const GroupPage: React.FC = () => {
       console.error('Error loading flashcards:', error);
       setFlashcards([]);
     }
-  }, [groupId]);
+  }, [groupId, isValidGroupId]);
 
   useEffect(() => {
-    if (groupId) {
+    if (isValidGroupId) {
       loadGroup();
       loadNotes();
       loadMembers();
       loadFlashcards();
+    } else {
+      setLoading(false);
     }
-  }, [groupId, loadGroup, loadMembers, loadNotes, loadFlashcards]);
+  }, [isValidGroupId, loadGroup, loadMembers, loadNotes, loadFlashcards]);
 
   // WebSocket эффекты
   useEffect(() => {
-    if (group) {
-      // Присоединяемся к комнате группы
+    if (group && isValidGroupId) {
       webSocketService.joinGroup(group._id);
       
-      // Подписываемся на события группы
       const handleNewFlashcard = (data: any) => {
         if (data.groupId === group._id) {
           loadFlashcards();
@@ -205,10 +175,8 @@ const GroupPage: React.FC = () => {
       webSocketService.on('new-note', handleNewNote);
       webSocketService.on('member-joined', handleMemberJoined);
       
-      // Отправляем событие активности
       webSocketService.sendUserActivity(null, group._id, 'viewing_group');
       
-      // Очистка при размонтировании
       return () => {
         webSocketService.leaveGroup(group._id);
         webSocketService.off('new-flashcard', handleNewFlashcard);
@@ -216,7 +184,7 @@ const GroupPage: React.FC = () => {
         webSocketService.off('member-joined', handleMemberJoined);
       };
     }
-  }, [group, loadFlashcards, loadNotes, loadMembers]);
+  }, [group, isValidGroupId, loadFlashcards, loadNotes, loadMembers]);
 
   const getRoleBadge = (role: string) => {
     const roleConfig = {
@@ -368,13 +336,17 @@ const GroupPage: React.FC = () => {
                       <Button variant="success" onClick={() => setShowInviteModal(true)}>
                         Пригласить участников
                       </Button>
-                      <Button variant="outline" href={`/subjects/${group.subjectId?._id}/flashcards`}>
-                        Изучать карточки
-                      </Button>
+                      {/* Кнопка «Изучать карточки» только если есть предмет */}
+                      {group.subjectId?._id && (
+                        <Button variant="outline" href={`/subjects/${group.subjectId._id}/flashcards`}>
+                          Изучать карточки
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
               )}
+              {/* Остальные вкладки остаются без изменений */}
               {activeTab === 'members' && (
                 <div className="members-tab">
                   <h3>Участники группы</h3>

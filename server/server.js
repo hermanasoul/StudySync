@@ -31,7 +31,8 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:"],
-      scriptSrc: ["'self'", "'unsafe-inline'"]
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      connectSrc: ["'self'", "ws://localhost:5000"]  // <-- добавить
     }
   },
   crossOriginResourcePolicy: { policy: "cross-origin" }
@@ -94,6 +95,7 @@ app.use('/api/rewards', require('./routes/rewards'));
 app.use('/api/friends', require('./routes/friends'));
 app.use('/api/follows', require('./routes/follows'));
 app.use('/api/leaderboards', require('./routes/leaderboards'));
+app.use('/api/chats', require('./routes/chats'));
 
 // Проверка работы сервера
 app.get('/', (req, res) => {

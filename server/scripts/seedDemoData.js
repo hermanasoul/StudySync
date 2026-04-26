@@ -181,7 +181,7 @@ for (const u of demoUsers) {
 
     console.log('\n🎉 Демонстрационные данные успешно загружены!');
     console.log('------------------------------------------');
-    console.log('Тестовые аккаунты (пароль у всех: demo123):');
+    console.log('Тестовые аккаунты (пароль у всех: Demo123!):');
     demoUsers.forEach(u => console.log(`  ${u.email}`));
     console.log('------------------------------------------');
 

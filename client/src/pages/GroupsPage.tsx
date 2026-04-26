@@ -1,7 +1,6 @@
 // client/src/pages/GroupsPage.tsx
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import CreateGroupModal from '../components/CreateGroupModal';
 import JoinGroupModal from '../components/JoinGroupModal';
@@ -52,95 +51,15 @@ const GroupsPage: React.FC = () => {
       setLoading(true);
       const response = await groupsAPI.getMy();
       if (response.data.success) {
-        const groupsWithCount = response.data.groups.map((group: any) => ({
+        const normalized = response.data.groups.map((group: any) => ({
           ...group,
-          memberCount: group.members.length
+          _id: group._id || group.id, // гарантируем _id
+          memberCount: group.members.length,
         }));
-        setGroups(groupsWithCount);
-      } else {
-        const currentUser = JSON.parse(localStorage.getItem('studysync_user') || '{}');
-        const mockGroups: Group[] = [
-          {
-            _id: '1',
-            name: 'Биология для начинающих',
-            description: 'Изучаем основы биологии вместе',
-            subjectId: {
-              _id: '1',
-              name: 'Биология',
-              color: 'green'
-            },
-            createdBy: {
-              _id: '1',
-              name: currentUser.name || 'Администратор',
-              email: currentUser.email || 'admin@example.com'
-            },
-            members: [
-              {
-                user: {
-                  _id: '1',
-                  name: currentUser.name || 'Администратор',
-                  email: currentUser.email || 'admin@example.com'
-                },
-                role: 'owner'
-              },
-              {
-                user: {
-                  _id: '2',
-                  name: 'Иван',
-                  email: 'ivan@example.com'
-                },
-                role: 'member'
-              }
-            ],
-            isPublic: true,
-            inviteCode: 'ABC123',
-            memberCount: 2
-          }
-        ];
-        setGroups(mockGroups);
+        setGroups(normalized);
       }
     } catch (error) {
       console.error('Error loading groups:', error);
-      const currentUser = JSON.parse(localStorage.getItem('studysync_user') || '{}');
-      const mockGroups: Group[] = [
-        {
-          _id: '1',
-          name: 'Биология для начинающих',
-          description: 'Изучаем основы биологии вместе',
-          subjectId: {
-            _id: '1',
-            name: 'Биология',
-            color: 'green'
-          },
-          createdBy: {
-            _id: '1',
-            name: currentUser.name || 'Администратор',
-            email: currentUser.email || 'admin@example.com'
-          },
-          members: [
-            {
-              user: {
-                _id: '1',
-                name: currentUser.name || 'Администратор',
-                email: currentUser.email || 'admin@example.com'
-              },
-              role: 'owner'
-            },
-            {
-              user: {
-                _id: '2',
-                name: 'Иван',
-                email: 'ivan@example.com'
-              },
-              role: 'member'
-            }
-          ],
-          isPublic: true,
-          inviteCode: 'ABC123',
-          memberCount: 2
-        }
-      ];
-      setGroups(mockGroups);
     } finally {
       setLoading(false);
     }
@@ -154,10 +73,7 @@ const GroupsPage: React.FC = () => {
     };
     const config = roleConfig[role as keyof typeof roleConfig] || roleConfig.member;
     return (
-      <span
-        className="role-badge"
-        style={{ backgroundColor: config.color }}
-      >
+      <span className="role-badge" style={{ backgroundColor: config.color }}>
         {config.label}
       </span>
     );
@@ -213,7 +129,7 @@ const GroupsPage: React.FC = () => {
                   <div className="group-header">
                     <div className="group-info">
                       <h3 className="group-name">{group.name}</h3>
-                      {group.subjectId && group.subjectId.name && (
+                      {group.subjectId?.name && (
                         <span className={`subject-tag ${group.subjectId.color || 'blue'}`}>
                           {group.subjectId.name}
                         </span>
@@ -224,9 +140,7 @@ const GroupsPage: React.FC = () => {
                       {group.isPublic && <span className="public-badge">Публичная</span>}
                     </div>
                   </div>
-                  <p className="group-description">
-                    {group.description || 'Описание отсутствует'}
-                  </p>
+                  <p className="group-description">{group.description || 'Описание отсутствует'}</p>
                   <div className="group-stats">
                     <div className="stat">
                       <span className="stat-number">{group.memberCount}</span>

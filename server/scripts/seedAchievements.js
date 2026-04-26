@@ -105,10 +105,25 @@ const achievements = [
     category: 'social',
     difficulty: 'bronze',
     points: 50,
-    requirements: { type: 'friends_count', target: 1 },
+    requirements: { type: 'friends_count', count: 1 },  // <-- было target: 1, теперь count
     secret: false,
     isActive: true,
     sortOrder: 28
+  },
+
+  // === DAILY LOGIN (добавлено) ===
+  {
+    code: 'DAILY_LOGIN_3',
+    name: 'Три дня подряд',
+    description: 'Заходите в приложение 3 дня подряд',
+    icon: '🔥',
+    category: 'system',
+    difficulty: 'bronze',
+    points: 20,
+    requirements: { type: 'streak', target: 'login', days: 3 },
+    secret: false,
+    isActive: true,
+    sortOrder: 29
   },
 
   // === ГРУППОВЫЕ ДОСТИЖЕНИЯ ===
@@ -387,47 +402,20 @@ async function seedAchievements() {
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/studysync');
     console.log('✅ Connected to MongoDB');
 
-    // Удаляем старые достижения
     await Achievement.deleteMany({});
     console.log('✅ Old achievements cleared');
 
-    // Вставляем новые достижения
     const insertedAchievements = await Achievement.insertMany(achievements);
     console.log(`✅ Created ${insertedAchievements.length} achievements`);
 
-    // Выводим статистику
-    const statsByCategory = {};
-    const statsByDifficulty = {};
-
-    insertedAchievements.forEach(achievement => {
-      statsByCategory[achievement.category] = (statsByCategory[achievement.category] || 0) + 1;
-      statsByDifficulty[achievement.difficulty] = (statsByDifficulty[achievement.difficulty] || 0) + 1;
-    });
-
-    console.log('\n📊 Achievement Statistics:');
-    console.log('By category:');
-    Object.entries(statsByCategory).forEach(([category, count]) => {
-      console.log(`  ${category}: ${count}`);
-    });
-
-    console.log('\nBy difficulty:');
-    Object.entries(statsByDifficulty).forEach(([difficulty, count]) => {
-      console.log(`  ${difficulty}: ${count}`);
-    });
-
-    const totalPoints = insertedAchievements.reduce((sum, a) => sum + a.points, 0);
-    console.log(`\n💰 Total possible points: ${totalPoints}`);
-
     console.log('\n🎉 Achievement seeding completed successfully!');
     process.exit(0);
-
   } catch (error) {
     console.error('❌ Error seeding achievements:', error);
     process.exit(1);
   }
 }
 
-// Запуск скрипта
 if (require.main === module) {
   seedAchievements();
 }
