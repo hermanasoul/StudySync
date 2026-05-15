@@ -1,3 +1,5 @@
+/* Header.css */
+
 .header {
   background: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -9,6 +11,7 @@
   z-index: 1000;
   height: 120px;
 }
+
 .header-content {
   max-width: 1200px;
   margin: 0 auto;
@@ -17,21 +20,23 @@
   display: flex;
   flex-direction: column;
 }
+
 .header-top {
   display: flex;
   justify-content: center;
-  padding: 15px 0;
+  align-items: center;
+  padding: 10px 0;
   border-bottom: 1px solid #e1e5e9;
   height: 60px;
 }
+
 .header-bottom {
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 60px;
-  flex: 1;
 }
-/* Логотип */
+
 .logo {
   font-size: 28px;
   font-weight: bold;
@@ -42,8 +47,10 @@
 
 .nav {
   display: flex;
-  gap: 30px;
+  gap: 24px;
+  align-items: center;
 }
+
 .nav-link {
   color: #6b7280;
   text-decoration: none;
@@ -51,71 +58,33 @@
   transition: color 0.2s;
   padding: 8px 0;
   line-height: 1.4;
-  vertical-align: middle;
-  display: inline-flex;
-  align-items: center;
+  white-space: nowrap;
 }
+
 .nav-link:hover {
   color: #4f46e5;
 }
 
 .header-buttons {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   align-items: center;
-  vertical-align: middle;
 }
 
-.header-buttons .btn {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  vertical-align: middle !important;
-  height: 32px !important;
-  padding: 8px 16px !important;
-  border-radius: 10px !important;
-  font-size: 16px !important;
-  font-weight: 600 !important;
-  min-width: 100px !important;
-  white-space: nowrap;
-  color: white !important;
-  text-decoration: none !important;
-  border: none !important;
-  outline: none !important;
-  cursor: pointer !important;
-  transition: all 0.3s ease !important;
-}
-
-.header-buttons .btn-success {
-  background: #10b981 !important;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important;
-}
-
-.header-buttons .btn-danger {
-  background: #ef4444 !important;
-  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3) !important;
-}
-
-.user-name {
+.user-greeting {
   font-weight: 500;
   color: #374151;
-  line-height: 1.4;
   white-space: nowrap;
-  display: flex;
-  align-items: center;
+  font-size: 0.9rem;
 }
 
+/* Адаптивность */
 @media (max-width: 768px) {
   .header {
     height: auto;
-    min-height: 120px;
   }
   .header-content {
-    padding: 0 15px;
-  }
-  .header-top {
-    padding: 10px 0;
-    height: 50px;
+    padding: 0 10px;
   }
   .header-bottom {
     flex-wrap: wrap;
@@ -125,33 +94,16 @@
   }
   .nav {
     flex-wrap: wrap;
-    gap: 15px;
-    min-width: 100%;
+    gap: 12px;
     justify-content: center;
   }
   .header-buttons {
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 8px;
     justify-content: center;
     width: 100%;
   }
-  .user-name {
+  .user-greeting {
     display: none;
-  }
-  .nav-link {
-    font-size: 14px;
-    padding: 6px 0;
-  }
-}
-
-/* Стили для кнопки уведомлений в хедере */
-.header-buttons .notifications-container {
-  margin-right: 8px;
-}
-
-/* Если в хедере много элементов, можно добавить адаптивность */
-@media (max-width: 768px) {
-  .header-buttons .notifications-container {
-    margin-right: 4px;
   }
 }

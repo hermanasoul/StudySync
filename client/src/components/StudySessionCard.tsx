@@ -1,6 +1,6 @@
 // client/src/components/StudySessionCard.tsx
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { studySessionsAPI } from '../services/api';
@@ -50,17 +50,17 @@ interface StudySessionCardProps {
 const StudySessionCard: React.FC<StudySessionCardProps> = ({ session, onJoin, onRefresh }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const activeParticipants = session.participants.filter(p => p.status === 'active');
 
   const getStatusColor = () => {
     switch (session.status) {
-      case 'waiting': return '#ffa726'; // оранжевый
-      case 'active': return '#4caf50'; // зеленый
-      case 'paused': return '#78909c'; // серый
-      case 'completed': return '#9e9e9e'; // светло-серый
+      case 'waiting': return '#ffa726';
+      case 'active': return '#4caf50';
+      case 'paused': return '#78909c';
+      case 'completed': return '#9e9e9e';
       default: return '#9e9e9e';
     }
   };
@@ -103,7 +103,6 @@ const StudySessionCard: React.FC<StudySessionCardProps> = ({ session, onJoin, on
     if (diffMins < 60) return `${diffMins} мин назад`;
     if (diffMins < 1440) return `${Math.floor(diffMins / 60)} ч назад`;
     
-    // Если больше суток, показываем дату
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const hours = date.getHours().toString().padStart(2, '0');
@@ -112,37 +111,32 @@ const StudySessionCard: React.FC<StudySessionCardProps> = ({ session, onJoin, on
     return `${day}.${month} ${hours}:${minutes}`;
   };
 
+  const isHost = user?.id === session.host._id;
+  const isAlreadyJoined = activeParticipants.some(p => p.user._id === user?.id);
+
   const handleQuickJoin = async () => {
     if (loading) return;
     
+    // Если уже участник или хост, просто переходим в сессию
+    if (isAlreadyJoined || isHost) {
+      navigate(`/study-session/${session._id}`);
+      return;
+    }
+
     setLoading(true);
     setError('');
-
     try {
-      // Пытаемся присоединиться к сессии
       await studySessionsAPI.join(session._id);
-      
-      // Если успешно, вызываем onJoin
       onJoin();
-      
-      // Перенаправляем в сессию
       navigate(`/study-session/${session._id}`);
     } catch (err: any) {
       console.error('Error joining session:', err);
       setError(err.response?.data?.message || 'Ошибка при присоединении');
-      
-      // Если ошибка, обновляем список сессий
-      if (onRefresh) {
-        setTimeout(() => onRefresh(), 1000);
-      }
+      if (onRefresh) setTimeout(() => onRefresh(), 1000);
     } finally {
       setLoading(false);
     }
   };
-
-  const isHost = user?.id === session.host._id;
-  const isAlreadyJoined = activeParticipants.some(p => p.user._id === user?.id);
-  const isFull = activeParticipants.length >= 10; // Предполагаем максимум 10 участников
 
   return (
     <div className="study-session-card">
@@ -271,31 +265,24 @@ const StudySessionCard: React.FC<StudySessionCardProps> = ({ session, onJoin, on
           </div>
 
           <div className="session-actions">
-            {isAlreadyJoined ? (
-              <button 
-                className="btn btn-primary"
-                onClick={() => navigate(`/study-session/${session._id}`)}
-              >
-                {isHost ? 'Управлять' : 'Продолжить'}
-              </button>
-            ) : (
-              <button 
-                className={`btn ${isFull ? 'btn-disabled' : 'btn-primary'}`}
-                onClick={handleQuickJoin}
-                disabled={loading || isFull}
-              >
-                {loading ? (
-                  <>
-                    <span className="spinner"></span>
-                    Присоединение...
-                  </>
-                ) : isFull ? (
-                  'Заполнена'
-                ) : (
-                  'Присоединиться'
-                )}
-              </button>
-            )}
+            <button 
+              className="btn btn-primary"
+              onClick={handleQuickJoin}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <span className="spinner"></span>
+                  Присоединение...
+                </>
+              ) : isHost ? (
+                'Управлять'
+              ) : isAlreadyJoined ? (
+                'Продолжить'
+              ) : (
+                'Присоединиться'
+              )}
+            </button>
           </div>
         </div>
       </div>

@@ -593,13 +593,20 @@ router.post('/:id/join',
 
     if (!session) return next(new AppError('Сессия не найдена', 404));
 
-    // Разрешаем хосту и уже существующим участникам всегда
-    if (session.host._id.toString() === req.user.id || session.participants.some(p => p.user._id.toString() === req.user.id)) {
-      // Обновляем статус, если нужно
-      await session.addParticipant(req.user.id);
+    const userId = req.user.id.toString(); // приводим к строке
+    const hostId = session.host._id.toString();
+    const isHost = hostId === userId;
+    const isParticipant = session.participants.some(p => p.user._id.toString() === userId);
+
+    console.log(`🔍 Join request: user=${userId}, host=${hostId}, isHost=${isHost}, isParticipant=${isParticipant}`);
+
+    // Разрешаем хосту и существующим участникам всегда
+    if (isHost || isParticipant) {
+      console.log('✅ Allowing join (host or existing participant)');
+      await session.addParticipant(userId);
       const participantRecord = new StudySessionParticipant({
         session: session._id,
-        user: req.user.id,
+        user: userId,
         status: 'active'
       });
       await participantRecord.save();
@@ -613,22 +620,20 @@ router.post('/:id/join',
     }
 
     // Проверка доступа для новых участников
+    console.log(`🔒 Checking access for new user. Access type: ${session.accessType}`);
     if (session.accessType === 'private') {
-      const isInvited = session.invitedUsers.some(id => id.toString() === req.user.id);
+      const isInvited = session.invitedUsers.some(id => id.toString() === userId);
       if (!isInvited) return next(new AppError('Вы не приглашены в эту сессию', 403));
     } else if (session.accessType === 'friends') {
       const host = await User.findById(session.host._id).select('friends');
-      const isFriend = host.friends.some(friend => 
-        friend.userId && friend.userId.toString() === req.user.id && friend.status === 'accepted'
-      );
+      const isFriend = host.friends.some(f => f.userId && f.userId.toString() === userId && f.status === 'accepted');
       if (!isFriend) return next(new AppError('Сессия доступна только друзьям', 403));
     }
 
-    await session.addParticipant(req.user.id);
-
+    await session.addParticipant(userId);
     const participantRecord = new StudySessionParticipant({
       session: session._id,
-      user: req.user.id,
+      user: userId,
       status: 'active'
     });
     await participantRecord.save();
@@ -636,7 +641,7 @@ router.post('/:id/join',
     const ws = req.app.get('ws');
     if (ws) {
       const triggers = new AchievementTriggers(ws);
-      await triggers.onStudySessionJoined(req.user.id, session);
+      await triggers.onStudySessionJoined(userId, session);
     }
 
     const populatedSession = await StudySession.findById(session._id)
@@ -772,7 +777,7 @@ router.post('/:id/timer',
 
     if (!session) return next(new AppError('Сессия не найдена', 404));
 
-    const participant = session.participants.find(p => p.user.toString() === req.user.id);
+    const participant = session.participants.find(p => p.user.toString() === req.user.id.toString());
     if (!participant || (participant.role !== 'host' && participant.role !== 'co-host')) {
       return next(new AppError('Только хост или со-хост может управлять таймером', 403));
     }
@@ -930,7 +935,7 @@ router.post('/:id/flashcards',
       case 'answer':
         if (!flashcardId) return next(new AppError('ID карточки обязателен', 400));
 
-        const participant = session.participants.find(p => p.user.toString() === req.user.id);
+        const participant = session.participants.find(p => p.user.toString() === req.user.id.toString());
         if (participant) {
           participant.stats.cardsReviewed += 1;
           if (answer === 'correct') {
@@ -1213,8 +1218,11 @@ router.post('/:id/invite',
     const { userIds } = req.body;
     const session = await StudySession.findById(req.params.id);
     if (!session) return next(new AppError('Сессия не найдена', 404));
-    if (session.host.toString() !== req.user.id) {
-      return next(new AppError('Только хост может приглашать пользователей', 403));
+    
+    // Разрешаем приглашать хосту и со-хосту
+    const participant = session.participants.find(p => p.user.toString() === req.user.id.toString());
+    if (!participant || (participant.role !== 'host' && participant.role !== 'co-host')) {
+      return next(new AppError('Только хост или со-хост может приглашать пользователей', 403));
     }
 
     const users = await User.find({ _id: { $in: userIds } });
@@ -1309,7 +1317,9 @@ router.put('/:id/settings',
     const { studyMode, pomodoroSettings, notifications, accessType } = req.body;
     const session = await StudySession.findById(req.params.id);
     if (!session) return next(new AppError('Сессия не найдена', 404));
-    if (session.host.toString() !== req.user.id) {
+    
+    const participant = session.participants.find(p => p.user.toString() === req.user.id.toString());
+    if (!participant || participant.role !== 'host') {
       return next(new AppError('Только хост может изменять настройки', 403));
     }
 
@@ -1333,52 +1343,33 @@ router.put('/:id/settings',
   })
 );
 
-// ==================== ЗАПУСК СЕССИИ ====================
-/**
- * @swagger
- * /study-sessions/{id}/start:
- *   post:
- *     summary: Запустить сессию (только хост)
- *     tags: [StudySessions]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID сессии
- *     responses:
- *       200:
- *         description: Сессия запущена
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 session:
- *                   $ref: '#/components/schemas/StudySession'
- *       400:
- *         description: Сессия уже начата или завершена
- *       403:
- *         description: Только хост может начать сессию
- *       404:
- *         description: Сессия не найдена
- */
+// ==================== ЗАПУСК СЕССИИ (ИСПРАВЛЕН - приведение типов) ====================
 router.post('/:id/start',
   auth,
   clearCacheOnMutation(),
   catchAsync(async (req, res, next) => {
     const session = await StudySession.findById(req.params.id);
     if (!session) return next(new AppError('Сессия не найдена', 404));
-    if (session.host.toString() !== req.user.id) return next(new AppError('Только хост может начать сессию', 403));
-    if (session.status !== 'waiting') return next(new AppError('Сессия уже начата или завершена', 400));
-    
+
+    // Приводим оба ID к строкам для корректного сравнения
+    const userId = req.user.id.toString();
+    const hostId = session.host ? session.host.toString() : null;
+
+    console.log('=== START REQUEST (FIXED) ===');
+    console.log('req.user.id (string):', userId);
+    console.log('session.host (string):', hostId);
+
+    if (!hostId || hostId !== userId) {
+      console.log('❌ Отказано: пользователь не является хостом');
+      return next(new AppError('Только хост может начать сессию', 403));
+    }
+
+    if (session.status !== 'waiting') {
+      return next(new AppError('Сессия уже начата или завершена', 400));
+    }
+
+    console.log('✅ Хост подтверждён, запускаем сессию');
+
     session.status = 'active';
     session.timerState = {
       active: false,
@@ -1388,7 +1379,7 @@ router.post('/:id/start',
       totalElapsed: 0
     };
     await session.save();
-    
+
     const ws = req.app.get('ws');
     if (ws) {
       ws.emitToStudySession(session._id, 'study_session_started', {
@@ -1397,7 +1388,7 @@ router.post('/:id/start',
         timestamp: new Date().toISOString()
       });
       for (const participant of session.participants) {
-        if (participant.status === 'active' && participant.user.toString() !== req.user.id) {
+        if (participant.status === 'active' && participant.user.toString() !== userId) {
           await ws.sendNotification(participant.user.toString(), {
             type: 'study_session_started',
             title: 'Сессия началась!',
@@ -1407,53 +1398,25 @@ router.post('/:id/start',
         }
       }
     }
-    
+
     res.json({ success: true, message: 'Сессия начата', session });
   })
 );
 
-// ==================== ЗАВЕРШЕНИЕ СЕССИИ (хостом) ====================
-/**
- * @swagger
- * /study-sessions/{id}/complete:
- *   post:
- *     summary: Завершить сессию (только хост)
- *     tags: [StudySessions]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID сессии
- *     responses:
- *       200:
- *         description: Сессия завершена
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *       400:
- *         description: Сессия уже завершена
- *       403:
- *         description: Только хост может завершить сессию
- *       404:
- *         description: Сессия не найдена
- */
+// ==================== ЗАВЕРШЕНИЕ СЕССИИ (исправлен) ====================
 router.post('/:id/complete',
   auth,
   clearCacheOnMutation(),
   catchAsync(async (req, res, next) => {
     const session = await StudySession.findById(req.params.id);
     if (!session) return next(new AppError('Сессия не найдена', 404));
-    if (session.host.toString() !== req.user.id) return next(new AppError('Только хост может завершить сессию', 403));
+    
+    const hostId = session.host ? session.host.toString() : null;
+    const userId = req.user.id.toString();
+    if (!hostId || hostId !== userId) {
+      return next(new AppError('Только хост может завершить сессию', 403));
+    }
+
     if (session.status === 'completed') return next(new AppError('Сессия уже завершена', 400));
     
     session.status = 'completed';

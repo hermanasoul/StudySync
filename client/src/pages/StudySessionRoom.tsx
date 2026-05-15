@@ -20,7 +20,7 @@ interface StudySession {
     status: string;
     stats: { timeSpent: number; cardsReviewed: number; correctAnswers: number; streak: number };
   }>;
-  subjectId: { _id: string; name: string };
+  subjectId: { _id: string; name: string } | null;
   groupId?: { _id: string; name: string };
   flashcards: Array<{
     flashcardId: { _id: string; question: string; answer: string; hint?: string };
@@ -55,13 +55,14 @@ const StudySessionRoom: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const joinedRef = useRef(false);
 
   const loadSession = useCallback(async () => {
     if (!sessionId) return;
     try {
       const res = await studySessionsAPI.getById(sessionId);
       setSession(res.data.session);
-      if (res.data.messages) setMessages(res.data.messages);
+      // Сообщения загрузятся через WebSocket
     } catch (err: any) {
       setError(err.response?.data?.message || 'Ошибка загрузки сессии');
     } finally {
@@ -71,25 +72,28 @@ const StudySessionRoom: React.FC = () => {
 
   useEffect(() => { loadSession(); }, [loadSession]);
 
-  // WebSocket для сессии
+  // WebSocket для сессии (однократное присоединение)
   useEffect(() => {
-    if (!sessionId) return;
+    if (!sessionId || joinedRef.current) return;
 
     const joinRoom = () => {
       console.log('📡 Присоединяемся к учебной сессии через WebSocket:', sessionId);
       webSocketService.joinStudySession(sessionId);
+      joinedRef.current = true;
     };
 
-    // Присоединяемся сразу
     joinRoom();
 
-    // При переподключении сокета заново заходим в комнату
     const handleReconnect = () => {
       console.log('🔄 WebSocket переподключился, заходим в сессию');
-      joinRoom();
+      // Если сокет переподключился, заново заходим
+      webSocketService.joinStudySession(sessionId);
     };
     const handleConnected = () => {
-      joinRoom();
+      // При первом подключении тоже заходим, но только если ещё не зашли
+      if (!joinedRef.current) {
+        joinRoom();
+      }
     };
 
     webSocketService.on('reconnected', handleReconnect);
@@ -98,7 +102,18 @@ const StudySessionRoom: React.FC = () => {
     const handleStateUpdate = (data: any) => {
       console.log('📦 Получено обновление состояния сессии:', data);
       if (data.session) setSession(data.session);
-      if (data.messages) setMessages(data.messages);
+    };
+
+    const handleInitialMessages = (msgs: any[]) => {
+      console.log('📨 Получены начальные сообщения:', msgs);
+      const chatMsgs: ChatMessage[] = msgs.map((msg: any) => ({
+        _id: msg._id,
+        userId: msg.userId,
+        userName: msg.userName || msg.userId?.name,
+        content: msg.content,
+        createdAt: msg.createdAt,
+      }));
+      setMessages(chatMsgs);
     };
 
     const handleNewMessage = (msg: any) => {
@@ -126,6 +141,7 @@ const StudySessionRoom: React.FC = () => {
     const handleError = (err: any) => console.error('❌ Ошибка учебной сессии:', err);
 
     webSocketService.on('study_session_state', handleStateUpdate);
+    webSocketService.on('study_session_messages', handleInitialMessages);
     webSocketService.on('study_session_message', handleNewMessage);
     webSocketService.on('study_session_flashcard_change', handleFlashcardChange);
     webSocketService.on('study_session_timer_update', handleTimerUpdate);
@@ -138,12 +154,14 @@ const StudySessionRoom: React.FC = () => {
       webSocketService.off('reconnected', handleReconnect);
       webSocketService.off('connected', handleConnected);
       webSocketService.off('study_session_state', handleStateUpdate);
+      webSocketService.off('study_session_messages', handleInitialMessages);
       webSocketService.off('study_session_message', handleNewMessage);
       webSocketService.off('study_session_flashcard_change', handleFlashcardChange);
       webSocketService.off('study_session_timer_update', handleTimerUpdate);
       webSocketService.off('study_session_participant_joined', handleParticipantJoined);
       webSocketService.off('study_session_participant_left', handleParticipantLeft);
       webSocketService.off('study_session_error', handleError);
+      joinedRef.current = false;
     };
   }, [sessionId, loadSession]);
 
@@ -163,7 +181,10 @@ const StudySessionRoom: React.FC = () => {
 
   const handleTimerComplete = async (type: 'work' | 'break') => {};
 
-  const currentFlashcard = session?.flashcards[session.currentFlashcardIndex]?.flashcardId;
+  const subjectName = session?.subjectId?.name || 'Без предмета';
+  const flashcardList = session?.flashcards || [];
+  const currentIndex = session?.currentFlashcardIndex ?? 0;
+  const currentFlashcard = flashcardList.length > 0 ? flashcardList[currentIndex]?.flashcardId : null;
 
   const handleFlashcardAction = async (action: 'next' | 'previous' | 'answer', answer?: 'correct' | 'incorrect') => {
     if (!session) return;
@@ -176,7 +197,6 @@ const StudySessionRoom: React.FC = () => {
     } catch (err) { console.error(err); }
   };
 
-  // Отправка сообщения через WebSocket
   const sendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
@@ -222,7 +242,7 @@ const StudySessionRoom: React.FC = () => {
           <div className="session-info">
             <h1>{session.name}</h1>
             <div className="session-meta">
-              <span className="subject-badge">{session.subjectId.name}</span>
+              <span className="subject-badge">{subjectName}</span>
               {session.groupId && <span className="group-badge">{session.groupId.name}</span>}
               <span className="access-badge">{session.accessType === 'public' ? 'Публичная' : session.accessType === 'friends' ? 'Для друзей' : 'Приватная'}</span>
               <span className="mode-badge">{session.studyMode === 'collaborative' ? 'Совместный' : session.studyMode === 'individual' ? 'Индивидуальный' : 'Ведущий управляет'}</span>
@@ -276,7 +296,7 @@ const StudySessionRoom: React.FC = () => {
             {currentFlashcard && (
               <div className="flashcard-section">
                 <div className="flashcard-card" style={{ background: 'white', borderRadius: '12px', padding: '20px' }}>
-                  <h3 style={{ marginTop: 0 }}>Карточка {session.currentFlashcardIndex + 1} из {session.flashcards.length}</h3>
+                  <h3 style={{ marginTop: 0 }}>Карточка {currentIndex + 1} из {flashcardList.length}</h3>
                   <div className="flashcard-question" style={{ fontSize: '1.2rem', margin: '16px 0' }}>{currentFlashcard.question}</div>
                   {currentFlashcard.hint && <div className="flashcard-hint" style={{ background: '#fef3c7', padding: '8px', borderRadius: '8px', marginBottom: '12px' }}>💡 {currentFlashcard.hint}</div>}
                   <details style={{ marginBottom: '16px' }}>

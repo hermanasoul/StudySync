@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { studySessionsAPI, flashcardsAPI, subjectsAPI, groupsAPI, friendsAPI } from '../services/api';
+// client/src/components/CreateStudySessionModal.tsx
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { studySessionsAPI, flashcardsAPI, friendsAPI } from '../services/api';
 import './CreateStudySessionModal.css';
 
 interface Subject {
-  _id: string;
+  _id?: string;
+  id?: string;
   name: string;
   color?: string;
   icon?: string;
@@ -73,21 +76,9 @@ const CreateStudySessionModal: React.FC<CreateStudySessionModalProps> = ({
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
   const [loadingFriends, setLoadingFriends] = useState(false);
 
-  // Загружаем карточки при выборе предмета
-  useEffect(() => {
-    if (subjectId) {
-      fetchFlashcards();
-    }
-  }, [subjectId]);
-
-  // Загружаем друзей, если выбрана приватная сессия
-  useEffect(() => {
-    if (accessType === 'private') {
-      loadFriends();
-    }
-  }, [accessType]);
-
-  const fetchFlashcards = async () => {
+  // Загрузка карточек при изменении subjectId
+  const fetchFlashcards = useCallback(async () => {
+    if (!subjectId) return;
     try {
       setFlashcardsLoading(true);
       const response = await flashcardsAPI.getBySubject(subjectId);
@@ -99,21 +90,31 @@ const CreateStudySessionModal: React.FC<CreateStudySessionModalProps> = ({
     } finally {
       setFlashcardsLoading(false);
     }
-  };
+  }, [subjectId]);
 
-  const loadFriends = async () => {
-    setLoadingFriends(true);
-    try {
-      const response = await friendsAPI.getFriends({ status: 'accepted', limit: 100 });
-      if (response.data.success) {
-        setFriends(response.data.data);
-      }
-    } catch (err) {
-      console.error('Error loading friends:', err);
-    } finally {
-      setLoadingFriends(false);
+  useEffect(() => {
+    fetchFlashcards();
+  }, [fetchFlashcards]);
+
+  // Загрузка друзей при выборе приватного доступа
+  useEffect(() => {
+    if (accessType === 'private') {
+      const loadFriends = async () => {
+        setLoadingFriends(true);
+        try {
+          const response = await friendsAPI.getFriends({ status: 'accepted', limit: 100 });
+          if (response.data.success) {
+            setFriends(response.data.data);
+          }
+        } catch (err) {
+          console.error('Error loading friends:', err);
+        } finally {
+          setLoadingFriends(false);
+        }
+      };
+      loadFriends();
     }
-  };
+  }, [accessType]);
 
   const handleNextStep = () => {
     if (step === 1 && (!name.trim() || !subjectId)) {
@@ -169,7 +170,7 @@ const CreateStudySessionModal: React.FC<CreateStudySessionModalProps> = ({
       const sessionData = {
         name: name.trim(),
         description: description.trim(),
-        subjectId,
+        subjectId,   // теперь это гарантированно ID
         groupId: groupId || undefined,
         accessType,
         studyMode,
@@ -198,6 +199,9 @@ const CreateStudySessionModal: React.FC<CreateStudySessionModalProps> = ({
       setLoading(false);
     }
   };
+
+  // Безопасное получение ID предмета
+  const getSubjectId = (subject: Subject) => subject._id || subject.id || '';
 
   const renderStep1 = () => (
     <div className="create-session-step">
@@ -243,8 +247,8 @@ const CreateStudySessionModal: React.FC<CreateStudySessionModalProps> = ({
           >
             <option value="">Выберите предмет</option>
             {subjects.map(subject => (
-              <option key={subject._id} value={subject._id}>
-                {subject.icon} {subject.name}
+              <option key={getSubjectId(subject)} value={getSubjectId(subject)}>
+                {subject.icon ? `${subject.icon} ` : ''}{subject.name}
               </option>
             ))}
           </select>

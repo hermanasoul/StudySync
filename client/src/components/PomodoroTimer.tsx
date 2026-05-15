@@ -35,14 +35,17 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
   const [localActive, setLocalActive] = useState(isActive);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Ref для предотвращения одновременных вызовов onTimerUpdate
+  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Синхронизация с пропсами (только при реальном изменении)
+  // Синхронизация с пропсами БЕЗ localRemaining в зависимостях
   useEffect(() => {
-    if (remainingSeconds !== localRemaining) {
-      setLocalRemaining(remainingSeconds);
-    }
+    setLocalRemaining(remainingSeconds);
+  }, [remainingSeconds]);
+
+  useEffect(() => {
     setLocalActive(isActive);
-  }, [remainingSeconds, isActive, localRemaining]);
+  }, [isActive]);
 
   // Основной таймер
   useEffect(() => {
@@ -65,6 +68,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
               const newType = timerType === 'work' ? 'break' : 'work';
               const newDuration = newType === 'work' ? workDuration * 60 : breakDuration * 60;
               
+              // Отправляем обновление родителю
               onTimerUpdate({
                 active: true,
                 type: newType,
@@ -91,18 +95,25 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [localActive, disabled, timerType, workDuration, breakDuration, autoSwitch, onTimerUpdate, onTimerComplete, localRemaining]);
+  }, [localActive, disabled, timerType, workDuration, breakDuration, autoSwitch, onTimerUpdate, onTimerComplete]);
 
-  // Обновляем родительский компонент при изменении оставшегося времени
+  // Отправка обновлений родителю только при изменении localRemaining (один раз в секунду)
   useEffect(() => {
     if (localRemaining !== remainingSeconds) {
-      onTimerUpdate({
-        active: localActive,
-        type: timerType,
-        remaining: localRemaining,
-        startTime: localActive ? new Date() : undefined
-      });
+      // Используем debounce, чтобы не слать слишком часто
+      if (updateTimeoutRef.current) clearTimeout(updateTimeoutRef.current);
+      updateTimeoutRef.current = setTimeout(() => {
+        onTimerUpdate({
+          active: localActive,
+          type: timerType,
+          remaining: localRemaining,
+          startTime: localActive ? new Date() : undefined
+        });
+      }, 100);
     }
+    return () => {
+      if (updateTimeoutRef.current) clearTimeout(updateTimeoutRef.current);
+    };
   }, [localRemaining, localActive, timerType, onTimerUpdate, remainingSeconds]);
 
   const playSound = () => {

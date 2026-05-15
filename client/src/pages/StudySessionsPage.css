@@ -3,6 +3,7 @@
 .study-sessions-page {
   min-height: 100vh;
   background: #f1f5f9;
+  padding-top: 140px; /* отступ под фиксированную шапку */
 }
 
 .page-content {
@@ -11,6 +12,7 @@
   padding: 24px 20px;
 }
 
+/* Верхняя строка */
 .page-top-row {
   display: flex;
   justify-content: space-between;
@@ -38,6 +40,7 @@
   flex-shrink: 0;
 }
 
+/* Кнопки */
 .btn {
   padding: 8px 18px;
   border-radius: 10px;
@@ -70,6 +73,7 @@
   background: #f8fafc;
 }
 
+/* Статистика */
 .stats-row {
   display: flex;
   gap: 12px;
@@ -98,6 +102,7 @@
   margin-top: 2px;
 }
 
+/* Фильтры */
 .filters-row {
   display: flex;
   align-items: flex-end;
@@ -148,17 +153,18 @@
   cursor: pointer;
 }
 
+/* Сетка сессий */
 .sessions-content {
   margin-top: 8px;
 }
 
-/* !!! Увеличена минимальная ширина колонки до 340px */
 .sessions-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 20px;
 }
 
+/* Загрузка */
 .loading-container {
   display: flex;
   flex-direction: column;
