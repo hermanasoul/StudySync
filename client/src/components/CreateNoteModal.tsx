@@ -1,6 +1,6 @@
 // client/src/components/CreateNoteModal.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { notesAPI, achievementsAPI } from '../services/api';
 import './CreateNoteModal.css';
 
@@ -17,14 +17,55 @@ const CreateNoteModal: React.FC<CreateNoteModalProps> = ({ isOpen, onClose, onSu
   const [tags, setTags] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const isSubmitting = useRef(false);
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Сброс флага при открытии модалки
+  useEffect(() => {
+    if (isOpen) {
+      isSubmitting.current = false;
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
+  const extractError = (data: any): string => {
+    if (typeof data === 'string') return data;
+    if (data?.error) {
+      if (typeof data.error === 'string') return data.error;
+      if (data.error.message) return data.error.message;
+      if (data.error.errors) {
+        return Object.values(data.error.errors).map((e: any) => e.message).join('; ');
+      }
+      return JSON.stringify(data.error);
+    }
+    if (data?.message) return data.message;
+    return 'Ошибка при создании заметки';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) { setError('Введите заголовок'); return; }
-    if (!content.trim()) { setError('Введите содержание'); return; }
-    if (!subjectId) { setError('Не указан предмет'); return; }
+
+    // Блокировка: если уже отправляется, ничего не делаем
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
+
+    // Валидация
+    if (!title.trim()) {
+      setError('Введите заголовок');
+      isSubmitting.current = false;
+      return;
+    }
+    if (!content.trim()) {
+      setError('Введите содержание');
+      isSubmitting.current = false;
+      return;
+    }
+    if (!subjectId) {
+      setError('Не указан предмет');
+      isSubmitting.current = false;
+      return;
+    }
 
     setLoading(true);
     setError('');
@@ -50,11 +91,12 @@ const CreateNoteModal: React.FC<CreateNoteModalProps> = ({ isOpen, onClose, onSu
       onSubmit({ title: title.trim(), content: content.trim(), tags: tagArray });
       onClose();
     } catch (err: any) {
-      console.error('Create note error:', err);
-      const msg = err.response?.data?.error || err.response?.data?.errors?.[0]?.msg || 'Ошибка при создании заметки';
+      const msg = extractError(err.response?.data);
       setError(msg);
     } finally {
       setLoading(false);
+      // Разблокируем только после полного завершения (успех или ошибка)
+      isSubmitting.current = false;
     }
   };
 
@@ -81,7 +123,9 @@ const CreateNoteModal: React.FC<CreateNoteModalProps> = ({ isOpen, onClose, onSu
           </div>
           <div className="form-actions">
             <button type="button" onClick={onClose} className="btn-outline" disabled={loading}>Отмена</button>
-            <button type="submit" className="btn-primary" disabled={loading || !title.trim() || !content.trim()}>Создать</button>
+            <button ref={submitButtonRef} type="submit" className="btn-primary" disabled={loading || !title.trim() || !content.trim() || isSubmitting.current}>
+              {loading ? 'Создание...' : 'Создать'}
+            </button>
           </div>
         </form>
       </div>

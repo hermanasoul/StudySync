@@ -11,6 +11,7 @@ interface ConfirmModalProps {
   message: string;
   confirmText?: string;
   cancelText?: string;
+  error?: string | null;
 }
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -19,40 +20,26 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onConfirm,
   title,
   message,
-  confirmText = 'Удалить',
-  cancelText = 'Отмена'
+  confirmText = 'Подтвердить',
+  cancelText = 'Отмена',
+  error
 }) => {
   if (!isOpen) return null;
 
-  const handleConfirm = () => {
-    onConfirm();
-    onClose();
-  };
-
   return (
-    <div className="confirm-modal-overlay">
-      <div className="confirm-modal-content">
-        <div className="confirm-modal-header">
-          <h3>{title}</h3>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>{title}</h2>
+          <button className="close-button" onClick={onClose}>×</button>
         </div>
-        
-        <div className="confirm-modal-body">
+        <div className="modal-body">
+          {error && <div className="error-message"><strong>Ошибка:</strong> {error}</div>}
           <p>{message}</p>
         </div>
-
-        <div className="confirm-modal-actions">
-          <button 
-            className="btn-cancel"
-            onClick={onClose}
-          >
-            {cancelText}
-          </button>
-          <button 
-            className="btn-confirm"
-            onClick={handleConfirm}
-          >
-            {confirmText}
-          </button>
+        <div className="modal-actions">
+          <button className="btn-outline" onClick={onClose}>{cancelText}</button>
+          <button className="btn-danger" onClick={onConfirm}>{confirmText}</button>
         </div>
       </div>
     </div>

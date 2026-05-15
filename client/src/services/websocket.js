@@ -1,5 +1,3 @@
-// client\src\services\websocket.js
-
 import { io } from 'socket.io-client';
 
 class WebSocketService {
@@ -20,7 +18,6 @@ class WebSocketService {
     }
 
     try {
-      // Извлекаем userId из токена
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         this.userId = payload.id;
@@ -28,14 +25,16 @@ class WebSocketService {
         console.error('Error parsing token:', e);
       }
 
-      this.socket = io(process.env.REACT_APP_WS_URL || 'http://localhost:5000', {
+      const wsUrl = 'http://localhost:5000';
+
+      this.socket = io(wsUrl, {
         auth: { token },
         transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionAttempts: this.maxReconnectAttempts,
         reconnectionDelay: this.reconnectDelay,
         timeout: 10000,
-        query: { token }
+        query: { token },
       });
 
       this.setupEventHandlers();
@@ -58,9 +57,7 @@ class WebSocketService {
       console.log('❌ WebSocket disconnected:', reason);
       this.isConnected = false;
       this.emit('disconnected', reason);
-      
       if (reason === 'io server disconnect') {
-        // Сервер отключил нас, нужно переподключиться
         this.socket.connect();
       }
     });
@@ -88,81 +85,35 @@ class WebSocketService {
       this.emit('reconnect-failed');
     });
 
-    // Обработка пользовательских событий
-    this.socket.on('new-flashcard', (data) => {
-      this.emit('new-flashcard', data);
-    });
+    // Внешние события
+    this.socket.on('new-flashcard', (data) => { this.emit('new-flashcard', data); });
+    this.socket.on('new-note', (data) => { this.emit('new-note', data); });
+    this.socket.on('member-joined', (data) => { this.emit('member-joined', data); });
+    this.socket.on('flashcard-updated', (data) => { this.emit('flashcard-updated', data); });
+    this.socket.on('user-activity-update', (data) => { this.emit('user-activity-update', data); });
+    this.socket.on('group-invitation', (data) => { this.emit('group-invitation', data); });
+    this.socket.on('notification', (data) => { this.emit('notification', data); });
+    this.socket.on('group-notification', (data) => { this.emit('group-notification', data); });
+    this.socket.on('study-progress-update', (data) => { this.emit('study-progress-update', data); });
 
-    this.socket.on('new-note', (data) => {
-      this.emit('new-note', data);
-    });
+    // Учебные сессии
+    this.socket.on('study_session_state', (data) => { this.emit('study_session_state', data); });
+    this.socket.on('study_session_participant_joined', (data) => { this.emit('study_session_participant_joined', data); });
+    this.socket.on('study_session_participant_left', (data) => { this.emit('study_session_participant_left', data); });
+    this.socket.on('study_session_message', (data) => { this.emit('study_session_message', data); });
+    this.socket.on('study_session_timer_update', (data) => { this.emit('study_session_timer_update', data); });
+    this.socket.on('study_session_flashcard_change', (data) => { this.emit('study_session_flashcard_change', data); });
+    this.socket.on('study_session_flashcard_answer', (data) => { this.emit('study_session_flashcard_answer', data); });
+    this.socket.on('study_session_user_status', (data) => { this.emit('study_session_user_status', data); });
+    this.socket.on('study_session_error', (data) => { this.emit('study_session_error', data); });
 
-    this.socket.on('member-joined', (data) => {
-      this.emit('member-joined', data);
-    });
+    // Чаты
+    this.socket.on('new_message', (data) => { this.emit('new_message', data); });
+    this.socket.on('message_updated', (data) => { this.emit('message_updated', data); });
+    this.socket.on('message_deleted', (data) => { this.emit('message_deleted', data); });
+    this.socket.on('chat_updated', (data) => { this.emit('chat_updated', data); });
 
-    this.socket.on('flashcard-updated', (data) => {
-      this.emit('flashcard-updated', data);
-    });
-
-    this.socket.on('user-activity-update', (data) => {
-      this.emit('user-activity-update', data);
-    });
-
-    this.socket.on('group-invitation', (data) => {
-      this.emit('group-invitation', data);
-    });
-
-    this.socket.on('notification', (data) => {
-      this.emit('notification', data);
-    });
-
-    this.socket.on('group-notification', (data) => {
-      this.emit('group-notification', data);
-    });
-
-    this.socket.on('study-progress-update', (data) => {
-      this.emit('study-progress-update', data);
-    });
-
-    // Обработка событий учебных сессий
-    this.socket.on('study_session_state', (data) => {
-      this.emit('study_session_state', data);
-    });
-
-    this.socket.on('study_session_participant_joined', (data) => {
-      this.emit('study_session_participant_joined', data);
-    });
-
-    this.socket.on('study_session_participant_left', (data) => {
-      this.emit('study_session_participant_left', data);
-    });
-
-    this.socket.on('study_session_message', (data) => {
-      this.emit('study_session_message', data);
-    });
-
-    this.socket.on('study_session_timer_update', (data) => {
-      this.emit('study_session_timer_update', data);
-    });
-
-    this.socket.on('study_session_flashcard_change', (data) => {
-      this.emit('study_session_flashcard_change', data);
-    });
-
-    this.socket.on('study_session_flashcard_answer', (data) => {
-      this.emit('study_session_flashcard_answer', data);
-    });
-
-    this.socket.on('study_session_user_status', (data) => {
-      this.emit('study_session_user_status', data);
-    });
-
-    this.socket.on('study_session_error', (data) => {
-      this.emit('study_session_error', data);
-    });
-
-    // Ping-pong для поддержания соединения
+    // Ping-pong
     setInterval(() => {
       if (this.socket && this.isConnected) {
         this.socket.emit('ping');
@@ -170,7 +121,6 @@ class WebSocketService {
     }, 30000);
   }
 
-  // Подписка на события
   on(event, handler) {
     if (!this.eventHandlers.has(event)) {
       this.eventHandlers.set(event, []);
@@ -178,7 +128,6 @@ class WebSocketService {
     this.eventHandlers.get(event).push(handler);
   }
 
-  // Отписка от событий
   off(event, handler) {
     if (this.eventHandlers.has(event)) {
       const handlers = this.eventHandlers.get(event);
@@ -189,7 +138,6 @@ class WebSocketService {
     }
   }
 
-  // Вызов обработчиков событий
   emit(event, data) {
     if (this.eventHandlers.has(event)) {
       this.eventHandlers.get(event).forEach(handler => {
@@ -202,128 +150,47 @@ class WebSocketService {
     }
   }
 
-  // Отправка событий на сервер
   send(event, data) {
     if (this.socket && this.isConnected) {
+      console.log(`📤 Sending event ${event}:`, data);
       this.socket.emit(event, data);
     } else {
       console.warn(`Cannot send event ${event}: WebSocket not connected`);
     }
   }
 
-  // Существующие методы для групп
-  joinGroup(groupId) {
-    this.send('join_group', groupId);
-  }
+  // === Методы для чатов ===
+  joinChat(chatId) { this.send('join_chat', chatId); }
+  leaveChat(chatId) { this.send('leave_chat', chatId); }
 
-  leaveGroup(groupId) {
-    this.send('leave_group', groupId);
-  }
+  // === Методы групп ===
+  joinGroup(groupId) { this.send('join_group', groupId); }
+  leaveGroup(groupId) { this.send('leave_group', groupId); }
+  sendGroupMessage(groupId, content) { this.send('group_message', { groupId, content }); }
+  sendFlashcardCreated(groupId, flashcard) { this.send('flashcard-created', { groupId, flashcard }); }
+  sendNoteCreated(groupId, note) { this.send('note-created', { groupId, note }); }
+  sendInviteSent(groupId, invitedUserId) { this.send('invite-sent', { groupId, invitedUserId }); }
+  sendUserActivity(subjectId, groupId, action) { this.send('user-activity', { subjectId, groupId, action }); }
+  sendFlashcardStudied(flashcardId, subjectId, isCorrect) { this.send('flashcard-studied', { flashcardId, subjectId, isCorrect }); }
 
-  sendGroupMessage(groupId, content) {
-    this.send('group_message', { groupId, content });
-  }
+  // === Методы для учебных сессий ===
+  joinStudySession(sessionId) { this.send('study_session_join', { sessionId }); }
+  leaveStudySession(sessionId) { this.send('study_session_leave', { sessionId }); }
+  sendStudySessionMessage(sessionId, content) { this.send('study_session_message', { sessionId, content }); }
+  updateStudySessionTimer(sessionId, timerState) { this.send('study_session_timer_update', { sessionId, timerState }); }
+  changeStudySessionFlashcard(sessionId, flashcardIndex) { this.send('study_session_flashcard_change', { sessionId, flashcardIndex }); }
+  answerStudySessionFlashcard(sessionId, flashcardId, isCorrect) { this.send('study_session_flashcard_answer', { sessionId, flashcardId, isCorrect }); }
+  updateStudySessionUserStatus(sessionId, status) { this.send('study_session_user_status', { sessionId, status }); }
 
-  sendFlashcardStudied(flashcardId, subjectId, isCorrect) {
-    this.send('flashcard-studied', {
-      flashcardId,
-      subjectId,
-      isCorrect
-    });
-  }
+  onStudySessionState(handler) { this.on('study_session_state', handler); }
+  onStudySessionParticipantJoined(handler) { this.on('study_session_participant_joined', handler); }
+  onStudySessionParticipantLeft(handler) { this.on('study_session_participant_left', handler); }
+  onStudySessionMessage(handler) { this.on('study_session_message', handler); }
+  onStudySessionTimerUpdate(handler) { this.on('study_session_timer_update', handler); }
+  onStudySessionFlashcardChange(handler) { this.on('study_session_flashcard_change', handler); }
+  onStudySessionFlashcardAnswer(handler) { this.on('study_session_flashcard_answer', handler); }
+  onStudySessionError(handler) { this.on('study_session_error', handler); }
 
-  sendFlashcardCreated(groupId, flashcard) {
-    this.send('flashcard-created', {
-      groupId,
-      flashcard
-    });
-  }
-
-  sendNoteCreated(groupId, note) {
-    this.send('note-created', {
-      groupId,
-      note
-    });
-  }
-
-  sendInviteSent(groupId, invitedUserId) {
-    this.send('invite-sent', {
-      groupId,
-      invitedUserId
-    });
-  }
-
-  sendUserActivity(subjectId, groupId, action) {
-    this.send('user-activity', {
-      subjectId,
-      groupId,
-      action
-    });
-  }
-
-  // Методы для учебных сессий
-  joinStudySession(sessionId) {
-    this.send('study_session_join', { sessionId });
-  }
-
-  leaveStudySession(sessionId) {
-    this.send('study_session_leave', { sessionId });
-  }
-
-  sendStudySessionMessage(sessionId, content) {
-    this.send('study_session_message', { sessionId, content });
-  }
-
-  updateStudySessionTimer(sessionId, timerState) {
-    this.send('study_session_timer_update', { sessionId, timerState });
-  }
-
-  changeStudySessionFlashcard(sessionId, flashcardIndex) {
-    this.send('study_session_flashcard_change', { sessionId, flashcardIndex });
-  }
-
-  answerStudySessionFlashcard(sessionId, flashcardId, isCorrect) {
-    this.send('study_session_flashcard_answer', { sessionId, flashcardId, isCorrect });
-  }
-
-  updateStudySessionUserStatus(sessionId, status) {
-    this.send('study_session_user_status', { sessionId, status });
-  }
-
-  // Вспомогательные методы для учебных сессий
-  onStudySessionState(handler) {
-    this.on('study_session_state', handler);
-  }
-
-  onStudySessionParticipantJoined(handler) {
-    this.on('study_session_participant_joined', handler);
-  }
-
-  onStudySessionParticipantLeft(handler) {
-    this.on('study_session_participant_left', handler);
-  }
-
-  onStudySessionMessage(handler) {
-    this.on('study_session_message', handler);
-  }
-
-  onStudySessionTimerUpdate(handler) {
-    this.on('study_session_timer_update', handler);
-  }
-
-  onStudySessionFlashcardChange(handler) {
-    this.on('study_session_flashcard_change', handler);
-  }
-
-  onStudySessionFlashcardAnswer(handler) {
-    this.on('study_session_flashcard_answer', handler);
-  }
-
-  onStudySessionError(handler) {
-    this.on('study_session_error', handler);
-  }
-
-  // Отключение
   disconnect() {
     if (this.socket) {
       this.socket.disconnect();
@@ -335,22 +202,18 @@ class WebSocketService {
     }
   }
 
-  // Получение статуса подключения
   getStatus() {
     return {
       isConnected: this.isConnected,
       reconnectAttempts: this.reconnectAttempts,
-      userId: this.userId
+      userId: this.userId,
     };
   }
 
-  // Проверка соединения
   checkConnection() {
     return this.isConnected && this.socket && this.socket.connected;
   }
 }
 
-// Создаем глобальный экземпляр
 const webSocketService = new WebSocketService();
-
 export default webSocketService;

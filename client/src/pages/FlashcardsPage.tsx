@@ -17,7 +17,6 @@ interface Flashcard {
   answer: string;
   hint?: string;
   subjectId: string;
-  known: boolean;
 }
 
 const FlashcardsPage: React.FC = () => {
@@ -40,24 +39,20 @@ const FlashcardsPage: React.FC = () => {
     if (!validSubjectId) return;
     try {
       setLoading(true);
-      let response;
-      if (mode === 'study') {
-        response = await flashcardsAPI.getForStudy(validSubjectId);
-      } else {
-        response = await flashcardsAPI.getBySubject(validSubjectId);
-      }
+      const response = mode === 'study'
+        ? await flashcardsAPI.getForStudy(validSubjectId)
+        : await flashcardsAPI.getBySubject(validSubjectId);
       if (response.data.success) {
-        const cards = (response.data.flashcards || []).map((c: any) => ({
+        setFlashcards((response.data.flashcards || []).map((c: any) => ({
           ...c,
-          _id: c.id || c._id,
-        }));
-        setFlashcards(cards);
+          _id: c._id || c.id
+        })));
         setCurrentCard(0);
         setShowAnswer(false);
         setStudiedCards([]);
       }
-    } catch (error) {
-      console.error('Error loading flashcards:', error);
+    } catch (err) {
+      console.error('Error loading flashcards:', err);
       setFlashcards([]);
     } finally {
       setLoading(false);
@@ -72,11 +67,11 @@ const FlashcardsPage: React.FC = () => {
   useEffect(() => {
     if (validSubjectId && mode === 'study') {
       webSocketService.sendUserActivity(validSubjectId, null, 'studying_flashcards');
-      const handleFlashcardUpdated = (data: any) => {
+      const handler = (data: any) => {
         if (data.subjectId === validSubjectId) console.log(`Карточка обновлена`);
       };
-      webSocketService.on('flashcard-updated', handleFlashcardUpdated);
-      return () => { webSocketService.off('flashcard-updated', handleFlashcardUpdated); };
+      webSocketService.on('flashcard-updated', handler);
+      return () => { webSocketService.off('flashcard-updated', handler); };
     }
   }, [validSubjectId, mode]);
 
@@ -93,27 +88,29 @@ const FlashcardsPage: React.FC = () => {
     );
   }
 
-  const handleCreateFlashcard = () => loadFlashcards();
+  const handleCreateFlashcard = (newCard: Flashcard) => {
+    setFlashcards(prev => [newCard, ...prev]);
+    setShowCreateModal(false);
+  };
 
-  const handleEditFlashcard = (updatedFlashcard?: Flashcard) => {
-    if (updatedFlashcard) {
-      setFlashcards(prev => prev.map(c => c._id === updatedFlashcard._id ? { ...c, ...updatedFlashcard } : c));
-    } else {
-      loadFlashcards();
+  const handleEditFlashcard = (updated?: Flashcard) => {
+    if (updated) {
+      setFlashcards(prev => prev.map(c => c._id === updated._id ? { ...c, ...updated } : c));
     }
     setShowEditModal(false);
     setEditingFlashcard(null);
   };
 
-  const handleDeleteFlashcard = async () => {
-    if (!editingFlashcard) return;
+  const handleDeleteCard = async (cardId: string) => {
     try {
-      await flashcardsAPI.delete(editingFlashcard._id);
-      setFlashcards(prev => prev.filter(c => c._id !== editingFlashcard._id));
-      setShowEditModal(false);
-      setEditingFlashcard(null);
-    } catch (error) {
-      console.error('Error deleting flashcard:', error);
+      await flashcardsAPI.delete(cardId);
+      setFlashcards(prev => prev.filter(c => c._id !== cardId));
+      if (editingFlashcard?._id === cardId) {
+        setShowEditModal(false);
+        setEditingFlashcard(null);
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
       setError('Ошибка при удалении карточки');
     }
   };
@@ -125,10 +122,7 @@ const FlashcardsPage: React.FC = () => {
       webSocketService.sendFlashcardStudied(card._id, validSubjectId!, true);
       if (!studiedCards.includes(card._id)) setStudiedCards([...studiedCards, card._id]);
       nextCard();
-    } catch (error) {
-      console.error(error);
-      nextCard();
-    }
+    } catch (e) { console.error(e); nextCard(); }
   };
 
   const handleDontKnow = async () => {
@@ -138,10 +132,7 @@ const FlashcardsPage: React.FC = () => {
       webSocketService.sendFlashcardStudied(card._id, validSubjectId!, false);
       if (!studiedCards.includes(card._id)) setStudiedCards([...studiedCards, card._id]);
       nextCard();
-    } catch (error) {
-      console.error(error);
-      nextCard();
-    }
+    } catch (e) { console.error(e); nextCard(); }
   };
 
   const nextCard = () => {
@@ -154,7 +145,7 @@ const FlashcardsPage: React.FC = () => {
   };
 
   const startStudy = () => setMode('study');
-  const exitStudy = () => { setMode('view'); setShowStudyComplete(false); };
+  const exitStudy = () => { setMode('view'); setShowEditModal(false); setShowStudyComplete(false); };
   const restartStudy = () => {
     setCurrentCard(0);
     setShowAnswer(false);
@@ -166,9 +157,7 @@ const FlashcardsPage: React.FC = () => {
     return (
       <div className="flashcards-page">
         <Header />
-        <div className="page-with-header">
-          <div className="loading">Загрузка карточек...</div>
-        </div>
+        <div className="page-with-header"><div className="loading">Загрузка карточек...</div></div>
       </div>
     );
   }
@@ -189,20 +178,14 @@ const FlashcardsPage: React.FC = () => {
             <div className="flashcards-actions">
               {mode === 'view' && (
                 <>
-                  <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
-                    + Создать карточку
-                  </button>
+                  <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>+ Создать карточку</button>
                   {flashcards.length > 0 && (
-                    <button className="btn btn-success" onClick={startStudy}>
-                      🎯 Начать изучение
-                    </button>
+                    <button className="btn btn-success" onClick={startStudy}>🎯 Начать изучение</button>
                   )}
                 </>
               )}
               {mode === 'study' && (
-                <button className="btn btn-outline" onClick={exitStudy}>
-                  ← Вернуться к просмотру
-                </button>
+                <button className="btn btn-outline" onClick={exitStudy}>← Вернуться к просмотру</button>
               )}
             </div>
           </div>
@@ -214,34 +197,21 @@ const FlashcardsPage: React.FC = () => {
                   <div className="empty-icon">📚</div>
                   <h3>Пока нет карточек</h3>
                   <p>Создайте первую карточку для изучения</p>
-                  <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
-                    Создать карточку
-                  </button>
+                  <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>Создать карточку</button>
                 </div>
               ) : (
                 <div className="flashcards-grid">
                   {flashcards.map(card => (
                     <div key={card._id} className="flashcard-card">
                       <div className="flashcard-content">
-                        <div className="flashcard-question">
-                          <h3>{card.question}</h3>
-                          {card.hint && <div className="flashcard-hint">💡 {card.hint}</div>}
-                        </div>
-                        <div className="flashcard-answer">
-                          <p>{card.answer}</p>
-                        </div>
+                        <div className="flashcard-question"><h3>{card.question}</h3>{card.hint && <div className="flashcard-hint">💡 {card.hint}</div>}</div>
+                        <div className="flashcard-answer"><p>{card.answer}</p></div>
                       </div>
                       <div className="flashcard-actions">
-                        <button
-                          className="btn btn-outline"
-                          onClick={() => { setEditingFlashcard(card); setShowEditModal(true); }}
-                        >
+                        <button className="btn btn-outline" onClick={() => { setEditingFlashcard(card); setShowEditModal(true); }}>
                           Редактировать
                         </button>
-                        <button
-                          className="btn btn-danger"
-                          onClick={() => { setEditingFlashcard(card); handleDeleteFlashcard(); }}
-                        >
+                        <button className="btn btn-danger" onClick={() => handleDeleteCard(card._id)}>
                           Удалить
                         </button>
                       </div>
@@ -254,28 +224,19 @@ const FlashcardsPage: React.FC = () => {
 
           {mode === 'study' && flashcards.length > 0 && (
             <div className="study-mode">
-              <div className="study-progress">
-                Прогресс: {currentCard + 1} / {flashcards.length}
-              </div>
+              <div className="study-progress">Прогресс: {currentCard + 1} / {flashcards.length}</div>
               <div className="flashcard-study">
                 <div className="study-card">
                   <div className="card-question">
                     <h2>{flashcards[currentCard].question}</h2>
-                    {flashcards[currentCard].hint && (
-                      <div className="card-hint">💡 Подсказка: {flashcards[currentCard].hint}</div>
-                    )}
+                    {flashcards[currentCard].hint && <div className="card-hint">💡 {flashcards[currentCard].hint}</div>}
                   </div>
                   {showAnswer && (
-                    <div className="card-answer">
-                      <h3>Ответ:</h3>
-                      <p>{flashcards[currentCard].answer}</p>
-                    </div>
+                    <div className="card-answer"><h3>Ответ:</h3><p>{flashcards[currentCard].answer}</p></div>
                   )}
                   <div className="study-actions">
                     {!showAnswer ? (
-                      <button className="btn btn-primary" onClick={() => setShowAnswer(true)}>
-                        Показать ответ
-                      </button>
+                      <button className="btn btn-primary" onClick={() => setShowAnswer(true)}>Показать ответ</button>
                     ) : (
                       <div className="knowledge-actions">
                         <button className="btn btn-success" onClick={handleKnow}>Знаю ✅</button>
@@ -298,13 +259,13 @@ const FlashcardsPage: React.FC = () => {
           subjectId={validSubjectId}
         />
       )}
-      {editingFlashcard && (
+      {editingFlashcard && showEditModal && (
         <EditFlashcardModal
           isOpen={showEditModal}
           onClose={() => { setShowEditModal(false); setEditingFlashcard(null); }}
           flashcard={editingFlashcard}
           onFlashcardUpdated={handleEditFlashcard}
-          onFlashcardDeleted={handleDeleteFlashcard}
+          onFlashcardDeleted={() => handleDeleteCard(editingFlashcard._id)}
         />
       )}
       {showStudyComplete && (

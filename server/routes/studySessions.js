@@ -13,6 +13,7 @@ const { AppError, catchAsync } = require('../middleware/errorHandler');
 const mongoose = require('mongoose');
 const AchievementTriggers = require('../services/achievementTriggers');
 const Notification = require('../models/Notification');
+const { clearCacheOnMutation } = require('../middleware/cache');
 
 /**
  * @swagger
@@ -85,6 +86,124 @@ const Notification = require('../models/Notification');
  *         name:
  *           type: string
  */
+
+// ==================== ИСТОРИЯ СЕССИЙ ПОЛЬЗОВАТЕЛЯ ====================
+/**
+ * @swagger
+ * /study-sessions/history:
+ *   get:
+ *     summary: Получить историю завершённых учебных сессий пользователя
+ *     tags: [StudySessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: subjectId
+ *         schema:
+ *           type: string
+ *         description: Фильтр по ID предмета
+ *       - in: query
+ *         name: from
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Начальная дата (YYYY-MM-DD)
+ *       - in: query
+ *         name: to
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Конечная дата (YYYY-MM-DD)
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Номер страницы
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Количество элементов на странице
+ *     responses:
+ *       200:
+ *         description: История сессий
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 pagination:
+ *                   type: object
+ *                 sessions:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/StudySession'
+ */
+router.get('/history',
+  auth,
+  catchAsync(async (req, res, next) => {
+    const { subjectId, from, to, page = 1, limit = 20 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const limitNum = parseInt(limit);
+
+    const query = {
+      'participants.user': req.user.id,
+      status: 'completed'
+    };
+
+    if (subjectId) query.subjectId = subjectId;
+    if (from || to) {
+      query.createdAt = {};
+      if (from) query.createdAt.$gte = new Date(from);
+      if (to) query.createdAt.$lte = new Date(to);
+    }
+
+    const [sessions, total] = await Promise.all([
+      StudySession.find(query)
+        .populate('host', 'name avatarUrl')
+        .populate('subjectId', 'name icon color')
+        .populate('groupId', 'name')
+        .sort('-createdAt')
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      StudySession.countDocuments(query)
+    ]);
+
+    const sessionsWithUserStats = await Promise.all(sessions.map(async (session) => {
+      const participantStats = await StudySessionParticipant.findOne({
+        session: session._id,
+        user: req.user.id
+      }).select('stats').lean();
+
+      return {
+        ...session,
+        userStats: participantStats?.stats || {
+          timeSpent: 0,
+          cardsReviewed: 0,
+          correctAnswers: 0,
+          streak: 0
+        }
+      };
+    }));
+
+    res.json({
+      success: true,
+      pagination: {
+        page: parseInt(page),
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum)
+      },
+      count: sessionsWithUserStats.length,
+      sessions: sessionsWithUserStats
+    });
+  })
+);
 
 // ==================== СОЗДАНИЕ СЕССИИ ====================
 /**
@@ -172,6 +291,7 @@ const Notification = require('../models/Notification');
  */
 router.post('/', 
   auth,
+  clearCacheOnMutation(),
   catchAsync(async (req, res, next) => {
     const { 
       name, 
@@ -426,7 +546,7 @@ router.get('/active',
   })
 );
 
-// ==================== ПРИСОЕДИНЕНИЕ К СЕССИИ ====================
+// ==================== ПРИСОЕДИНЕНИЕ К СЕССИИ (ИСПРАВЛЕНО) ====================
 /**
  * @swagger
  * /study-sessions/{id}/join:
@@ -465,6 +585,7 @@ router.get('/active',
  */
 router.post('/:id/join',
   auth,
+  clearCacheOnMutation(),
   catchAsync(async (req, res, next) => {
     const session = await StudySession.findById(req.params.id)
       .populate('host', 'friends')
@@ -472,22 +593,36 @@ router.post('/:id/join',
 
     if (!session) return next(new AppError('Сессия не найдена', 404));
 
+    // Разрешаем хосту и уже существующим участникам всегда
+    if (session.host._id.toString() === req.user.id || session.participants.some(p => p.user._id.toString() === req.user.id)) {
+      // Обновляем статус, если нужно
+      await session.addParticipant(req.user.id);
+      const participantRecord = new StudySessionParticipant({
+        session: session._id,
+        user: req.user.id,
+        status: 'active'
+      });
+      await participantRecord.save();
+
+      const populatedSession = await StudySession.findById(session._id)
+        .populate('host', 'name avatarUrl level')
+        .populate('participants.user', 'name avatarUrl level')
+        .populate('subjectId', 'name')
+        .populate('flashcards.flashcardId');
+      return res.json({ success: true, message: 'Вы уже в сессии', session: populatedSession });
+    }
+
+    // Проверка доступа для новых участников
     if (session.accessType === 'private') {
       const isInvited = session.invitedUsers.some(id => id.toString() === req.user.id);
       if (!isInvited) return next(new AppError('Вы не приглашены в эту сессию', 403));
     } else if (session.accessType === 'friends') {
-      const isFriend = session.host.friends.some(friend => 
+      const host = await User.findById(session.host._id).select('friends');
+      const isFriend = host.friends.some(friend => 
         friend.userId && friend.userId.toString() === req.user.id && friend.status === 'accepted'
       );
-      if (!isFriend && !session.participants.some(p => p.user._id.toString() === req.user.id)) {
-        return next(new AppError('Сессия доступна только друзьям', 403));
-      }
+      if (!isFriend) return next(new AppError('Сессия доступна только друзьям', 403));
     }
-
-    const alreadyJoined = session.participants.some(p => 
-      p.user._id.toString() === req.user.id && p.status === 'active'
-    );
-    if (alreadyJoined) return next(new AppError('Вы уже присоединились к сессии', 400));
 
     await session.addParticipant(req.user.id);
 
@@ -630,6 +765,7 @@ router.get('/:id',
  */
 router.post('/:id/timer',
   auth,
+  clearCacheOnMutation(),
   catchAsync(async (req, res, next) => {
     const { action, timerType } = req.body;
     const session = await StudySession.findById(req.params.id);
@@ -764,6 +900,7 @@ router.post('/:id/timer',
  */
 router.post('/:id/flashcards',
   auth,
+  clearCacheOnMutation(),
   catchAsync(async (req, res, next) => {
     const { action, flashcardId, answer } = req.body;
     const session = await StudySession.findById(req.params.id);
@@ -905,6 +1042,7 @@ router.post('/:id/flashcards',
  */
 router.post('/:id/leave',
   auth,
+  clearCacheOnMutation(),
   catchAsync(async (req, res, next) => {
     const session = await StudySession.findById(req.params.id);
     if (!session) return next(new AppError('Сессия не найдена', 404));
@@ -1070,6 +1208,7 @@ router.get('/:id/stats',
  */
 router.post('/:id/invite',
   auth,
+  clearCacheOnMutation(),
   catchAsync(async (req, res, next) => {
     const { userIds } = req.body;
     const session = await StudySession.findById(req.params.id);
@@ -1165,6 +1304,7 @@ router.post('/:id/invite',
  */
 router.put('/:id/settings',
   auth,
+  clearCacheOnMutation(),
   catchAsync(async (req, res, next) => {
     const { studyMode, pomodoroSettings, notifications, accessType } = req.body;
     const session = await StudySession.findById(req.params.id);
@@ -1232,6 +1372,7 @@ router.put('/:id/settings',
  */
 router.post('/:id/start',
   auth,
+  clearCacheOnMutation(),
   catchAsync(async (req, res, next) => {
     const session = await StudySession.findById(req.params.id);
     if (!session) return next(new AppError('Сессия не найдена', 404));
@@ -1308,6 +1449,7 @@ router.post('/:id/start',
  */
 router.post('/:id/complete',
   auth,
+  clearCacheOnMutation(),
   catchAsync(async (req, res, next) => {
     const session = await StudySession.findById(req.params.id);
     if (!session) return next(new AppError('Сессия не найдена', 404));
@@ -1320,7 +1462,6 @@ router.post('/:id/complete',
     const ws = req.app.get('ws');
     if (ws) {
       const triggers = new AchievementTriggers(ws);
-      // Вызываем триггер завершения для всех активных участников
       const activeParticipants = session.participants.filter(p => p.status === 'active');
       for (const p of activeParticipants) {
         await triggers.onStudySessionCompleted(p.user, { session });
@@ -1328,129 +1469,6 @@ router.post('/:id/complete',
     }
     
     res.json({ success: true, message: 'Сессия завершена' });
-  })
-);
-
-// ==================== ИСТОРИЯ СЕССИЙ ПОЛЬЗОВАТЕЛЯ ====================
-/**
- * @swagger
- * /study-sessions/history:
- *   get:
- *     summary: Получить историю завершённых учебных сессий пользователя
- *     tags: [StudySessions]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: subjectId
- *         schema:
- *           type: string
- *         description: Фильтр по ID предмета
- *       - in: query
- *         name: from
- *         schema:
- *           type: string
- *           format: date
- *         description: Начальная дата (YYYY-MM-DD)
- *       - in: query
- *         name: to
- *         schema:
- *           type: string
- *           format: date
- *         description: Конечная дата (YYYY-MM-DD)
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Номер страницы
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 20
- *         description: Количество элементов на странице
- *     responses:
- *       200:
- *         description: История сессий
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 pagination:
- *                   type: object
- *                 sessions:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/StudySession'
- */
-router.get('/history',
-  auth,
-  catchAsync(async (req, res, next) => {
-    const { subjectId, from, to, page = 1, limit = 20 } = req.query;
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    const limitNum = parseInt(limit);
-
-    // Базовый фильтр: пользователь является участником и сессия завершена
-    const query = {
-      'participants.user': req.user.id,
-      status: 'completed'
-    };
-
-    if (subjectId) {
-      query.subjectId = subjectId;
-    }
-
-    if (from || to) {
-      query.createdAt = {};
-      if (from) query.createdAt.$gte = new Date(from);
-      if (to) query.createdAt.$lte = new Date(to);
-    }
-
-    const [sessions, total] = await Promise.all([
-      StudySession.find(query)
-        .populate('host', 'name avatarUrl')
-        .populate('subjectId', 'name icon color')
-        .populate('groupId', 'name')
-        .sort('-createdAt')
-        .skip(skip)
-        .limit(limitNum)
-        .lean(),
-      StudySession.countDocuments(query)
-    ]);
-
-    // Для каждой сессии подгружаем статистику текущего пользователя
-    const sessionsWithUserStats = await Promise.all(sessions.map(async (session) => {
-      const participantStats = await StudySessionParticipant.findOne({
-        session: session._id,
-        user: req.user.id
-      }).select('stats').lean();
-
-      return {
-        ...session,
-        userStats: participantStats?.stats || {
-          timeSpent: 0,
-          cardsReviewed: 0,
-          correctAnswers: 0,
-          streak: 0
-        }
-      };
-    }));
-
-    res.json({
-      success: true,
-      pagination: {
-        page: parseInt(page),
-        limit: limitNum,
-        total,
-        pages: Math.ceil(total / limitNum)
-      },
-      count: sessionsWithUserStats.length,
-      sessions: sessionsWithUserStats
-    });
   })
 );
 

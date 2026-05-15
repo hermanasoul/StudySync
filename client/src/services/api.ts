@@ -1,4 +1,4 @@
-// client\src\services\api.ts
+// client/src/services/api.ts
 
 import axios from 'axios';
 
@@ -26,7 +26,6 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Токен истек или недействителен
       localStorage.removeItem('studysync_token');
       localStorage.removeItem('studysync_user');
       window.location.href = '/login';
@@ -35,7 +34,7 @@ api.interceptors.response.use(
   }
 );
 
-// Интерфейсы для учебных сессий
+// Интерфейсы для учебных сессий (из исходного файла)
 export interface StudySession {
   _id: string;
   name: string;
@@ -167,10 +166,10 @@ export interface CreateStudySessionData {
     autoSwitch?: boolean;
   };
   flashcardIds?: string[];
-  invitedUsers?: string[]; // <-- добавить
+  invitedUsers?: string[];
 }
 
-// Существующие интерфейсы (оставлены для совместимости)
+// Существующие интерфейсы
 export interface Achievement {
   id: string;
   code: string;
@@ -201,78 +200,49 @@ export interface UserAchievement {
   updatedAt: string;
 }
 
-// Методы для работы с учебными сессиями
+// ====================== API-методы ======================
+
 export const studySessionsAPI = {
-  // Создание сессии
-  create: (data: CreateStudySessionData) => 
+  create: (data: CreateStudySessionData) =>
     api.post('/study-sessions', data),
-  
-  // Получение активных сессий
   getActive: (params?: {
     accessType?: string;
     subjectId?: string;
     groupId?: string;
     friendsOnly?: boolean;
   }) => api.get('/study-sessions/active', { params }),
-  
-  // Присоединение к сессии
-  join: (sessionId: string) => 
-    api.post(`/study-sessions/${sessionId}/join`),
-  
-  // Получение информации о сессии
-  getById: (sessionId: string) => 
-    api.get(`/study-sessions/${sessionId}`),
-  
-  // Управление таймером
-  updateTimer: (sessionId: string, data: { 
-    action: 'start' | 'pause' | 'reset' | 'switch'; 
-    timerType?: 'work' | 'break' 
+  join: (sessionId: string) => api.post(`/study-sessions/${sessionId}/join`),
+  getById: (sessionId: string) => api.get(`/study-sessions/${sessionId}`),
+  updateTimer: (sessionId: string, data: {
+    action: 'start' | 'pause' | 'reset' | 'switch';
+    timerType?: 'work' | 'break';
   }) => api.post(`/study-sessions/${sessionId}/timer`, data),
-  
-  // Управление карточками
   updateFlashcards: (sessionId: string, data: {
     action: 'next' | 'previous' | 'jump' | 'answer';
     flashcardId?: string;
     answer?: 'correct' | 'incorrect';
     index?: number;
   }) => api.post(`/study-sessions/${sessionId}/flashcards`, data),
-  
-  // Выход из сессии
-  leave: (sessionId: string) => 
-    api.post(`/study-sessions/${sessionId}/leave`),
-  
-  // Получение статистики
-  getStats: (sessionId: string) => 
-    api.get(`/study-sessions/${sessionId}/stats`),
-  
-  // Приглашение пользователей
-  invite: (sessionId: string, userIds: string[]) => 
+  leave: (sessionId: string) => api.post(`/study-sessions/${sessionId}/leave`),
+  getStats: (sessionId: string) => api.get(`/study-sessions/${sessionId}/stats`),
+  invite: (sessionId: string, userIds: string[]) =>
     api.post(`/study-sessions/${sessionId}/invite`, { userIds }),
-  
-  // Изменение настроек
   updateSettings: (sessionId: string, data: {
     studyMode?: string;
     pomodoroSettings?: any;
     notifications?: any;
     accessType?: string;
   }) => api.put(`/study-sessions/${sessionId}/settings`, data),
-  
-  // Получение сессий пользователя
-  getMySessions: (params?: { 
+  getMySessions: (params?: {
     status?: string;
     limit?: number;
     skip?: number;
   }) => api.get('/study-sessions/my', { params }),
-  
-  // Завершение сессии
-  complete: (sessionId: string) => 
+  complete: (sessionId: string) =>
     api.post(`/study-sessions/${sessionId}/complete`),
-
-  // Запуск сессии
-  start: (sessionId: string) => 
+  start: (sessionId: string) =>
     api.post(`/study-sessions/${sessionId}/start`),
-
-  getHistory: (params?: { 
+  getHistory: (params?: {
     subjectId?: string;
     from?: string;
     to?: string;
@@ -281,7 +251,6 @@ export const studySessionsAPI = {
   }) => api.get('/study-sessions/history', { params }),
 };
 
-// Существующие методы API (оставлены для совместимости)
 export const groupsAPI = {
   getMy: () => api.get('/groups/my'),
   getById: (id: string) => api.get(`/groups/${id}`),
@@ -289,14 +258,19 @@ export const groupsAPI = {
   delete: (id: string) => api.delete(`/groups/${id}`),
   getMembers: (id: string) => api.get(`/groups/${id}/members`),
   getNotes: (id: string) => api.get(`/groups/${id}/notes`),
-  createFlashcard: (groupId: string, flashcardData: any) => 
+  createFlashcard: (groupId: string, flashcardData: any) =>
     api.post(`/groups/${groupId}/flashcards`, flashcardData),
-  createNote: (groupId: string, noteData: any) => 
+  createNote: (groupId: string, noteData: any) =>
     api.post(`/groups/${groupId}/notes`, noteData),
-  createInvite: (groupId: string, email: string) => 
+  createInvite: (groupId: string, email: string) =>
     api.post(`/groups/${groupId}/invite`, { email }),
   join: (inviteCode: string) => api.post('/groups/join', { inviteCode }),
   getFlashcards: (groupId: string) => api.get(`/groups/${groupId}/flashcards`),
+  // Новые методы для редактирования/удаления карточек в группе
+  updateFlashcard: (groupId: string, flashcardId: string, data: any) =>
+    api.put(`/groups/${groupId}/flashcards/${flashcardId}`, data),
+  deleteFlashcard: (groupId: string, flashcardId: string) =>
+    api.delete(`/groups/${groupId}/flashcards/${flashcardId}`),
 };
 
 export const subjectsAPI = {
@@ -304,8 +278,10 @@ export const subjectsAPI = {
 };
 
 export const flashcardsAPI = {
-  getBySubject: (subjectId: string) => api.get(`/flashcards/subject/${subjectId}`),
-  getForStudy: (subjectId: string) => api.get(`/flashcards/study/${subjectId}`),
+  getBySubject: (subjectId: string) =>
+    api.get(`/flashcards/subject/${subjectId}`),
+  getForStudy: (subjectId: string) =>
+    api.get(`/flashcards/study/${subjectId}`),
   create: (data: any) => api.post('/flashcards', data),
   update: (id: string, data: any) => api.put(`/flashcards/${id}`, data),
   delete: (id: string) => api.delete(`/flashcards/${id}`),
@@ -354,15 +330,16 @@ export const achievementsAPI = {
   getMy: () => api.get('/achievements/my'),
   getProgress: () => api.get('/achievements/progress'),
   getById: (id: string) => api.get(`/achievements/${id}`),
-  check: (achievementCode: string, progress?: number) => 
+  check: (achievementCode: string, progress?: number) =>
     api.post(`/achievements/check/${achievementCode}`, { progress }),
   getLeaderboard: (params?: {
     limit?: number;
     category?: string;
   }) => api.get('/achievements/leaderboard/top', { params }),
   getMyPosition: () => api.get('/achievements/leaderboard/my-position'),
-  getRecommendations: () => api.get('/achievements/recommendations/next'),
-  reset: (achievementCode: string) => 
+  getRecommendations: () =>
+    api.get('/achievements/recommendations/next'),
+  reset: (achievementCode: string) =>
     api.delete(`/achievements/reset/${achievementCode}`),
 };
 
@@ -384,11 +361,11 @@ export const levelsAPI = {
 
 export const badgesAPI = {
   getMyBadges: () => api.get('/badges/my-badges'),
-  addDisplayedBadge: (achievementId: string, position?: number) => 
+  addDisplayedBadge: (achievementId: string, position?: number) =>
     api.post('/badges/display-badge', { achievementId, position }),
-  removeDisplayedBadge: (achievementId: string) => 
+  removeDisplayedBadge: (achievementId: string) =>
     api.delete(`/badges/remove-displayed-badge/${achievementId}`),
-  reorderBadges: (badgesOrder: string[]) => 
+  reorderBadges: (badgesOrder: string[]) =>
     api.put('/badges/reorder-badges', { badgesOrder }),
   getStreak: () => api.get('/badges/streak'),
   updateStreak: () => api.post('/badges/update-streak'),
@@ -403,9 +380,9 @@ export const questsAPI = {
   }) => api.get('/quests', { params }),
   getMyQuests: () => api.get('/quests/my-quests'),
   getById: (questId: string) => api.get(`/quests/${questId}`),
-  updateProgress: (questCode: string, progress?: number) => 
+  updateProgress: (questCode: string, progress?: number) =>
     api.post(`/quests/update-progress/${questCode}`, { progress }),
-  claimReward: (userQuestId: string) => 
+  claimReward: (userQuestId: string) =>
     api.post(`/quests/claim/${userQuestId}`),
   getStats: () => api.get('/quests/stats/my'),
   generateDaily: () => api.post('/quests/generate-daily'),
@@ -414,43 +391,61 @@ export const questsAPI = {
 export const rewardsAPI = {
   getAvailable: () => api.get('/rewards/available'),
   getMy: () => api.get('/rewards/my'),
-  applyTheme: (theme: string) => api.post('/rewards/apply-theme', { theme }),
-  applyAvatarEffect: (effect: string) => api.post('/rewards/apply-avatar-effect', { effect }),
-  applyBadgeFrame: (frame: string) => api.post('/rewards/apply-badge-frame', { frame }),
-  applyProfileBackground: (background: string) => 
+  applyTheme: (theme: string) =>
+    api.post('/rewards/apply-theme', { theme }),
+  applyAvatarEffect: (effect: string) =>
+    api.post('/rewards/apply-avatar-effect', { effect }),
+  applyBadgeFrame: (frame: string) =>
+    api.post('/rewards/apply-badge-frame', { frame }),
+  applyProfileBackground: (background: string) =>
     api.post('/rewards/apply-profile-background', { background }),
-  getThemePreview: (theme: string) => api.get(`/rewards/preview-theme/${theme}`),
-  getAvatarEffectPreview: (effect: string) => 
+  getThemePreview: (theme: string) =>
+    api.get(`/rewards/preview-theme/${theme}`),
+  getAvatarEffectPreview: (effect: string) =>
     api.get(`/rewards/preview-avatar-effect/${effect}`),
   resetDefaults: () => api.post('/rewards/reset-defaults'),
 };
 
 export const friendsAPI = {
-  getFriends: (params?: { status?: string; limit?: number; skip?: number }) =>
-    api.get('/friends', { params }),
+  getFriends: (params?: {
+    status?: string;
+    limit?: number;
+    skip?: number;
+  }) => api.get('/friends', { params }),
   getIncomingRequests: () => api.get('/friends/requests/incoming'),
   getOutgoingRequests: () => api.get('/friends/requests/outgoing'),
   sendRequest: (userId: string) => api.post(`/friends/request/${userId}`),
-  acceptRequest: (friendshipId: string) => api.post(`/friends/accept/${friendshipId}`),
-  rejectRequest: (friendshipId: string) => api.post(`/friends/reject/${friendshipId}`),
-  removeFriend: (friendshipId: string) => api.delete(`/friends/${friendshipId}`),
-  getFriendshipStatus: (userId: string) => api.get(`/friends/status/${userId}`),
-  searchUsers: (query: string, params?: { excludeFriends?: boolean; limit?: number }) =>
-    api.get('/friends/search', { params: { query, ...params } }),
+  acceptRequest: (friendshipId: string) =>
+    api.post(`/friends/accept/${friendshipId}`),
+  rejectRequest: (friendshipId: string) =>
+    api.post(`/friends/reject/${friendshipId}`),
+  removeFriend: (friendshipId: string) =>
+    api.delete(`/friends/${friendshipId}`),
+  getFriendshipStatus: (userId: string) =>
+    api.get(`/friends/status/${userId}`),
+  searchUsers: (
+    query: string,
+    params?: { excludeFriends?: boolean; limit?: number }
+  ) => api.get('/friends/search', { params: { query, ...params } }),
   getFriendsStats: () => api.get('/friends/stats'),
 };
 
 export const followsAPI = {
   followUser: (userId: string) => api.post(`/follows/follow/${userId}`),
-  unfollowUser: (userId: string) => api.delete(`/follows/follow/${userId}`),
+  unfollowUser: (userId: string) =>
+    api.delete(`/follows/follow/${userId}`),
   getFollowers: (params?: { limit?: number; skip?: number }) =>
     api.get('/follows/followers', { params }),
   getFollowing: (params?: { limit?: number; skip?: number }) =>
     api.get('/follows/following', { params }),
-  getUserFollowers: (userId: string, params?: { limit?: number; skip?: number }) =>
-    api.get(`/follows/${userId}/followers`, { params }),
-  getUserFollowing: (userId: string, params?: { limit?: number; skip?: number }) =>
-    api.get(`/follows/${userId}/following`, { params }),
+  getUserFollowers: (
+    userId: string,
+    params?: { limit?: number; skip?: number }
+  ) => api.get(`/follows/${userId}/followers`, { params }),
+  getUserFollowing: (
+    userId: string,
+    params?: { limit?: number; skip?: number }
+  ) => api.get(`/follows/${userId}/following`, { params }),
   checkFollow: (userId: string) => api.get(`/follows/check/${userId}`),
   getRecommendations: (params?: { limit?: number }) =>
     api.get('/follows/recommendations', { params }),
@@ -459,10 +454,14 @@ export const followsAPI = {
 export const leaderboardsAPI = {
   getGlobal: (params?: { metric?: string; limit?: number }) =>
     api.get('/leaderboards/global', { params }),
-  getGroup: (groupId: string, params?: { metric?: string; limit?: number }) =>
-    api.get(`/leaderboards/group/${groupId}`, { params }),
-  getSubject: (subjectId: string, params?: { metric?: string; limit?: number }) =>
-    api.get(`/leaderboards/subject/${subjectId}`, { params }),
+  getGroup: (
+    groupId: string,
+    params?: { metric?: string; limit?: number }
+  ) => api.get(`/leaderboards/group/${groupId}`, { params }),
+  getSubject: (
+    subjectId: string,
+    params?: { metric?: string; limit?: number }
+  ) => api.get(`/leaderboards/subject/${subjectId}`, { params }),
   getWeekly: (params?: { metric?: string; limit?: number }) =>
     api.get('/leaderboards/weekly', { params }),
   getMonthly: (params?: { metric?: string; limit?: number }) =>
@@ -472,8 +471,11 @@ export const leaderboardsAPI = {
 };
 
 export const chatsAPI = {
-  getUserChats: (params?: { type?: string; limit?: number; skip?: number }) =>
-    api.get('/chats', { params }),
+  getUserChats: (params?: {
+    type?: string;
+    limit?: number;
+    skip?: number;
+  }) => api.get('/chats', { params }),
   createChat: (data: {
     type: 'direct' | 'group';
     participantIds: string[];
@@ -482,45 +484,61 @@ export const chatsAPI = {
     groupId?: string;
   }) => api.post('/chats', data),
   getChat: (chatId: string) => api.get(`/chats/${chatId}`),
-  getChatMessages: (chatId: string, params?: {
-    limit?: number;
-    skip?: number;
-    before?: string;
-    after?: string;
-  }) => api.get(`/chats/${chatId}/messages`, { params }),
-  sendMessage: (chatId: string, data: {
-    content: string;
-    replyTo?: string;
-    attachments?: Array<{
-      url: string;
-      filename: string;
-      fileType: string;
-      size: number;
-    }>;
-  }) => api.post(`/chats/${chatId}/messages`, data),
+  getChatMessages: (
+    chatId: string,
+    params?: {
+      limit?: number;
+      skip?: number;
+      before?: string;
+      after?: string;
+    }
+  ) => api.get(`/chats/${chatId}/messages`, { params }),
+  sendMessage: (
+    chatId: string,
+    data: {
+      content: string;
+      replyTo?: string;
+      attachments?: Array<{
+        url: string;
+        filename: string;
+        fileType: string;
+        size: number;
+      }>;
+    }
+  ) => api.post(`/chats/${chatId}/messages`, data),
+  sendMessageFormData: (chatId: string, formData: FormData) =>
+    api.post(`/chats/${chatId}/messages`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
   editMessage: (messageId: string, data: { content: string }) =>
     api.put(`/chats/messages/${messageId}`, data),
-  deleteMessage: (messageId: string) => api.delete(`/chats/messages/${messageId}`),
+  deleteMessage: (messageId: string) =>
+    api.delete(`/chats/messages/${messageId}`),
+  deleteMessageForMe: (messageId: string) =>
+    api.delete(`/chats/messages/${messageId}/for-me`),
   addParticipant: (chatId: string, userId: string) =>
     api.post(`/chats/${chatId}/participants`, { userId }),
   removeParticipant: (chatId: string, userId: string) =>
     api.delete(`/chats/${chatId}/participants/${userId}`),
   markChatAsRead: (chatId: string) => api.post(`/chats/${chatId}/read`),
+  getScheduledMessages: () => api.get('/chats/messages/scheduled'),
 };
 
 // Вспомогательные функции
-export const validateInviteCode = (code: string): { isValid: boolean; message?: string } => {
+export const validateInviteCode = (
+  code: string
+): { isValid: boolean; message?: string } => {
   if (!code) return { isValid: false, message: 'Пустой код' };
   if (code.length < 6) return { isValid: false, message: 'Короткий код' };
   return { isValid: true };
 };
 
-export const normalizeSubject = (subject: string): string => subject.trim().toLowerCase();
+export const normalizeSubject = (subject: string): string =>
+  subject.trim().toLowerCase();
 
 export type Role = 'owner' | 'member' | 'admin' | 'guest';
-
 const validRoles: Role[] = ['owner', 'member', 'admin', 'guest'];
-
-export const isValidRole = (role: string): boolean => validRoles.includes(role as Role);
+export const isValidRole = (role: string): boolean =>
+  validRoles.includes(role as Role);
 
 export default api;

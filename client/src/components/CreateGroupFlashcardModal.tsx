@@ -10,15 +10,11 @@ interface CreateGroupFlashcardModalProps {
   onClose: () => void;
   groupId: string;
   subjectId: string;
-  onFlashcardCreated: () => void;
+  onFlashcardCreated: (newCard?: any) => void;
 }
 
 const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
-  isOpen,
-  onClose,
-  groupId,
-  subjectId,
-  onFlashcardCreated
+  isOpen, onClose, groupId, subjectId, onFlashcardCreated
 }) => {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
@@ -27,6 +23,20 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
   const [error, setError] = useState('');
 
   if (!isOpen) return null;
+
+  const extractError = (data: any): string => {
+    if (typeof data === 'string') return data;
+    if (data?.error) {
+      if (typeof data.error === 'string') return data.error;
+      if (data.error.message) return data.error.message;
+      if (data.error.errors) {
+        return Object.values(data.error.errors).map((e: any) => e.message).join('; ');
+      }
+      return JSON.stringify(data.error);
+    }
+    if (data?.message) return data.message;
+    return 'Ошибка при создании карточки';
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,53 +77,58 @@ const CreateGroupFlashcardModal: React.FC<CreateGroupFlashcardModalProps> = ({
             name: newCard.authorId?.name || 'Пользователь'
           }
         });
+
+        onFlashcardCreated({
+          _id: newCard._id || newCard.id,
+          question: newCard.question,
+          answer: newCard.answer,
+          hint: newCard.hint,
+          subjectId: subjectId,
+          groupId: groupId,
+        });
+      } else {
+        onFlashcardCreated();
       }
 
+      // Сбрасываем поля только при успешном создании
       setQuestion('');
       setAnswer('');
       setHint('');
-      onFlashcardCreated();
       onClose();
     } catch (err: any) {
-      const msg = err.response?.data?.error || err.response?.data?.errors?.[0]?.msg || 'Ошибка при создании карточки';
+      const msg = extractError(err.response?.data);
       setError(msg);
+      // поля не сбрасываются, остаются заполненными
     } finally {
       setLoading(false);
     }
   };
 
   const handleClose = () => {
-    setQuestion('');
-    setAnswer('');
-    setHint('');
-    setError('');
+    // Не сбрасываем поля, чтобы можно было продолжить редактирование при повторном открытии
     onClose();
   };
 
   return (
     <div className="modal-overlay" onClick={handleClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
         <button className="close-button" onClick={handleClose}>×</button>
         <div className="modal-header">
           <h2>Создать карточку для группы</h2>
         </div>
         <form onSubmit={handleSubmit} className="flashcard-form">
-          {error && (
-            <div className="error-message">
-              <strong>Ошибка:</strong> {error}
-            </div>
-          )}
+          {error && <div className="error-message"><strong>Ошибка:</strong> {error}</div>}
           <div className="form-group">
             <label htmlFor="question">Вопрос *</label>
-            <textarea id="question" value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="Введите вопрос..." required rows={3} />
+            <textarea id="question" value={question} onChange={e => setQuestion(e.target.value)} placeholder="Введите вопрос..." required rows={3} />
           </div>
           <div className="form-group">
             <label htmlFor="answer">Ответ *</label>
-            <textarea id="answer" value={answer} onChange={(e) => setAnswer(e.target.value)} placeholder="Введите ответ..." required rows={3} />
+            <textarea id="answer" value={answer} onChange={e => setAnswer(e.target.value)} placeholder="Введите ответ..." required rows={3} />
           </div>
           <div className="form-group">
             <label htmlFor="hint">Подсказка (необязательно)</label>
-            <input id="hint" type="text" value={hint} onChange={(e) => setHint(e.target.value)} placeholder="Введите подсказку..." />
+            <input id="hint" type="text" value={hint} onChange={e => setHint(e.target.value)} placeholder="Введите подсказку..." />
           </div>
           <div className="form-actions">
             <button type="button" onClick={handleClose} className="btn-secondary" disabled={loading}>Отмена</button>

@@ -46,7 +46,6 @@ const NotesPage: React.FC = () => {
     });
   };
 
-  // Надёжное извлечение текста ошибки
   const extractError = (data: any): string => {
     if (typeof data === 'string') return data;
     if (data?.error) {
@@ -69,11 +68,16 @@ const NotesPage: React.FC = () => {
       const response = await fetchWithAuth(`/notes/subject/${validSubjectId}`);
       const data = await response.json();
       if (data.success) {
-        const normalized = (data.notes || []).map((n: any) => ({
+        const freshNotes = (data.notes || []).map((n: any) => ({
           ...n,
           _id: n._id || n.id,
         }));
-        setNotes(normalized);
+        // Фильтруем дубликаты по _id
+        const uniqueNotes = freshNotes.filter(
+          (note: Note, index: number, self: Note[]) =>
+            index === self.findIndex((t: Note) => t._id === note._id)
+        );
+        setNotes(uniqueNotes);
       } else {
         setError(extractError(data));
       }
@@ -90,23 +94,20 @@ const NotesPage: React.FC = () => {
     else setLoading(false);
   }, [validSubjectId, loadNotes]);
 
-  // Создание с мгновенным добавлением
   const handleCreateNote = async (noteData: { title: string; content: string; tags: string[] }) => {
     if (!validSubjectId) return;
     try {
       setError(null);
+      console.log('Отправка POST /notes...');  // отладка
       const response = await fetchWithAuth('/notes', {
         method: 'POST',
         body: JSON.stringify({ ...noteData, subjectId: validSubjectId }),
       });
       const data = await response.json();
-      if (data.success && data.note) {
-        const newNote: Note = {
-          ...data.note,
-          _id: data.note._id,
-        };
-        setNotes(prev => [newNote, ...prev]);
+      console.log('Ответ на создание заметки:', data); // отладка
+      if (data.success) {
         setShowCreateModal(false);
+        await loadNotes();   // перезагружаем список с сервера
       } else {
         setError(extractError(data));
       }
@@ -116,7 +117,6 @@ const NotesPage: React.FC = () => {
     }
   };
 
-  // Редактирование с ожиданием ответа и локальным обновлением
   const handleEditNote = async (noteId: string, noteData: { title: string; content: string; tags: string[] }) => {
     try {
       setError(null);
@@ -140,7 +140,6 @@ const NotesPage: React.FC = () => {
     }
   };
 
-  // Удаление с ожиданием ответа и локальным удалением
   const handleDeleteNote = async () => {
     if (!selectedNote?._id) { setError('Не выбрана заметка для удаления'); return; }
     try {

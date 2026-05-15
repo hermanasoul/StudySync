@@ -18,7 +18,7 @@ interface EditNoteModalProps {
   onClose: () => void;
   onSubmit: (noteId: string, noteData: { title: string; content: string; tags: string[] }) => Promise<void>;
   note: Note | null;
-  onDelete?: (noteId: string) => Promise<void>;  // опциональный колбэк удаления
+  onDelete?: (noteId: string) => Promise<void>;
 }
 
 const EditNoteModal: React.FC<EditNoteModalProps> = ({ isOpen, onClose, onSubmit, note, onDelete }) => {
@@ -29,6 +29,20 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({ isOpen, onClose, onSubmit
   const [error, setError] = useState('');
 
   if (!isOpen || !note) return null;
+
+  const extractError = (data: any): string => {
+    if (typeof data === 'string') return data;
+    if (data?.error) {
+      if (typeof data.error === 'string') return data.error;
+      if (data.error.message) return data.error.message;
+      if (data.error.errors) {
+        return Object.values(data.error.errors).map((e: any) => e.message).join('; ');
+      }
+      return JSON.stringify(data.error);
+    }
+    if (data?.message) return data.message;
+    return 'Ошибка обновления';
+  };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,8 +61,7 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({ isOpen, onClose, onSubmit
       });
       onClose();
     } catch (err: any) {
-      const msg = err?.message || 'Ошибка обновления';
-      setError(msg);
+      setError(extractError(err?.response?.data || err));
     } finally {
       setLoading(false);
     }
@@ -61,7 +74,7 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({ isOpen, onClose, onSubmit
       await onDelete(note._id);
       onClose();
     } catch (err: any) {
-      setError(err?.message || 'Ошибка удаления');
+      setError(extractError(err?.response?.data || err));
     } finally {
       setLoading(false);
     }

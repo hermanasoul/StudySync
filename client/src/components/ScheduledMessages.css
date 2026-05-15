@@ -1,0 +1,180 @@
+/* ScheduledMessages.css */
+
+.scheduled-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  backdrop-filter: blur(2px);
+}
+
+.scheduled-dialog {
+  background: #1e1e2e;
+  border: 1px solid #3f3f55;
+  border-radius: 12px;
+  padding: 0;
+  color: #eee;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+}
+
+.scheduled-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #3f3f55;
+}
+
+.scheduled-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.scheduled-header .close-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.scheduled-header .close-btn:hover {
+  color: #fff;
+}
+
+.scheduled-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+
+.loading,
+.no-data {
+  text-align: center;
+  color: #aaa;
+  padding: 20px 0;
+}
+
+.scheduled-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.scheduled-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid #2a2a3c;
+  transition: background 0.2s;
+}
+
+.scheduled-item:hover {
+  background: #2a2a3c;
+}
+
+.msg-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.msg-info strong {
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.msg-content {
+  margin: 4px 0;
+  font-size: 0.9rem;
+  color: #ccc;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
+  hyphens: auto;
+}
+
+.msg-attachments {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.msg-attachment {
+  font-size: 0.8rem;
+  color: #b4a3ff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.attachment-icon {
+  font-size: 1rem;
+}
+
+.attachment-name {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.attachment-size {
+  color: #888;
+  margin-left: 4px;
+}
+
+.msg-info small {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.msg-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.msg-actions .btn-small {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  min-width: auto;
+}
+
+.scheduled-footer {
+  padding: 12px 20px;
+  border-top: 1px solid #3f3f55;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.scheduled-footer .btn {
+  min-width: 100px;
+}
+
+.scheduled-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scheduled-body::-webkit-scrollbar-thumb {
+  background: #3f3f55;
+  border-radius: 3px;
+}
+
+.scheduled-body::-webkit-scrollbar-track {
+  background: transparent;
+}

@@ -89,6 +89,7 @@ router.post('/login',
       avatarUrl: user.avatarUrl
     };
 
+    // Отправляем ответ
     res.json({
       success: true,
       message: 'Вход выполнен успешно',
@@ -96,6 +97,12 @@ router.post('/login',
       token,
       tokenExpiresIn: '7d'
     });
+
+    // Ежедневный вход после отправки ответа (не блокирует запрос)
+    const triggers = req.app.get('achievementTriggers');
+    if (triggers) {
+      await triggers.onDailyLogin(user._id);
+    }
   })
 );
 

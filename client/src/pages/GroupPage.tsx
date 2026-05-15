@@ -6,10 +6,11 @@ import Header from '../components/Header';
 import CreateGroupFlashcardModal from '../components/CreateGroupFlashcardModal';
 import CreateGroupNoteModal from '../components/CreateGroupNoteModal';
 import EditGroupNoteModal from '../components/EditGroupNoteModal';
+import EditFlashcardModal from '../components/EditFlashcardModal';   // <-- новый импорт
 import InviteMembersModal from '../components/InviteMembersModal';
 import Button from '../components/Button';
-import webSocketService from '../services/websocket';
 import { groupsAPI } from '../services/api';
+import webSocketService from '../services/websocket';
 import './GroupPage.css';
 import '../App.css';
 
@@ -28,7 +29,9 @@ interface Note {
   _id: string;
   title: string;
   content: string;
+  tags: string[];
   createdAt: string;
+  updatedAt: string;
   authorId: { _id: string; name: string };
   groupId: string;
 }
@@ -39,7 +42,7 @@ interface Flashcard {
   answer: string;
   hint?: string;
   subjectId: string;
-  groupId: string;
+  groupId?: string;   // <-- сделали необязательным
 }
 
 const GroupPage: React.FC = () => {
@@ -54,19 +57,22 @@ const GroupPage: React.FC = () => {
   const [showCreateFlashcardModal, setShowCreateFlashcardModal] = useState(false);
   const [showCreateNoteModal, setShowCreateNoteModal] = useState(false);
   const [showEditNoteModal, setShowEditNoteModal] = useState(false);
+  const [showEditFlashcardModal, setShowEditFlashcardModal] = useState(false);   // новое состояние
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [editingFlashcard, setEditingFlashcard] = useState<Flashcard | null>(null); // новое
   const [members, setMembers] = useState<Group['members']>([]);
 
-  const isValidGroupId = groupId && groupId !== 'undefined';
+  const isValidGroupId = !!groupId && groupId !== 'undefined';
 
-  const loadGroup = useCallback(async () => {
+  // Загрузка всех данных (гарантированно через HTTP)
+  const loadAllData = useCallback(async () => {
     if (!isValidGroupId) return;
     try {
       setLoading(true);
-      const response = await groupsAPI.getById(groupId!);
-      if (response.data.success) {
-        const g = response.data.group;
+      const groupRes = await groupsAPI.getById(groupId!);
+      if (groupRes.data.success) {
+        const g = groupRes.data.group;
         const normalizedGroup: Group = {
           _id: g._id || g.id,
           name: g.name,
@@ -84,6 +90,27 @@ const GroupPage: React.FC = () => {
         };
         setGroup(normalizedGroup);
         setMembers(normalizedGroup.members);
+
+        const [notesRes, flashcardsRes] = await Promise.all([
+          groupsAPI.getNotes(g._id || g.id),
+          groupsAPI.getFlashcards(g._id || g.id)
+        ]);
+
+        if (notesRes.data.success) {
+          setNotes((notesRes.data.notes || []).map((n: any) => ({
+            ...n,
+            _id: n._id || n.id,
+            tags: n.tags || [],
+            updatedAt: n.updatedAt || n.createdAt,
+            authorId: n.authorId ? { ...n.authorId, _id: n.authorId._id || n.authorId.id } : n.authorId
+          })));
+        }
+        if (flashcardsRes.data.success) {
+          setFlashcards((flashcardsRes.data.flashcards || []).map((f: any) => ({
+            ...f,
+            _id: f._id || f.id,
+          })));
+        }
       }
     } catch (error) {
       console.error(error);
@@ -91,70 +118,42 @@ const GroupPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [groupId, isValidGroupId]);
-
-  const loadMembers = useCallback(async () => {
-    if (!isValidGroupId || !group?._id) return;
-    try {
-      const response = await groupsAPI.getMembers(group._id);
-      if (response.data.success) setMembers(response.data.members);
-    } catch (error) { console.error(error); }
-  }, [isValidGroupId, group]);
-
-  const loadNotes = useCallback(async () => {
-    if (!isValidGroupId || !group?._id) return;
-    try {
-      const response = await groupsAPI.getNotes(group._id);
-      if (response.data.success) {
-        const normalizedNotes = (response.data.notes || []).map((n: any) => ({
-          ...n,
-          _id: n._id || n.id,
-          authorId: n.authorId ? { ...n.authorId, _id: n.authorId._id || n.authorId.id } : n.authorId
-        }));
-        setNotes(normalizedNotes);
-      } else setNotes([]);
-    } catch (error) { console.error(error); setNotes([]); }
-  }, [isValidGroupId, group]);
-
-  const loadFlashcards = useCallback(async () => {
-    if (!isValidGroupId || !group?._id) return;
-    try {
-      const response = await groupsAPI.getFlashcards(group._id);
-      if (response.data.success) {
-        const normalizedCards = (response.data.flashcards || []).map((f: any) => ({
-          ...f,
-          _id: f._id || f.id,
-        }));
-        setFlashcards(normalizedCards);
-      } else setFlashcards([]);
-    } catch (error) { console.error(error); setFlashcards([]); }
-  }, [isValidGroupId, group]);
+  }, [isValidGroupId, groupId]);
 
   useEffect(() => {
     if (isValidGroupId) {
-      loadGroup();
-      loadNotes();
-      loadMembers();
-      loadFlashcards();
-    } else setLoading(false);
-  }, [isValidGroupId]); // eslint-disable-line react-hooks/exhaustive-deps
+      loadAllData();
+    } else {
+      setLoading(false);
+    }
+  }, [isValidGroupId, loadAllData]);
 
+  // WebSocket-подписки (фоновое обновление)
   useEffect(() => {
     if (!group?._id) return;
+
+    const handleNewFlashcard = (data: any) => {
+      if (data.groupId === group._id) loadAllData();
+    };
+    const handleNewNote = (data: any) => {
+      if (data.groupId === group._id) loadAllData();
+    };
+    const handleMemberJoined = (data: any) => {
+      if (data.groupId === group._id) loadAllData();
+    };
+
     webSocketService.joinGroup(group._id);
-    const handleNewFlashcard = (data: any) => { if (data.groupId === group._id) loadFlashcards(); };
-    const handleNewNote = (data: any) => { if (data.groupId === group._id) loadNotes(); };
-    const handleMemberJoined = (data: any) => { if (data.groupId === group._id) loadMembers(); };
     webSocketService.on('new-flashcard', handleNewFlashcard);
     webSocketService.on('new-note', handleNewNote);
     webSocketService.on('member-joined', handleMemberJoined);
+
     return () => {
+      webSocketService.leaveGroup(group._id);
       webSocketService.off('new-flashcard', handleNewFlashcard);
       webSocketService.off('new-note', handleNewNote);
       webSocketService.off('member-joined', handleMemberJoined);
-      webSocketService.leaveGroup(group._id);
     };
-  }, [group, loadFlashcards, loadNotes, loadMembers]);
+  }, [group?._id, loadAllData]);
 
   const getRoleBadge = (role: string) => {
     const cfg = { owner: { label: 'Владелец', color: '#ef4444' }, admin: { label: 'Админ', color: '#f59e0b' }, member: { label: 'Участник', color: '#3b82f6' } };
@@ -174,35 +173,59 @@ const GroupPage: React.FC = () => {
   };
 
   const handleNoteCreated = (newNoteData?: any) => {
-    if (newNoteData && (newNoteData.id || newNoteData._id)) {
-      const newNote: Note = {
-        _id: newNoteData._id || newNoteData.id,
+    if (newNoteData?._id) {
+      setNotes(prev => [{
+        _id: newNoteData._id,
         title: newNoteData.title || '',
         content: newNoteData.content || '',
-        createdAt: new Date().toISOString(),
+        tags: newNoteData.tags || [],
+        createdAt: newNoteData.createdAt || new Date().toISOString(),
+        updatedAt: newNoteData.updatedAt || new Date().toISOString(),
         authorId: newNoteData.authorId || { _id: '', name: 'Вы' },
         groupId: group?._id || ''
-      };
-      setNotes(prev => [newNote, ...prev]);
+      }, ...prev]);
     } else {
-      loadNotes();
+      loadAllData();
     }
   };
 
   const handleFlashcardCreated = (newCardData?: any) => {
-    if (newCardData && (newCardData.id || newCardData._id)) {
-      const newCard: Flashcard = {
-        _id: newCardData._id || newCardData.id,
+    if (newCardData?._id) {
+      setFlashcards(prev => [{
+        _id: newCardData._id,
         question: newCardData.question || '',
         answer: newCardData.answer || '',
         hint: newCardData.hint,
         subjectId: newCardData.subjectId || '',
         groupId: group?._id || ''
-      };
-      setFlashcards(prev => [newCard, ...prev]);
+      }, ...prev]);
     } else {
-      loadFlashcards();
+      loadAllData();
     }
+  };
+
+  const handleFlashcardUpdated = (updatedCard?: Flashcard) => {
+    if (updatedCard) {
+      setFlashcards(prev => prev.map(f => f._id === updatedCard._id ? updatedCard : f));
+    } else {
+      loadAllData();
+    }
+  };
+
+  const handleFlashcardDeleted = () => {
+    loadAllData(); // проще перезагрузить список после удаления
+  };
+
+  const handleNoteUpdated = (updatedNote?: Note) => {
+    if (updatedNote) {
+      setNotes(prev => prev.map(n => n._id === updatedNote._id ? updatedNote : n));
+    } else {
+      loadAllData();
+    }
+  };
+
+  const handleNoteDeleted = () => {
+    loadAllData();
   };
 
   if (loading) return <div className="group-page"><Header /><div className="page-with-header"><div className="loading">Загрузка группы...</div></div></div>;
@@ -268,12 +291,41 @@ const GroupPage: React.FC = () => {
               )}
               {activeTab==='flashcards' && (
                 <div className="flashcards-tab">
-                  <div className="flashcards-header"><h3>Карточки группы ({flashcards.length})</h3><Button variant="primary" onClick={()=>setShowCreateFlashcardModal(true)}>+ Создать карточку</Button></div>
+                  <div className="flashcards-header">
+                    <h3>Карточки группы ({flashcards.length})</h3>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      {subjectIdUnified && (
+                        <Button variant="outline" href={`/subjects/${subjectIdUnified}/flashcards`}>
+                          Изучать все карточки предмета
+                        </Button>
+                      )}
+                      <Button variant="primary" onClick={()=>setShowCreateFlashcardModal(true)}>+ Создать карточку</Button>
+                    </div>
+                  </div>
                   {flashcards.length===0 ? (
                     <div className="empty-state"><div className="empty-icon">📚</div><h4>Пока нет карточек</h4><p>Создайте первую карточку для совместного изучения</p><Button variant="primary" onClick={()=>setShowCreateFlashcardModal(true)}>Создать карточку</Button></div>
                   ) : (
                     <div className="flashcards-list">
-                      {flashcards.map(f=><div key={f._id} className="flashcard-card"><div className="flashcard-content"><div className="flashcard-question"><h4>{f.question}</h4>{f.hint&&<div className="flashcard-hint">💡 {f.hint}</div>}</div><div className="flashcard-answer"><p>{f.answer}</p></div></div></div>)}
+                      {flashcards.map(f=>
+                        <div key={f._id} className="flashcard-card">
+                          <div className="flashcard-content">
+                            <div className="flashcard-question"><h4>{f.question}</h4>{f.hint&&<div className="flashcard-hint">💡 {f.hint}</div>}</div>
+                            <div className="flashcard-answer"><p>{f.answer}</p></div>
+                          </div>
+                          {/* Кнопка редактирования/удаления */}
+                          <div className="flashcard-actions">
+                            <button
+                              className="edit-btn"
+                              onClick={() => {
+                                setEditingFlashcard(f);
+                                setShowEditFlashcardModal(true);
+                              }}
+                            >
+                              ✏️
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -317,8 +369,15 @@ const GroupPage: React.FC = () => {
             onClose={() => { setShowEditNoteModal(false); setEditingNote(null); }}
             note={editingNote}
             groupId={group._id}
-            onNoteUpdated={loadNotes}
-            onNoteDeleted={loadNotes}
+            onNoteUpdated={handleNoteUpdated}
+            onNoteDeleted={handleNoteDeleted}
+          />
+          <EditFlashcardModal
+            isOpen={showEditFlashcardModal}
+            onClose={() => { setShowEditFlashcardModal(false); setEditingFlashcard(null); }}
+            flashcard={editingFlashcard}
+            onFlashcardUpdated={handleFlashcardUpdated}
+            onFlashcardDeleted={handleFlashcardDeleted}
           />
           <InviteMembersModal
             isOpen={showInviteModal}

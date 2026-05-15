@@ -1,24 +1,191 @@
-.chats-page .page-with-header {
-  padding: 0;
-  height: calc(100vh - 64px);
+/* client/src/pages/ChatsPage.css */
+
+/* Основной контейнер страницы */
+.chats-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #121212; /* глубокий тёмный фон */
+  color: #eee;
+}
+
+/* Шапка страницы уже учтена через компонент Header, поэтому отступ для содержимого */
+.page-with-header {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
 }
 
 .chats-container {
   display: flex;
+  flex: 1;
   height: 100%;
+  background: #1e1e2e;
 }
 
+/* Левая панель со списком чатов */
 .chats-sidebar {
   width: 300px;
-  border-right: 1px solid #e5e7eb;
-  background: white;
+  border-right: 1px solid #3f3f55;
+  background: #1e1e2e;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
+/* Заголовок боковой панели */
+.chats-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #2a2a3c;
+  border-bottom: 1px solid #3f3f55;
+  flex-shrink: 0;
+}
+
+.chats-sidebar-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #ddd;
+  font-weight: 600;
+}
+
+/* Кнопки (общие стили для тёмной темы) */
+.btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: background 0.2s, opacity 0.2s;
+  color: #fff;
+}
+
+.btn-primary {
+  background: #5b4d8c;
+}
+
+.btn-primary:hover {
+  background: #6a5fa0;
+}
+
+.btn-success {
+  background: #2d8c4a;
+}
+
+.btn-success:hover {
+  background: #37a359;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid #3f3f55;
+  color: #ccc;
+}
+
+.btn-outline:hover {
+  border-color: #5b4d8c;
+  color: #fff;
+}
+
+.btn-danger {
+  background: #852c3a;
+}
+
+.btn-danger:hover {
+  background: #a33648;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 0.85rem;
+}
+
+/* Форма создания чата */
+.create-chat-form {
+  padding: 16px;
+  background: #2a2a3c;
+  border-bottom: 1px solid #3f3f55;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-label {
+  font-size: 0.85rem;
+  color: #aaa;
+  font-weight: 500;
+}
+
+select,
+input[type="text"],
+input[type="datetime-local"] {
+  width: 100%;
+  padding: 8px 12px;
+  background: #1e1e2e;
+  border: 1px solid #3f3f55;
+  border-radius: 8px;
+  color: #eee;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+select:focus,
+input[type="text"]:focus,
+input[type="datetime-local"]:focus {
+  border-color: #5b4d8c;
+}
+
+select option {
+  background: #1e1e2e;
+  color: #eee;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Сообщения об ошибках и подсказках */
+.error-message {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.info-message {
+  color: #aaa;
+  font-size: 0.8rem;
+}
+
+.info-message a {
+  color: #b4a3ff;
+  text-decoration: none;
+}
+
+.info-message a:hover {
+  text-decoration: underline;
+}
+
+/* Правая часть – окно чата или приветственный экран */
 .chats-main {
   flex: 1;
-  background: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  background: #1a1a2e;
 }
 
+/* Приветственный экран, если чат не выбран */
 .no-chat-selected {
   display: flex;
   flex-direction: column;
@@ -27,19 +194,14 @@
   height: 100%;
   padding: 40px;
   text-align: center;
-  color: #374151;
-}
-
-.welcome-icon {
-  font-size: 80px;
-  margin-bottom: 24px;
-  opacity: 0.8;
+  color: #ccc;
+  background: #1a1a2e;
 }
 
 .no-chat-selected h2 {
   margin: 0 0 16px 0;
   font-size: 28px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(135deg, #8b5cf6, #c084fc);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -47,57 +209,47 @@
 
 .no-chat-selected p {
   margin: 0 0 40px 0;
-  color: #6b7280;
+  color: #9ca3af;
   font-size: 16px;
   max-width: 400px;
 }
 
+/* Блок с возможностями чатов (если используются) */
 .chat-features {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 24px;
-  max-width: 800px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  max-width: 700px;
   width: 100%;
 }
 
 .feature {
   display: flex;
-  gap: 16px;
-  padding: 20px;
-  background: white;
+  gap: 12px;
+  padding: 16px;
+  background: #2a2a3c;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s;
 }
 
 .feature:hover {
-  transform: translateY(-4px);
+  transform: translateY(-3px);
 }
 
 .feature-icon {
-  font-size: 32px;
-  flex-shrink: 0;
+  font-size: 28px;
 }
 
 .feature-text h4 {
-  margin: 0 0 8px 0;
-  font-size: 16px;
-  color: #333;
+  margin: 0 0 6px 0;
+  font-size: 15px;
+  color: #eee;
 }
 
 .feature-text p {
   margin: 0;
-  font-size: 14px;
-  color: #6b7280;
-}
-
-.error {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  font-size: 18px;
-  color: #666;
+  font-size: 13px;
+  color: #9ca3af;
 }
 
 /* Адаптивность */
@@ -111,19 +263,33 @@
   .chats-container {
     flex-direction: column;
   }
-  
+
   .chats-sidebar {
     width: 100%;
     height: 300px;
     border-right: none;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid #3f3f55;
   }
-  
+
   .chats-main {
     height: calc(100% - 300px);
   }
-  
+
   .chat-features {
     grid-template-columns: 1fr;
   }
+}
+
+/* Скроллбар для боковой панели */
+.chats-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chats-sidebar::-webkit-scrollbar-thumb {
+  background: #3f3f55;
+  border-radius: 3px;
+}
+
+.chats-sidebar::-webkit-scrollbar-track {
+  background: transparent;
 }

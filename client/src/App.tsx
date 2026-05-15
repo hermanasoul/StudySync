@@ -1,5 +1,3 @@
-// client/src/App.tsx
-
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -31,7 +29,6 @@ import './App.css';
 import './styles/buttons.css';
 import webSocketService from './services/websocket';
 
-
 function App() {
   const [achievementNotification, setAchievementNotification] = useState<any>(null);
   const [levelUpNotification, setLevelUpNotification] = useState<any>(null);
@@ -46,7 +43,7 @@ function App() {
           icon: data.data.achievementIcon,
           description: `Вы получили достижение "${data.data.achievementName}"!`,
           points: data.data.achievementPoints,
-          difficulty: data.data.achievementDifficulty
+          difficulty: data.data.achievementDifficulty,
         });
         setShowAchievement(true);
       }
@@ -60,7 +57,7 @@ function App() {
           levelName: data.data.levelName,
           icon: data.data.icon,
           color: data.data.color,
-          unlocks: data.data.unlocks
+          unlocks: data.data.unlocks,
         });
         setShowLevelUp(true);
       }
@@ -94,7 +91,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
-            
+
             {/* Защищенные маршруты */}
             <Route path="/dashboard" element={
               <ProtectedRoute>
@@ -119,8 +116,8 @@ function App() {
             <Route path="/flashcards" element={
               <ProtectedRoute>
                 <Navigate to="/subjects" replace />
-                </ProtectedRoute>
-              } />
+              </ProtectedRoute>
+            } />
             <Route path="/notifications" element={
               <ProtectedRoute>
                 <NotificationsPage />
@@ -187,10 +184,10 @@ function App() {
               </ProtectedRoute>
             } />
           </Routes>
-          
+
           {/* Компонент статуса WebSocket */}
           <WebSocketStatus />
-          
+
           {/* Уведомление о получении достижения */}
           {showAchievement && achievementNotification && (
             <AchievementNotification
@@ -198,7 +195,7 @@ function App() {
               onClose={handleCloseAchievement}
             />
           )}
-          
+
           {/* Уведомление о повышении уровня */}
           {showLevelUp && levelUpNotification && (
             <LevelUpNotification

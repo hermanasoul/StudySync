@@ -1,11 +1,11 @@
 // client/src/pages/StudySessionsPage.tsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { studySessionsAPI, subjectsAPI, groupsAPI } from '../services/api';
 import CreateStudySessionModal from '../components/CreateStudySessionModal';
 import StudySessionCard from '../components/StudySessionCard';
+import Header from '../components/Header';
 import './StudySessionsPage.css';
 
 interface Subject {
@@ -51,16 +51,14 @@ interface StudySession {
 }
 
 const StudySessionsPage: React.FC = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  
+
   const [sessions, setSessions] = useState<StudySession[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  
-  // Фильтры
+
   const [filters, setFilters] = useState({
     accessType: 'all',
     subjectId: '',
@@ -69,27 +67,17 @@ const StudySessionsPage: React.FC = () => {
     showActiveOnly: true
   });
 
-  useEffect(() => {
-    fetchData();
-  }, [filters]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      
-      // Загружаем предметы
       const subjectsResponse = await subjectsAPI.getAll();
       if (subjectsResponse.data.success) {
         setSubjects(subjectsResponse.data.subjects);
       }
-
-      // Загружаем группы пользователя
       const groupsResponse = await groupsAPI.getMy();
       if (groupsResponse.data.success) {
         setGroups(groupsResponse.data.groups);
       }
-
-      // Загружаем сессии
       const params: any = {};
       if (filters.accessType !== 'all') params.accessType = filters.accessType;
       if (filters.subjectId) params.subjectId = filters.subjectId;
@@ -99,13 +87,11 @@ const StudySessionsPage: React.FC = () => {
       const sessionsResponse = await studySessionsAPI.getActive(params);
       if (sessionsResponse.data.success) {
         let filteredSessions = sessionsResponse.data.sessions;
-        
         if (filters.showActiveOnly) {
           filteredSessions = filteredSessions.filter(
             (session: StudySession) => session.status === 'waiting' || session.status === 'active'
           );
         }
-        
         setSessions(filteredSessions);
       }
     } catch (error) {
@@ -113,17 +99,17 @@ const StudySessionsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
-  const handleCreateSession = () => {
-    setShowCreateModal(true);
-  };
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleCreateSession = () => setShowCreateModal(true);
 
   const handleSessionCreated = (newSession: StudySession) => {
     setSessions([newSession, ...sessions]);
     setShowCreateModal(false);
-    
-    // Переходим в созданную сессию
     navigate(`/study-session/${newSession._id}`);
   };
 
@@ -136,167 +122,127 @@ const StudySessionsPage: React.FC = () => {
     }
   };
 
-  const handleRefresh = () => {
-    fetchData();
-  };
+  const handleRefresh = () => fetchData();
 
   const handleFilterChange = (key: string, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  const getActiveSessionsCount = () => {
-    return sessions.filter(s => s.status === 'active').length;
-  };
-
-  const getWaitingSessionsCount = () => {
-    return sessions.filter(s => s.status === 'waiting').length;
-  };
+  const getActiveSessionsCount = () => sessions.filter(s => s.status === 'active').length;
+  const getWaitingSessionsCount = () => sessions.filter(s => s.status === 'waiting').length;
 
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <div className="header-left">
-          <h1 className="page-title">Совместные учебные сессии</h1>
-          <div className="page-subtitle">
-            Изучайте материал вместе с друзьями и коллегами
+    <div className="study-sessions-page">
+      <Header />
+      <div className="page-content">
+        {/* Верхняя строка: заголовок + кнопки */}
+        <div className="page-top-row">
+          <div className="page-heading">
+            <h1 className="page-title">Совместные учебные сессии</h1>
+            <p className="page-subtitle">Изучайте материал вместе с друзьями и коллегами</p>
           </div>
-        </div>
-        <div className="header-right">
-          <button 
-            className="btn btn-primary btn-lg"
-            onClick={handleCreateSession}
-          >
-            <span className="btn-icon">+</span> Создать сессию
-          </button>
-          <button 
-            className="btn btn-outline btn-lg"
-            onClick={handleRefresh}
-          >
-            <span className="btn-icon">⟳</span> Обновить
-          </button>
-        </div>
-      </div>
-
-      <div className="stats-cards">
-        <div className="stat-card">
-          <div className="stat-value">{sessions.length}</div>
-          <div className="stat-label">Всего сессий</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-value">{getActiveSessionsCount()}</div>
-          <div className="stat-label">Активных</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-value">{getWaitingSessionsCount()}</div>
-          <div className="stat-label">Ожидают начала</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-value">
-            {sessions.reduce((sum, session) => sum + session.participantCount, 0)}
-          </div>
-          <div className="stat-label">Участников онлайн</div>
-        </div>
-      </div>
-
-      <div className="filters-section">
-        <div className="filter-group">
-          <label className="filter-label">Тип доступа</label>
-          <select 
-            className="filter-select"
-            value={filters.accessType}
-            onChange={(e) => handleFilterChange('accessType', e.target.value)}
-          >
-            <option value="all">Все типы</option>
-            <option value="public">Публичные</option>
-            <option value="friends">С друзьями</option>
-            <option value="private">Приватные</option>
-          </select>
-        </div>
-
-        <div className="filter-group">
-          <label className="filter-label">Предмет</label>
-          <select 
-            className="filter-select"
-            value={filters.subjectId}
-            onChange={(e) => handleFilterChange('subjectId', e.target.value)}
-          >
-            <option value="">Все предметы</option>
-            {subjects.map(subject => (
-              <option key={subject._id} value={subject._id}>
-                {subject.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="filter-group">
-          <label className="filter-label">Группа</label>
-          <select 
-            className="filter-select"
-            value={filters.groupId}
-            onChange={(e) => handleFilterChange('groupId', e.target.value)}
-          >
-            <option value="">Все группы</option>
-            {groups.map(group => (
-              <option key={group._id} value={group._id}>
-                {group.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="filter-checkboxes">
-          <label className="checkbox-label">
-            <input 
-              type="checkbox"
-              checked={filters.friendsOnly}
-              onChange={(e) => handleFilterChange('friendsOnly', e.target.checked)}
-            />
-            <span className="checkbox-custom"></span>
-            Только с друзьями
-          </label>
-          
-          <label className="checkbox-label">
-            <input 
-              type="checkbox"
-              checked={filters.showActiveOnly}
-              onChange={(e) => handleFilterChange('showActiveOnly', e.target.checked)}
-            />
-            <span className="checkbox-custom"></span>
-            Только активные
-          </label>
-        </div>
-      </div>
-
-      <div className="content-section">
-        {loading ? (
-          <div className="loading-container">
-            <div className="spinner"></div>
-            <div>Загрузка сессий...</div>
-          </div>
-        ) : sessions.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">📚</div>
-            <h3>Нет доступных сессий</h3>
-            <p>Создайте свою первую сессию или подождите, пока другие пользователи создадут новые</p>
-            <button 
-              className="btn btn-primary"
-              onClick={handleCreateSession}
-            >
-              Создать сессию
+          <div className="page-actions">
+            <button className="btn btn-primary" onClick={handleCreateSession}>
+              + Создать сессию
+            </button>
+            <button className="btn btn-outline" onClick={handleRefresh} title="Обновить">
+              ⟳
             </button>
           </div>
-        ) : (
-          <div className="sessions-grid">
-            {sessions.map(session => (
-              <StudySessionCard
-                key={session._id}
-                session={session}
-                onJoin={() => handleJoinSession(session._id)}
-              />
-            ))}
+        </div>
+
+        {/* Статистика горизонтально */}
+        <div className="stats-row">
+          <div className="stat-card">
+            <span className="stat-value">{sessions.length}</span>
+            <span className="stat-label">Всего сессий</span>
           </div>
-        )}
+          <div className="stat-card">
+            <span className="stat-value">{getActiveSessionsCount()}</span>
+            <span className="stat-label">Активных</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-value">{getWaitingSessionsCount()}</span>
+            <span className="stat-label">Ожидают начала</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-value">
+              {sessions.reduce((sum, s) => sum + s.participantCount, 0)}
+            </span>
+            <span className="stat-label">Участников онлайн</span>
+          </div>
+        </div>
+
+        {/* Фильтры горизонтально */}
+        <div className="filters-row">
+          <div className="filter-group">
+            <label>Тип доступа</label>
+            <select value={filters.accessType} onChange={e => handleFilterChange('accessType', e.target.value)}>
+              <option value="all">Все типы</option>
+              <option value="public">Публичные</option>
+              <option value="friends">С друзьями</option>
+              <option value="private">Приватные</option>
+            </select>
+          </div>
+
+          <div className="filter-group">
+            <label>Предмет</label>
+            <select value={filters.subjectId} onChange={e => handleFilterChange('subjectId', e.target.value)}>
+              <option value="">Все предметы</option>
+              {subjects.map(s => (
+                <option key={s._id} value={s._id}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="filter-group">
+            <label>Группа</label>
+            <select value={filters.groupId} onChange={e => handleFilterChange('groupId', e.target.value)}>
+              <option value="">Все группы</option>
+              {groups.map(g => (
+                <option key={g._id} value={g._id}>{g.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="filter-checkboxes">
+            <label className="checkbox-label">
+              <input type="checkbox" checked={filters.friendsOnly} onChange={e => handleFilterChange('friendsOnly', e.target.checked)} />
+              Только с друзьями
+            </label>
+            <label className="checkbox-label">
+              <input type="checkbox" checked={filters.showActiveOnly} onChange={e => handleFilterChange('showActiveOnly', e.target.checked)} />
+              Только активные
+            </label>
+          </div>
+        </div>
+
+        {/* Контент: загрузка или список сессий */}
+        <div className="sessions-content">
+          {loading ? (
+            <div className="loading-container">
+              <div className="spinner"></div>
+              <p>Загрузка сессий...</p>
+            </div>
+          ) : sessions.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon">📚</div>
+              <h3>Нет доступных сессий</h3>
+              <p>Создайте свою первую сессию или подождите, пока другие пользователи создадут новые</p>
+              <button className="btn btn-primary" onClick={handleCreateSession}>Создать сессию</button>
+            </div>
+          ) : (
+            <div className="sessions-grid">
+              {sessions.map(session => (
+                <StudySessionCard
+                  key={session._id}
+                  session={session}
+                  onJoin={() => handleJoinSession(session._id)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {showCreateModal && (

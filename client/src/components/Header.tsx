@@ -1,3 +1,5 @@
+// client/src/components/Header.tsx
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -32,6 +34,7 @@ const Header: React.FC = () => {
               <span className="nav-icon">💬</span>
               <span className="nav-text">Сообщения</span>
             </Link>
+            <Link to="/study-sessions" className="nav-link">📚 Сессии</Link>
             <Link to="/notifications" className="nav-link">🔔 Уведомления</Link>
             <Link to="/achievements" className="nav-link">🏆 Достижения</Link>
           </nav>

@@ -1,21 +1,56 @@
-// server/routes/notes.js
-
 const { body, param, query } = require('express-validator');
 const express = require('express');
 const mongoose = require('mongoose');
 const Note = require('../models/Note');
 const { auth } = require('../middleware/auth');
-const { 
-  noteValidation, 
-  idValidation, 
+const {
+  noteValidation,
+  idValidation,
   subjectIdValidation,
-  sanitizeInput 
+  sanitizeInput
 } = require('../middleware/validation');
 const { AppError, catchAsync } = require('../middleware/errorHandler');
 
 const router = express.Router();
 
-// Получение заметок по предмету
+/**
+ * @swagger
+ * /notes/subject/{subjectId}:
+ *   get:
+ *     summary: Получить заметки по предмету
+ *     tags: [Notes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: subjectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: tag
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Список заметок
+ */
 router.get('/subject/:subjectId',
   auth,
   subjectIdValidation,
@@ -67,7 +102,27 @@ router.get('/subject/:subjectId',
   })
 );
 
-// Получение заметок текущего пользователя
+/**
+ * @swagger
+ * /notes/my:
+ *   get:
+ *     summary: Получить заметки текущего пользователя
+ *     tags: [Notes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Список заметок пользователя
+ */
 router.get('/my',
   auth,
   [query('page').optional().isInt({ min: 1 }), query('limit').optional().isInt({ min: 1, max: 50 })],
@@ -104,7 +159,40 @@ router.get('/my',
   })
 );
 
-// Создание заметки
+/**
+ * @swagger
+ * /notes:
+ *   post:
+ *     summary: Создать заметку
+ *     tags: [Notes]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [title, content, subjectId]
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               subjectId:
+ *                 type: string
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               isPublic:
+ *                 type: boolean
+ *               groupId:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Заметка создана
+ */
 router.post('/',
   auth,
   sanitizeInput,
@@ -123,6 +211,38 @@ router.post('/',
       const Group = require('../models/Group');
       const group = await Group.findOne({ _id: groupId, 'members.user': req.user.id });
       if (!group) throw new AppError('Группа не найдена или доступ запрещен', 404);
+    }
+
+    // Защита от дубликатов: проверяем, нет ли такой же заметки за последние 2 минуты
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+    const existingNote = await Note.findOne({
+      authorId: req.user.id,
+      subjectId: subjectId,
+      title: title.trim(),
+      content: content.trim(),
+      createdAt: { $gte: twoMinutesAgo }
+    });
+
+    if (existingNote) {
+      const populated = await Note.findById(existingNote._id)
+        .populate('authorId', 'name email avatarUrl')
+        .select('-__v');
+      return res.status(200).json({
+        success: true,
+        message: 'Заметка уже существует',
+        note: {
+          _id: populated._id,
+          title: populated.title,
+          content: populated.content,
+          tags: populated.tags,
+          authorId: { _id: populated.authorId._id, name: populated.authorId.name, email: populated.authorId.email, avatarUrl: populated.authorId.avatarUrl },
+          subjectId: populated.subjectId,
+          groupId: populated.groupId,
+          isPublic: populated.isPublic,
+          createdAt: populated.createdAt,
+          updatedAt: populated.updatedAt
+        }
+      });
     }
 
     const note = await Note.create({
@@ -158,7 +278,24 @@ router.post('/',
   })
 );
 
-// Получение заметки по ID
+/**
+ * @swagger
+ * /notes/{id}:
+ *   get:
+ *     summary: Получить заметку по ID
+ *     tags: [Notes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Данные заметки
+ */
 router.get('/:id',
   auth,
   idValidation,
@@ -187,7 +324,40 @@ router.get('/:id',
   })
 );
 
-// Обновление заметки
+/**
+ * @swagger
+ * /notes/{id}:
+ *   put:
+ *     summary: Обновить заметку
+ *     tags: [Notes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               isPublic:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Заметка обновлена
+ */
 router.put('/:id',
   auth,
   idValidation,
@@ -234,7 +404,24 @@ router.put('/:id',
   })
 );
 
-// Удаление заметки
+/**
+ * @swagger
+ * /notes/{id}:
+ *   delete:
+ *     summary: Удалить заметку
+ *     tags: [Notes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Заметка удалена
+ */
 router.delete('/:id',
   auth,
   idValidation,
@@ -245,7 +432,36 @@ router.delete('/:id',
   })
 );
 
-// Поиск заметок
+/**
+ * @swagger
+ * /notes/search:
+ *   get:
+ *     summary: Поиск заметок
+ *     tags: [Notes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: subjectId
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Результаты поиска
+ */
 router.get('/search',
   auth,
   [
@@ -298,7 +514,18 @@ router.get('/search',
   })
 );
 
-// Статистика заметок
+/**
+ * @swagger
+ * /notes/stats/overview:
+ *   get:
+ *     summary: Статистика по заметкам
+ *     tags: [Notes]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Статистика
+ */
 router.get('/stats/overview',
   auth,
   catchAsync(async (req, res) => {

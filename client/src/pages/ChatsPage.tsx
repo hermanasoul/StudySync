@@ -1,110 +1,127 @@
-import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+// client/src/pages/ChatsPage.tsx
+
+import React, { useState, useEffect, useCallback } from 'react';
 import Header from '../components/Header';
 import ChatList from '../components/ChatList';
 import ChatWindow from '../components/ChatWindow';
+import { chatsAPI, friendsAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import webSocketService from '../services/websocket';
 import './ChatsPage.css';
-
-interface ChatParticipant {
-  userId: {
-    _id: string;
-    name: string;
-    avatarUrl: string;
-    level: number;
-  };
-  lastRead: string;
-}
 
 interface Chat {
   _id: string;
   type: 'direct' | 'group';
   name?: string;
-  participants: ChatParticipant[];
-  lastMessage?: {
-    content: string;
-    senderId: {
-      _id: string;
-      name: string;
-    };
-    sentAt: string;
-  };
+  participants: Array<{ _id: string; name: string; avatarUrl?: string }>;
+  lastMessage?: any;
   unreadCount: number;
-  createdAt: string;
-  updatedAt: string;
 }
 
-// Тип, ожидаемый ChatWindow
-interface MappedChat {
+interface Friend {
   _id: string;
-  type: 'direct' | 'group';
-  name?: string;
-  participants: Array<{
-    _id: string;
-    name: string;
-    avatarUrl?: string;
-  }>;
-  lastMessage?: {
-    _id: string;
-    chatId: string;
-    userId: {
-      _id: string;
-      name: string;
-      avatarUrl?: string;
-    };
-    content: string;
-    createdAt: string;
-    isRead: boolean;
-  };
-  unreadCount: number;
+  name: string;
+  email: string;
+  avatarUrl?: string;
 }
 
 const ChatsPage: React.FC = () => {
   const { user } = useAuth();
-  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newChatFriend, setNewChatFriend] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
 
-  const handleSelectChat = (chat: Chat) => {
-    setSelectedChat(chat);
-  };
+  const loadChats = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await chatsAPI.getUserChats();
+      if (res.data.success) {
+        const raw: Chat[] = res.data.data || [];
+        const unique = raw.filter((c, i, a) => a.findIndex(x => x._id === c._id) === i);
+        setChats(unique);
+      }
+    } catch (e) {
+      console.error(e);
+      setChats([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const handleCloseChat = () => {
-    setSelectedChat(null);
-  };
+  const loadFriends = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const res = await friendsAPI.getFriends();
+      if (res.data.success) {
+        const real = (res.data.friends as Friend[]).filter(f => f._id !== user.id);
+        setFriends(real);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [user?.id]);
 
-  // Преобразование чата к формату для ChatWindow
-  const mapChatForWindow = (chat: Chat): MappedChat => {
-    return {
-      _id: chat._id,
-      type: chat.type,
-      name: chat.name,
-      participants: chat.participants.map(p => ({
-        _id: p.userId._id,
-        name: p.userId.name,
-        avatarUrl: p.userId.avatarUrl,
-      })),
-      unreadCount: chat.unreadCount,
-      // lastMessage преобразуем, если нужно
-      lastMessage: chat.lastMessage ? {
-        _id: '', // временно, ChatWindow не использует _id сообщения в пропсах
-        chatId: chat._id,
-        userId: {
-          _id: chat.lastMessage.senderId._id,
-          name: chat.lastMessage.senderId.name,
-        },
-        content: chat.lastMessage.content,
-        createdAt: chat.lastMessage.sentAt,
-        isRead: false,
-      } : undefined,
+  useEffect(() => {
+    loadChats();
+    loadFriends();
+  }, [loadChats, loadFriends]);
+
+  // WebSocket-подписки для мгновенного обновления превью
+  useEffect(() => {
+    const handleChatUpdated = (updatedChat: Chat) => {
+      setChats(prev => prev.map(chat => (chat._id === updatedChat._id ? updatedChat : chat)));
     };
+
+    const handleNewMessage = (msg: any) => {
+      setChats(prev =>
+        prev.map(chat =>
+          chat._id === msg.chat
+            ? { ...chat, lastMessage: msg, updatedAt: new Date().toISOString() }
+            : chat
+        )
+      );
+    };
+
+    webSocketService.on('chat_updated', handleChatUpdated);
+    webSocketService.on('new_message', handleNewMessage);
+
+    return () => {
+      webSocketService.off('chat_updated', handleChatUpdated);
+      webSocketService.off('new_message', handleNewMessage);
+    };
+  }, []);
+
+  const createChat = async () => {
+    setError(null);
+    if (!newChatFriend) { setError('Выберите друга'); return; }
+    if (newChatFriend === user?.id) { setError('Нельзя создать чат с самим собой'); return; }
+    setCreating(true);
+    try {
+      const res = await chatsAPI.createChat({ type: 'direct', participantIds: [newChatFriend] });
+      if (res.data.success && res.data.chat) {
+        await loadChats();
+        setSelectedChatId(res.data.chat._id);
+        setShowCreateForm(false);
+        setNewChatFriend('');
+      } else {
+        setError('Не удалось создать чат');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Ошибка');
+    } finally {
+      setCreating(false);
+    }
   };
 
-  if (!user) {
-    return (
-      <div className="chats-page">
-        <Header />
-        <div className="error">Пожалуйста, войдите в систему.</div>
-      </div>
-    );
-  }
+  const getFriendName = (id: string) => {
+    const f = friends.find(x => x._id === id);
+    return f ? `${f.name} (${f.email})` : '';
+  };
 
   return (
     <div className="chats-page">
@@ -112,47 +129,43 @@ const ChatsPage: React.FC = () => {
       <div className="page-with-header">
         <div className="chats-container">
           <div className="chats-sidebar">
-            <ChatList 
-              onSelectChat={handleSelectChat}
-              selectedChatId={selectedChat?._id}
-            />
+            <div className="chats-sidebar-header">
+              <h3>Чаты</h3>
+              <button className="btn btn-primary btn-sm" onClick={() => setShowCreateForm(!showCreateForm)}>
+                {showCreateForm ? '– Скрыть' : '+ Новый чат'}
+              </button>
+            </div>
+            {showCreateForm && (
+              <div className="create-chat-form">
+                <div className="form-group">
+                  <label className="form-label">Выберите друга</label>
+                  <select value={newChatFriend} onChange={e => setNewChatFriend(e.target.value)} disabled={friends.length === 0}>
+                    <option value="">— Выберите —</option>
+                    {friends.map(f => (
+                      <option key={f._id} value={f._id}>{f.name} ({f.email})</option>
+                    ))}
+                  </select>
+                  {newChatFriend && <div className="selected-friend">Выбран: {getFriendName(newChatFriend)}</div>}
+                  {friends.length === 0 && <div className="info-message">Нет друзей. <a href="/friends">Добавить</a></div>}
+                </div>
+                <div className="form-actions">
+                  <button className="btn btn-success btn-sm" onClick={createChat} disabled={creating || !newChatFriend}>Создать чат</button>
+                  <button className="btn btn-outline btn-sm" onClick={() => { setShowCreateForm(false); setError(null); setNewChatFriend(''); }}>Отмена</button>
+                </div>
+                {error && <div className="error-message">{error}</div>}
+              </div>
+            )}
+            <ChatList chats={chats} loading={loading} onSelectChat={setSelectedChatId} activeChatId={selectedChatId || undefined} />
           </div>
-
           <div className="chats-main">
-            {selectedChat ? (
-              <ChatWindow 
-                chat={mapChatForWindow(selectedChat)}
-                onClose={handleCloseChat}
+            {selectedChatId ? (
+              <ChatWindow
+                chatId={selectedChatId}
+                onClose={() => setSelectedChatId(null)}
+                onChatsChanged={loadChats}
               />
             ) : (
-              <div className="no-chat-selected">
-                <div className="welcome-icon">💬</div>
-                <h2>Мессенджер StudySync</h2>
-                <p>Выберите чат из списка или начните новый диалог</p>
-                <div className="chat-features">
-                  <div className="feature">
-                    <div className="feature-icon">🚀</div>
-                    <div className="feature-text">
-                      <h4>Общение в реальном времени</h4>
-                      <p>Мгновенная отправка и получение сообщений</p>
-                    </div>
-                  </div>
-                  <div className="feature">
-                    <div className="feature-icon">👥</div>
-                    <div className="feature-text">
-                      <h4>Личные и групповые чаты</h4>
-                      <p>Общайтесь один на один или создавайте группы</p>
-                    </div>
-                  </div>
-                  <div className="feature">
-                    <div className="feature-icon">📚</div>
-                    <div className="feature-text">
-                      <h4>Учебные обсуждения</h4>
-                      <p>Делитесь материалами и обсуждайте учебные вопросы</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <div className="no-chat-selected"><p>Выберите чат или создайте новый</p></div>
             )}
           </div>
         </div>

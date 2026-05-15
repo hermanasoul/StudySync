@@ -1,14 +1,22 @@
 // client/src/components/CreateFlashcardModal.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { flashcardsAPI, achievementsAPI } from '../services/api';
 import webSocketService from '../services/websocket';
 import './CreateFlashcardModal.css';
 
+interface Flashcard {
+  _id: string;
+  question: string;
+  answer: string;
+  hint?: string;
+  subjectId: string;
+}
+
 interface CreateFlashcardModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onFlashcardCreated: () => void;
+  onFlashcardCreated: (flashcard: Flashcard) => void;
   subjectId: string;
   groupId?: string;
 }
@@ -21,17 +29,43 @@ const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
   const [hint, setHint] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const isSubmitting = useRef(false);
 
   if (!isOpen) return null;
 
+  const extractError = (data: any): string => {
+    if (typeof data === 'string') return data;
+    if (data?.error) {
+      if (typeof data.error === 'string') return data.error;
+      if (data.error.message) return data.error.message;
+      if (data.error.errors) {
+        return Object.values(data.error.errors).map((e: any) => e.message).join('; ');
+      }
+      return JSON.stringify(data.error);
+    }
+    if (data?.message) return data.message;
+    return 'Ошибка при создании карточки';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!question.trim() || !answer.trim()) {
-      setError('Заполните вопрос и ответ');
+
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
+
+    if (!question.trim()) {
+      setError('Введите вопрос');
+      isSubmitting.current = false;
+      return;
+    }
+    if (!answer.trim()) {
+      setError('Введите ответ');
+      isSubmitting.current = false;
       return;
     }
     if (!subjectId) {
-      setError('Не указан предмет для карточки');
+      setError('Не указан предмет');
+      isSubmitting.current = false;
       return;
     }
 
@@ -47,6 +81,20 @@ const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
         groupId: groupId
       });
 
+      const created = response.data.flashcard;
+      if (created) {
+        const newCard: Flashcard = {
+          _id: created._id || created.id,
+          question: created.question,
+          answer: created.answer,
+          hint: created.hint,
+          subjectId: created.subjectId
+        };
+        onFlashcardCreated(newCard);
+      } else {
+        onFlashcardCreated({ _id: '', question: question.trim(), answer: answer.trim(), hint: hint.trim(), subjectId });
+      }
+
       if (groupId && response.data.flashcard) {
         webSocketService.sendFlashcardCreated(groupId, {
           id: response.data.flashcard._id,
@@ -60,29 +108,17 @@ const CreateFlashcardModal: React.FC<CreateFlashcardModalProps> = ({
         });
       }
 
-      try {
-        await achievementsAPI.check('FIRST_FLASHCARD');
-        if (subjectId) {
-          const countResponse = await flashcardsAPI.getBySubject(subjectId);
-          const totalFlashcards = countResponse.data?.flashcards?.length || 0;
-          await achievementsAPI.check('FLASHCARD_CREATOR_5', Math.min(totalFlashcards / 5 * 100, 100));
-          await achievementsAPI.check('FLASHCARD_MASTER_20', Math.min(totalFlashcards / 20 * 100, 100));
-        }
-      } catch (achievementError) {
-        console.error('Error checking achievements:', achievementError);
-      }
+      try { await achievementsAPI.check('FIRST_FLASHCARD'); } catch (e) { console.error(e); }
 
       setQuestion('');
       setAnswer('');
       setHint('');
-      onFlashcardCreated();
       onClose();
     } catch (err: any) {
-      console.error('Create flashcard error:', err);
-      const msg = err.response?.data?.error || err.response?.data?.errors?.[0]?.msg || 'Ошибка при создании карточки';
-      setError(msg);
+      setError(extractError(err.response?.data));
     } finally {
       setLoading(false);
+      isSubmitting.current = false;
     }
   };
 

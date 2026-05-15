@@ -1,6 +1,6 @@
 // client/src/components/EditFlashcardModal.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { flashcardsAPI } from '../services/api';
 import './EditFlashcardModal.css';
 
@@ -10,13 +10,14 @@ interface Flashcard {
   answer: string;
   hint?: string;
   subjectId: string;
+  groupId?: string; // для совместимости с GroupPage
 }
 
 interface EditFlashcardModalProps {
   isOpen: boolean;
   onClose: () => void;
   flashcard: Flashcard | null;
-  onFlashcardUpdated: () => void;
+  onFlashcardUpdated: (flashcard?: Flashcard) => void;
   onFlashcardDeleted: () => void;
 }
 
@@ -27,13 +28,39 @@ const EditFlashcardModal: React.FC<EditFlashcardModalProps> = ({
   onFlashcardUpdated,
   onFlashcardDeleted
 }) => {
-  const [question, setQuestion] = useState(flashcard?.question || '');
-  const [answer, setAnswer] = useState(flashcard?.answer || '');
-  const [hint, setHint] = useState(flashcard?.hint || '');
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState('');
+  const [hint, setHint] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Заполняем поля при открытии модалки
+  useEffect(() => {
+    if (flashcard) {
+      setQuestion(flashcard.question || '');
+      setAnswer(flashcard.answer || '');
+      setHint(flashcard.hint || '');
+      setError('');
+      setShowDeleteConfirm(false);
+    }
+  }, [flashcard, isOpen]);
 
   if (!isOpen || !flashcard) return null;
+
+  const extractError = (data: any): string => {
+    if (typeof data === 'string') return data;
+    if (data?.error) {
+      if (typeof data.error === 'string') return data.error;
+      if (data.error.message) return data.error.message;
+      if (data.error.errors) {
+        return Object.values(data.error.errors).map((e: any) => e.message).join('; ');
+      }
+      return JSON.stringify(data.error);
+    }
+    if (data?.message) return data.message;
+    return 'Неизвестная ошибка';
+  };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,15 +72,25 @@ const EditFlashcardModal: React.FC<EditFlashcardModalProps> = ({
     setLoading(true);
     setError('');
     try {
-      await flashcardsAPI.update(flashcard._id, {
+      const response = await flashcardsAPI.update(flashcard._id, {
         question: question.trim(),
         answer: answer.trim(),
         hint: hint.trim()
       });
-      onFlashcardUpdated();
+
+      if (response.data.success && response.data.flashcard) {
+        onFlashcardUpdated({
+          ...flashcard,
+          question: response.data.flashcard.question || question.trim(),
+          answer: response.data.flashcard.answer || answer.trim(),
+          hint: response.data.flashcard.hint || hint.trim()
+        });
+      } else {
+        onFlashcardUpdated();
+      }
       onClose();
     } catch (err: any) {
-      const msg = err.response?.data?.error || err.response?.data?.errors?.[0]?.msg || 'Ошибка обновления';
+      const msg = extractError(err.response?.data);
       setError(msg);
     } finally {
       setLoading(false);
@@ -61,18 +98,25 @@ const EditFlashcardModal: React.FC<EditFlashcardModalProps> = ({
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Удалить карточку?')) return;
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
     setLoading(true);
     try {
       await flashcardsAPI.delete(flashcard._id);
       onFlashcardDeleted();
       onClose();
     } catch (err: any) {
-      const msg = err.response?.data?.error || 'Ошибка удаления';
-      setError(msg);
+      setError(extractError(err.response?.data));
     } finally {
       setLoading(false);
+      setShowDeleteConfirm(false);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
   };
 
   return (
@@ -101,6 +145,19 @@ const EditFlashcardModal: React.FC<EditFlashcardModalProps> = ({
             <button type="submit" className="btn-primary" disabled={loading}>Сохранить</button>
           </div>
         </form>
+
+        {/* Кастомное подтверждение удаления */}
+        {showDeleteConfirm && (
+          <div className="delete-confirm-overlay" onClick={cancelDelete}>
+            <div className="delete-confirm-dialog" onClick={e => e.stopPropagation()}>
+              <p>Удалить эту карточку?</p>
+              <div className="delete-confirm-actions">
+                <button className="btn btn-danger btn-sm" onClick={confirmDelete} disabled={loading}>Удалить</button>
+                <button className="btn btn-outline btn-sm" onClick={cancelDelete}>Отмена</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

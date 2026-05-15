@@ -43,8 +43,9 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.1",
+    "multer": "^2.1.1",
     "redis": "^4.6.13",
-    "socket.io": "^4.7.4",
+    "socket.io": "^4.7.5",
     "validator": "^13.11.0"
   },
   "devDependencies": {

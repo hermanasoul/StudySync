@@ -1,4 +1,5 @@
 // server/routes/groups.js
+
 const { body, param, query } = require('express-validator');
 const express = require('express');
 const mongoose = require('mongoose');
@@ -16,6 +17,7 @@ const {
   sanitizeInput 
 } = require('../middleware/validation');
 const { AppError, catchAsync } = require('../middleware/errorHandler');
+const { clearCacheOnMutation } = require('../middleware/cache');
 
 const router = express.Router();
 
@@ -30,102 +32,7 @@ const sendWebSocketEvent = (req, event, data) => {
   }
 };
 
-/**
- * @swagger
- * tags:
- *   name: Groups
- *   description: Управление учебными группами
- */
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     Group:
- *       type: object
- *       properties:
- *         _id:
- *           type: string
- *         name:
- *           type: string
- *         description:
- *           type: string
- *         subjectId:
- *           $ref: '#/components/schemas/Subject'
- *         createdBy:
- *           $ref: '#/components/schemas/User'
- *         members:
- *           type: array
- *           items:
- *             type: object
- *             properties:
- *               user:
- *                 $ref: '#/components/schemas/User'
- *               role:
- *                 type: string
- *                 enum: [owner, admin, member]
- *               joinedAt:
- *                 type: string
- *                 format: date-time
- *         isPublic:
- *           type: boolean
- *         inviteCode:
- *           type: string
- *         settings:
- *           type: object
- *         memberCount:
- *           type: number
- *         createdAt:
- *           type: string
- *           format: date-time
- *         updatedAt:
- *           type: string
- *           format: date-time
- */
-
-/**
- * @swagger
- * /groups:
- *   post:
- *     summary: Создать новую группу
- *     tags: [Groups]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - name
- *               - subjectId
- *             properties:
- *               name:
- *                 type: string
- *               description:
- *                 type: string
- *               subjectId:
- *                 type: string
- *               isPublic:
- *                 type: boolean
- *               settings:
- *                 type: object
- *     responses:
- *       201:
- *         description: Группа создана
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 group:
- *                   $ref: '#/components/schemas/Group'
- */
+// ================== СОЗДАНИЕ ГРУППЫ ==================
 router.post('/',
   auth,
   sanitizeInput,
@@ -133,7 +40,6 @@ router.post('/',
   catchAsync(async (req, res) => {
     const { name, description, subjectId, isPublic, settings } = req.body;
 
-    // Проверяем существование предмета
     const Subject = require('../models/Subject');
     const subject = await Subject.findById(subjectId);
     if (!subject) {
@@ -166,7 +72,6 @@ router.post('/',
       .populate('subjectId', 'name color')
       .select('-__v');
 
-    // Создаем уведомление для создателя группы
     const ws = req.app.get('ws');
     await ws.sendNotification(req.user.id, {
       type: 'system',
@@ -218,54 +123,7 @@ router.post('/',
   })
 );
 
-/**
- * @swagger
- * /groups/my:
- *   get:
- *     summary: Получить группы текущего пользователя
- *     tags: [Groups]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 20
- *       - in: query
- *         name: role
- *         schema:
- *           type: string
- *           enum: [owner, admin, member, all]
- *       - in: query
- *         name: public
- *         schema:
- *           type: string
- *           enum: [true, false, all]
- *     responses:
- *       200:
- *         description: Список групп
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 pagination:
- *                   type: object
- *                 count:
- *                   type: integer
- *                 groups:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Group'
- */
+// ================== МОИ ГРУППЫ ==================
 router.get('/my',
   auth,
   [
@@ -288,12 +146,10 @@ router.get('/my',
       'members.user': req.user.id
     };
 
-    // Фильтр по роли
     if (role !== 'all') {
       filter['members.role'] = role;
     }
 
-    // Фильтр по публичности
     if (public !== 'all') {
       filter.isPublic = public === 'true';
     }
@@ -355,34 +211,7 @@ router.get('/my',
   })
 );
 
-/**
- * @swagger
- * /groups/{id}:
- *   get:
- *     summary: Получить информацию о группе по ID
- *     tags: [Groups]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID группы
- *     responses:
- *       200:
- *         description: Информация о группе
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 group:
- *                   $ref: '#/components/schemas/Group'
- */
+// ================== ПОЛУЧИТЬ ГРУППУ ПО ID ==================
 router.get('/:id',
   auth,
   idValidation,
@@ -400,7 +229,6 @@ router.get('/:id',
       throw new AppError('Группа не найдена или доступ запрещен', 404);
     }
 
-    // Получаем статистику группы
     const [flashcardsCount, notesCount] = await Promise.all([
       Flashcard.countDocuments({ groupId: group._id }),
       Note.countDocuments({ groupId: group._id })
@@ -449,39 +277,7 @@ router.get('/:id',
   })
 );
 
-/**
- * @swagger
- * /groups/{id}:
- *   put:
- *     summary: Обновить группу
- *     tags: [Groups]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID группы
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               description:
- *                 type: string
- *               isPublic:
- *                 type: boolean
- *               settings:
- *                 type: object
- *     responses:
- *       200:
- *         description: Группа обновлена
- */
+// ================== ОБНОВИТЬ ГРУППУ ==================
 router.put('/:id',
   auth,
   idValidation,
@@ -542,25 +338,7 @@ router.put('/:id',
   })
 );
 
-/**
- * @swagger
- * /groups/{id}:
- *   delete:
- *     summary: Удалить группу
- *     tags: [Groups]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID группы
- *     responses:
- *       200:
- *         description: Группа удалена
- */
+// ================== УДАЛИТЬ ГРУППУ ==================
 router.delete('/:id',
   auth,
   idValidation,
@@ -575,7 +353,6 @@ router.delete('/:id',
       throw new AppError('Группа не найдена или недостаточно прав', 404);
     }
 
-    // Создаем уведомления для участников о удалении группы
     const ws = req.app.get('ws');
     for (const member of group.members) {
       if (member.user.toString() !== req.user.id) {
@@ -595,7 +372,6 @@ router.delete('/:id',
       }
     }
 
-    // Каскадное удаление связанных данных
     await Flashcard.deleteMany({ groupId: group._id });
     await Note.deleteMany({ groupId: group._id });
     await GroupInvite.deleteMany({ groupId: group._id });
@@ -608,36 +384,7 @@ router.delete('/:id',
   })
 );
 
-/**
- * @swagger
- * /groups/{id}/invite:
- *   post:
- *     summary: Пригласить участника в группу
- *     tags: [Groups]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID группы
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *             properties:
- *               email:
- *                 type: string
- *     responses:
- *       200:
- *         description: Приглашение отправлено
- */
+// ================== ПРИГЛАСИТЬ УЧАСТНИКА ==================
 router.post('/:id/invite',
   auth,
   idValidation,
@@ -656,12 +403,10 @@ router.post('/:id/invite',
       throw new AppError('Группа не найдена или недостаточно прав', 404);
     }
 
-    // Проверяем, разрешены ли приглашения
     if (!group.settings.allowMemberInvites && group.members.find(m => m.user.toString() === req.user.id)?.role !== 'owner') {
       throw new AppError('Приглашения участников отключены владельцем группы', 403);
     }
 
-    // Проверяем, не приглашен ли уже пользователь
     const existingInvite = await GroupInvite.findOne({
       groupId: group._id,
       email: email.toLowerCase(),
@@ -678,12 +423,11 @@ router.post('/:id/invite',
       email: email.toLowerCase(),
       token: require('crypto').randomBytes(32).toString('hex'),
       status: 'pending',
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 дней
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
     });
 
     await invite.save();
 
-    // Создаем уведомление для приглашенного пользователя
     const ws = req.app.get('ws');
     const invitedUser = await User.findOne({ email: email.toLowerCase() });
     if (invitedUser) {
@@ -703,7 +447,6 @@ router.post('/:id/invite',
       });
     }
 
-    // Уведомляем создателя о отправке приглашения
     await ws.sendNotification(req.user.id, {
       type: 'system',
       title: 'Приглашение отправлено',
@@ -727,25 +470,7 @@ router.post('/:id/invite',
   })
 );
 
-/**
- * @swagger
- * /groups/join/{inviteCode}:
- *   post:
- *     summary: Присоединиться к группе по коду приглашения
- *     tags: [Groups]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: inviteCode
- *         required: true
- *         schema:
- *           type: string
- *         description: Код приглашения
- *     responses:
- *       200:
- *         description: Успешное присоединение
- */
+// ================== ПРИСОЕДИНИТЬСЯ ПО КОДУ ==================
 router.post('/join/:inviteCode',
   auth,
   [
@@ -763,7 +488,6 @@ router.post('/join/:inviteCode',
       throw new AppError('Группа с таким кодом не найдена', 404);
     }
 
-    // Проверяем, является ли группа публичной
     if (!group.isPublic) {
       throw new AppError('Эта группа является приватной. Требуется приглашение.', 403);
     }
@@ -792,7 +516,6 @@ router.post('/join/:inviteCode',
 
     const ws = req.app.get('ws');
 
-    // Создаем уведомление для владельца группы о новом участнике
     await ws.sendNotification(group.createdBy.toString(), {
       type: 'group_join',
       title: 'Новый участник в группе',
@@ -808,7 +531,6 @@ router.post('/join/:inviteCode',
       }
     });
 
-    // Отправляем уведомления остальным участникам группы
     await ws.sendGroupNotification(group._id, {
       type: 'group_join',
       title: 'Новый участник в группе',
@@ -821,9 +543,8 @@ router.post('/join/:inviteCode',
           name: req.user.name
         }
       }
-    }, req.user.id); // Исключаем самого пользователя
+    }, req.user.id);
 
-    // Уведомляем нового участника
     await ws.sendNotification(req.user.id, {
       type: 'system',
       title: 'Вы присоединились к группе',
@@ -835,7 +556,6 @@ router.post('/join/:inviteCode',
       }
     });
 
-    // Отправляем WebSocket событие всем участникам группы
     sendWebSocketEvent(req, 'member-joined', {
       member: {
         id: req.user.id,
@@ -883,25 +603,7 @@ router.post('/join/:inviteCode',
   })
 );
 
-/**
- * @swagger
- * /groups/{id}/members:
- *   get:
- *     summary: Получить список участников группы
- *     tags: [Groups]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID группы
- *     responses:
- *       200:
- *         description: Список участников
- */
+// ================== УЧАСТНИКИ ГРУППЫ ==================
 router.get('/:id/members',
   auth,
   idValidation,
@@ -934,35 +636,7 @@ router.get('/:id/members',
   })
 );
 
-/**
- * @swagger
- * /groups/{id}/flashcards:
- *   get:
- *     summary: Получить карточки группы
- *     tags: [Groups]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID группы
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 20
- *     responses:
- *       200:
- *         description: Список карточек
- */
+// ================== КАРТОЧКИ ГРУППЫ ==================
 router.get('/:id/flashcards',
   auth,
   idValidation,
@@ -1023,43 +697,7 @@ router.get('/:id/flashcards',
   })
 );
 
-/**
- * @swagger
- * /groups/{id}/flashcards:
- *   post:
- *     summary: Создать карточку в группе
- *     tags: [Groups]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID группы
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - question
- *               - answer
- *             properties:
- *               question:
- *                 type: string
- *               answer:
- *                 type: string
- *               hint:
- *                 type: string
- *               subjectId:
- *                 type: string
- *     responses:
- *       201:
- *         description: Карточка создана
- */
+// POST карточку в группу
 router.post('/:id/flashcards',
   auth,
   idValidation,
@@ -1070,6 +708,7 @@ router.post('/:id/flashcards',
     body('hint').optional().trim().isLength({ max: 200 }),
     body('subjectId').optional().isMongoId()
   ],
+  clearCacheOnMutation(),
   catchAsync(async (req, res) => {
     const { question, answer, hint, subjectId } = req.body;
 
@@ -1082,12 +721,14 @@ router.post('/:id/flashcards',
       throw new AppError('Группа не найдена или доступ запрещен', 404);
     }
 
-    // Проверяем разрешения
+    if (!group.subjectId) {
+      throw new AppError('У группы не указан предмет', 400);
+    }
+
     if (!group.settings.allowMemberCreateCards && group.members.find(m => m.user.toString() === req.user.id)?.role === 'member') {
       throw new AppError('Создание карточек в этой группе ограничено', 403);
     }
 
-    // Проверяем существование предмета
     const Subject = require('../models/Subject');
     const subject = await Subject.findById(subjectId || group.subjectId);
     if (!subject) {
@@ -1112,7 +753,6 @@ router.post('/:id/flashcards',
 
     const ws = req.app.get('ws');
 
-    // Отправляем уведомления участникам группы о новой карточке
     await ws.sendGroupNotification(group._id, {
       type: 'flashcard_created',
       title: 'Новая карточка в группе',
@@ -1129,7 +769,6 @@ router.post('/:id/flashcards',
       }
     }, req.user.id);
 
-    // Отправляем WebSocket событие
     sendWebSocketEvent(req, 'new-flashcard', {
       flashcard: {
         id: populatedFlashcard._id,
@@ -1168,35 +807,64 @@ router.post('/:id/flashcards',
   })
 );
 
-/**
- * @swagger
- * /groups/{id}/notes:
- *   get:
- *     summary: Получить заметки группы
- *     tags: [Groups]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID группы
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 20
- *     responses:
- *       200:
- *         description: Список заметок
- */
+// ====== НОВОЕ: РЕДАКТИРОВАНИЕ КАРТОЧКИ ГРУППЫ ======
+router.put('/:groupId/flashcards/:flashcardId',
+  auth,
+  groupIdValidation,
+  [param('flashcardId').notEmpty().isMongoId()],
+  sanitizeInput,
+  [
+    body('question').optional().trim().isLength({ min: 3, max: 500 }),
+    body('answer').optional().trim().isLength({ min: 1, max: 1000 }),
+    body('hint').optional().trim().isLength({ max: 200 }),
+    body('difficulty').optional().isIn(['easy', 'medium', 'hard'])
+  ],
+  clearCacheOnMutation(),
+  catchAsync(async (req, res) => {
+    const flashcard = await Flashcard.findOne({
+      _id: req.params.flashcardId,
+      groupId: req.params.groupId,
+      authorId: req.user.id   // только автор может редактировать
+    });
+
+    if (!flashcard) {
+      throw new AppError('Карточка не найдена или нет прав', 404);
+    }
+
+    if (req.body.question !== undefined) flashcard.question = req.body.question.trim();
+    if (req.body.answer !== undefined) flashcard.answer = req.body.answer.trim();
+    if (req.body.hint !== undefined) flashcard.hint = req.body.hint.trim();
+    if (req.body.difficulty !== undefined) flashcard.difficulty = req.body.difficulty;
+
+    await flashcard.save();
+
+    res.json({ success: true, message: 'Карточка обновлена', flashcard });
+  })
+);
+
+// ====== НОВОЕ: УДАЛЕНИЕ КАРТОЧКИ ГРУППЫ ======
+router.delete('/:groupId/flashcards/:flashcardId',
+  auth,
+  groupIdValidation,
+  [param('flashcardId').notEmpty().isMongoId()],
+  clearCacheOnMutation(),
+  catchAsync(async (req, res) => {
+    const flashcard = await Flashcard.findOne({
+      _id: req.params.flashcardId,
+      groupId: req.params.groupId,
+      authorId: req.user.id   // только автор
+    });
+
+    if (!flashcard) {
+      throw new AppError('Карточка не найдена или нет прав', 404);
+    }
+
+    await flashcard.deleteOne();
+    res.json({ success: true, message: 'Карточка удалена' });
+  })
+);
+
+// ================== ЗАМЕТКИ ГРУППЫ ==================
 router.get('/:id/notes',
   auth,
   idValidation,
@@ -1254,43 +922,7 @@ router.get('/:id/notes',
   })
 );
 
-/**
- * @swagger
- * /groups/{id}/notes:
- *   post:
- *     summary: Создать заметку в группе
- *     tags: [Groups]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID группы
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - title
- *               - content
- *             properties:
- *               title:
- *                 type: string
- *               content:
- *                 type: string
- *               tags:
- *                 type: array
- *                 items:
- *                   type: string
- *     responses:
- *       201:
- *         description: Заметка создана
- */
+// POST заметку в группу
 router.post('/:id/notes',
   auth,
   idValidation,
@@ -1301,6 +933,7 @@ router.post('/:id/notes',
     body('tags').optional().isArray(),
     body('tags.*').optional().isString().trim().isLength({ max: 20 })
   ],
+  clearCacheOnMutation(),
   catchAsync(async (req, res) => {
     const { title, content, tags } = req.body;
 
@@ -1313,7 +946,10 @@ router.post('/:id/notes',
       throw new AppError('Группа не найдена или доступ запрещен', 404);
     }
 
-    // Проверяем разрешения
+    if (!group.subjectId) {
+      throw new AppError('У группы не указан предмет', 400);
+    }
+
     if (!group.settings.allowMemberCreateNotes && group.members.find(m => m.user.toString() === req.user.id)?.role === 'member') {
       throw new AppError('Создание заметок в этой группе ограничено', 403);
     }
@@ -1336,7 +972,6 @@ router.post('/:id/notes',
 
     const ws = req.app.get('ws');
 
-    // Отправляем уведомления участникам группы о новой заметке
     await ws.sendGroupNotification(group._id, {
       type: 'note_created',
       title: 'Новая заметка в группе',
@@ -1353,7 +988,6 @@ router.post('/:id/notes',
       }
     }, req.user.id);
 
-    // Отправляем WebSocket событие
     sendWebSocketEvent(req, 'new-note', {
       note: {
         id: populatedNote._id,
@@ -1392,45 +1026,7 @@ router.post('/:id/notes',
   })
 );
 
-/**
- * @swagger
- * /groups/{groupId}/notes/{noteId}:
- *   put:
- *     summary: Обновить заметку в группе
- *     tags: [Groups]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: groupId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID группы
- *       - in: path
- *         name: noteId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID заметки
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               title:
- *                 type: string
- *               content:
- *                 type: string
- *               tags:
- *                 type: array
- *                 items:
- *                   type: string
- *     responses:
- *       200:
- *         description: Заметка обновлена
- */
+// PUT /api/groups/:groupId/notes/:noteId
 router.put('/:groupId/notes/:noteId',
   auth,
   groupIdValidation,
@@ -1443,6 +1039,7 @@ router.put('/:groupId/notes/:noteId',
     body('content').optional().trim().isLength({ min: 10, max: 10000 }),
     body('tags').optional().isArray()
   ],
+  clearCacheOnMutation(),
   catchAsync(async (req, res) => {
     const { title, content, tags } = req.body;
 
@@ -1482,37 +1079,14 @@ router.put('/:groupId/notes/:noteId',
   })
 );
 
-/**
- * @swagger
- * /groups/{groupId}/notes/{noteId}:
- *   delete:
- *     summary: Удалить заметку из группы
- *     tags: [Groups]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: groupId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID группы
- *       - in: path
- *         name: noteId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID заметки
- *     responses:
- *       200:
- *         description: Заметка удалена
- */
+// DELETE /api/groups/:groupId/notes/:noteId
 router.delete('/:groupId/notes/:noteId',
   auth,
   groupIdValidation,
   [
     param('noteId').notEmpty().isMongoId()
   ],
+  clearCacheOnMutation(),
   catchAsync(async (req, res) => {
     const note = await Note.findOne({
       _id: req.params.noteId,
@@ -1533,37 +1107,7 @@ router.delete('/:groupId/notes/:noteId',
   })
 );
 
-/**
- * @swagger
- * /groups/public/all:
- *   get:
- *     summary: Получить список публичных групп
- *     tags: [Groups]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 20
- *       - in: query
- *         name: subjectId
- *         schema:
- *           type: string
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Список публичных групп
- */
+// ================== ПУБЛИЧНЫЕ ГРУППЫ ==================
 router.get('/public/all',
   auth,
   [
@@ -1584,7 +1128,7 @@ router.get('/public/all',
 
     const filter = {
       isPublic: true,
-      'members.user': { $ne: req.user.id } // Исключаем группы, где пользователь уже участник
+      'members.user': { $ne: req.user.id }
     };
 
     if (subjectId) {

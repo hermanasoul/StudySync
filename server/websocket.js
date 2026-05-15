@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const User = require('./models/User');
 const Notification = require('./models/Notification');
 const StudySession = require('./models/StudySession');
-const StudySessionMessage = require('./models/StudySessionMessage'); // <-- добавлено
+const StudySessionMessage = require('./models/StudySessionMessage');
 const Flashcard = require('./models/Flashcard');
 const { AppError } = require('./middleware/errorHandler');
 
@@ -64,9 +64,21 @@ class WebSocketServer {
 
       this.addConnectedUser(socket.userId, socket.id);
       socket.join(`user:${socket.userId}`);
-      this.sendNotificationStats(socket.userId);
 
-      // Групповые комнаты
+      // ========== КОМНАТЫ ЧАТОВ ==========
+      socket.on('join_chat', (chatId) => {
+        socket.join(`chat:${chatId}`);
+        this.addUserToRoom(socket.userId, `chat:${chatId}`);
+        console.log(`User ${socket.userId} joined chat room: ${chatId}`);
+      });
+
+      socket.on('leave_chat', (chatId) => {
+        socket.leave(`chat:${chatId}`);
+        this.removeUserFromRoom(socket.userId, `chat:${chatId}`);
+        console.log(`User ${socket.userId} left chat room: ${chatId}`);
+      });
+
+      // ========== ГРУППОВЫЕ КОМНАТЫ ==========
       socket.on('join-group', (groupId) => {
         socket.join(`group:${groupId}`);
         this.addUserToRoom(socket.userId, `group:${groupId}`);
@@ -79,7 +91,7 @@ class WebSocketServer {
         console.log(`User ${socket.userId} left group room: ${groupId}`);
       });
 
-      // Обработка карточек
+      // ========== ОБРАБОТКА КАРТОЧЕК ==========
       socket.on('flashcard-studied', (data) => {
         const { flashcardId, subjectId, isCorrect } = data;
         socket.to(`subject:${subjectId}`).emit('flashcard-updated', {
@@ -151,7 +163,6 @@ class WebSocketServer {
       });
 
       // ========== УЧЕБНЫЕ СЕССИИ ==========
-
       socket.on('study_session_join', async (data) => {
         try {
           const { sessionId } = data;
@@ -261,8 +272,8 @@ class WebSocketServer {
         });
         await messageDoc.save().catch(err => console.error('Failed to save message:', err));
 
-        // Рассылаем остальным участникам
-        socket.to(roomId).emit('study_session_message', message);
+        // Рассылаем ВСЕМ участникам (включая отправителя) для мгновенного отображения
+        this.io.to(roomId).emit('study_session_message', message);
       });
 
       // Обновление таймера Pomodoro
@@ -287,7 +298,6 @@ class WebSocketServer {
         }
       });
 
-      
       // Смена карточки
       socket.on('study_session_flashcard_change', async (data) => {
         const { sessionId, flashcardIndex } = data;
@@ -372,6 +382,7 @@ class WebSocketServer {
         });
       });
 
+      // ========== УВЕДОМЛЕНИЯ ==========
       socket.on('get-notification-stats', async () => {
         try {
           const unreadCount = await Notification.getUnreadCount(socket.userId);
@@ -399,6 +410,7 @@ class WebSocketServer {
         socket.emit('study_session_participants', { participants });
       });
 
+      // ========== ОТКЛЮЧЕНИЕ ==========
       socket.on('disconnect', () => {
         console.log(`❌ WebSocket: User ${socket.userId} disconnected`);
 
@@ -420,7 +432,7 @@ class WebSocketServer {
     });
   }
 
-  // Вспомогательные методы
+  // ========== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ==========
   addConnectedUser(userId, socketId) {
     if (!this.connectedUsers.has(userId)) {
       this.connectedUsers.set(userId, []);
@@ -461,18 +473,20 @@ class WebSocketServer {
 
   // Методы для учебных сессий
   async canJoinStudySession(userId, session) {
+    // Хост и уже участники могут всегда
+    if (session.host.toString() === userId) return true;
+    if (session.participants.some(p => p.user.toString() === userId)) return true;
+
     if (session.accessType === 'public') return true;
     if (session.accessType === 'private') {
-      return session.invitedUsers.some(id => id.toString() === userId) ||
-             session.participants.some(p => p.user.toString() === userId);
+      return session.invitedUsers.some(id => id.toString() === userId);
     }
     if (session.accessType === 'friends') {
-      const user = await User.findById(userId);
       const host = await User.findById(session.host);
-      if (!user || !host) return false;
-      return user.friends.some(friend =>
-        friend.userId && friend.userId.toString() === host._id.toString() && friend.status === 'accepted'
-      ) || session.participants.some(p => p.user.toString() === userId);
+      if (!host) return false;
+      return host.friends.some(friend =>
+        friend.userId && friend.userId.toString() === userId && friend.status === 'accepted'
+      );
     }
     return false;
   }
@@ -498,6 +512,15 @@ class WebSocketServer {
 
   emitToGroup(groupId, event, data) {
     this.io.to(`group:${groupId}`).emit(event, data);
+  }
+
+  emitToChat(chatId, event, data, excludeUserId = null) {
+    const room = `chat:${chatId}`;
+    if (excludeUserId) {
+      this.io.to(room).except(`user:${excludeUserId}`).emit(event, data);
+    } else {
+      this.io.to(room).emit(event, data);
+    }
   }
 
   emitToStudySession(sessionId, event, data, excludeUserId = null) {
@@ -559,6 +582,34 @@ class WebSocketServer {
       return notification;
     } catch (error) {
       console.error('Ошибка при отправке уведомления:', error);
+      throw error;
+    }
+  }
+
+  // Отправка уведомления всем участникам группы
+  async sendGroupNotification(groupId, notificationData, excludeUserId = null) {
+    try {
+      const group = await require('./models/Group').findById(groupId);
+      if (!group) {
+        console.error(`Группа ${groupId} не найдена`);
+        return [];
+      }
+
+      const notifications = [];
+      for (const member of group.members) {
+        const userId = member.user.toString();
+        if (excludeUserId && userId === excludeUserId) continue;
+        try {
+          const notification = await this.sendNotification(userId, notificationData);
+          notifications.push(notification);
+        } catch (error) {
+          console.error(`Ошибка при отправке уведомления участнику ${userId}:`, error);
+        }
+      }
+      console.log(`📢 Уведомление отправлено ${notifications.length} участникам группы ${groupId}`);
+      return notifications;
+    } catch (error) {
+      console.error('Ошибка при отправке уведомления участникам группы:', error);
       throw error;
     }
   }
