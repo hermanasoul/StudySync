@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: studysync-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - studysync-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: studysync-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - studysync-network
+
+  server:
+    build: ./server
+    container_name: studysync-server
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - MONGODB_URI=mongodb://mongo:27017/studysync
+      - JWT_SECRET=studysync_super_secret_key_2024
+      - JWT_EXPIRE=30d
+      - REDIS_URL=redis://redis:6379
+      - CLIENT_URL=http://localhost:3000
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - studysync-network
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+
+  client:
+    build: ./client
+    container_name: studysync-client
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000/api
+    depends_on:
+      - server
+    networks:
+      - studysync-network
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+
+  seed:
+    build: ./server
+    container_name: studysync-seed
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongo:27017/studysync
+      - JWT_SECRET=studysync_super_secret_key_2024
+      - JWT_EXPIRE=30d
+      - REDIS_URL=redis://redis:6379
+      - CLIENT_URL=http://localhost:3000
+    depends_on:
+      - mongo
+      - server
+    networks:
+      - studysync-network
+    command: >
+      sh -c "
+        echo '⏳ Ожидание готовности MongoDB...' &&
+        sleep 10 &&
+        echo '📦 Заполнение демо-данными...' &&
+        node scripts/seedDemoData.js &&
+        node scripts/seedFriendsOnly.js ; 
+        node scripts/seedAchievements.js &&
+        echo '✅ Демо-данные успешно загружены!' &&
+        exit 0
+      "
+
+volumes:
+  mongo-data:
+
+networks:
+  studysync-network:
+    driver: bridge

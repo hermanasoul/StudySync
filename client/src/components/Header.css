@@ -1,5 +1,3 @@
-/* Header.css */
-
 .header {
   background: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -35,6 +33,7 @@
   justify-content: space-between;
   align-items: center;
   height: 60px;
+  gap: 20px;
 }
 
 .logo {
@@ -49,6 +48,8 @@
   display: flex;
   gap: 24px;
   align-items: center;
+  flex: 1 1 auto;
+  justify-content: space-evenly;
 }
 
 .nav-link {
@@ -67,8 +68,9 @@
 
 .header-buttons {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
+  flex: 0 1 auto;
 }
 
 .user-greeting {
@@ -76,6 +78,109 @@
   color: #374151;
   white-space: nowrap;
   font-size: 0.9rem;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Компактные иконки уведомлений и сообщений */
+.header-buttons .notifications-button,
+.header-buttons .ChatNotification button {
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.9rem !important;
+  border-radius: 8px !important;
+  background: #f3f4f6 !important;
+  border: none !important;
+  cursor: pointer !important;
+  color: #374151 !important;
+  min-width: auto !important;
+  box-shadow: none !important;
+}
+
+.header-buttons .notifications-button:hover,
+.header-buttons .ChatNotification button:hover {
+  background: #e5e7eb !important;
+}
+
+/* Переключатель темы – чуть крупнее и справа */
+.theme-toggle {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1rem !important;
+  border-radius: 8px !important;
+  background: #f3f4f6 !important;
+  border: none !important;
+  cursor: pointer !important;
+  color: #374151 !important;
+  min-width: auto !important;
+  box-shadow: none !important;
+  margin-left: auto;
+}
+
+.theme-toggle:hover {
+  background: #e5e7eb !important;
+}
+/* Единый стиль для кнопок Профиль и Выйти */
+.header-buttons .btn {
+  padding: 0 16px !important;
+  height: 40px !important;
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  border: none !important;
+  white-space: nowrap !important;
+  min-width: auto !important;
+  box-shadow: none !important;
+  line-height: 1 !important;
+}
+
+.header-buttons .btn-success {
+  background: #10b981 !important;
+  color: white !important;
+}
+.header-buttons .btn-success:hover {
+  background: #059669 !important;
+}
+
+.header-buttons .btn-danger {
+  background: #ef4444 !important;
+  color: white !important;
+}
+.header-buttons .btn-danger:hover {
+  background: #dc2626 !important;
+}
+
+.header-buttons .btn-outline {
+  background: transparent !important;
+  border: 1px solid #d1d5db !important;
+  color: #374151 !important;
+}
+.header-buttons .btn-outline:hover {
+  background: #f3f4f6 !important;
+}
+
+.header-buttons .btn-primary {
+  background: #4f46e5 !important;
+  color: white !important;
+}
+.header-buttons .btn-primary:hover {
+  background: #4338ca !important;
 }
 
 /* Адаптивность */

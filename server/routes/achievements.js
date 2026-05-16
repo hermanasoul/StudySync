@@ -259,7 +259,10 @@ router.get('/my',
       .sort({ unlockedAt: -1, createdAt: -1 })
       .select('-__v');
 
-    const achievements = userAchievements.map(ua => ({
+    // Фильтруем записи, где achievementId не null
+    const validAchievements = userAchievements.filter(ua => ua.achievementId != null);
+
+    const achievements = validAchievements.map(ua => ({
       id: ua._id,
       achievement: {
         id: ua.achievementId._id,

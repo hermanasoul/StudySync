@@ -49,13 +49,11 @@ const groupSchema = new mongoose.Schema({
   }],
   isPublic: {
     type: Boolean,
-    default: false,
-    index: true
+    default: false
   },
   inviteCode: {
     type: String,
     unique: true,
-    index: true,
     uppercase: true,
     minlength: [6, 'Код приглашения должен быть не менее 6 символов'],
     maxlength: [10, 'Код приглашения не должен превышать 10 символов']
@@ -78,8 +76,7 @@ const groupSchema = new mongoose.Schema({
   },
   isActive: {
     type: Boolean,
-    default: true,
-    index: true
+    default: true
   }
 }, {
   timestamps: true,
@@ -87,7 +84,7 @@ const groupSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// Виртуальное поле для количества участников (ИСПРАВЛЕНО)
+// Виртуальное поле для количества участников
 groupSchema.virtual('memberCount').get(function() {
   return this.members ? this.members.length : 0;
 });

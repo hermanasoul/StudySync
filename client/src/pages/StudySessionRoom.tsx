@@ -55,14 +55,16 @@ const StudySessionRoom: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const joinedRef = useRef(false);
+
+  // Ref для отслеживания, подключён ли WebSocket
+  const wsConnected = useRef(webSocketService.checkConnection());
+  const joinSent = useRef(false);
 
   const loadSession = useCallback(async () => {
     if (!sessionId) return;
     try {
       const res = await studySessionsAPI.getById(sessionId);
       setSession(res.data.session);
-      // Сообщения загрузятся через WebSocket
     } catch (err: any) {
       setError(err.response?.data?.message || 'Ошибка загрузки сессии');
     } finally {
@@ -72,35 +74,41 @@ const StudySessionRoom: React.FC = () => {
 
   useEffect(() => { loadSession(); }, [loadSession]);
 
-  // WebSocket для сессии (однократное присоединение)
+  // Ожидание подключения WebSocket и вход в комнату
   useEffect(() => {
-    if (!sessionId || joinedRef.current) return;
+    if (!sessionId) return;
 
     const joinRoom = () => {
-      console.log('📡 Присоединяемся к учебной сессии через WebSocket:', sessionId);
+      if (joinSent.current) return;
+      console.log('📡 Вход в учебную сессию (WebSocket готов)');
       webSocketService.joinStudySession(sessionId);
-      joinedRef.current = true;
+      joinSent.current = true;
     };
 
-    joinRoom();
+    // Если уже подключены — сразу заходим
+    if (webSocketService.checkConnection()) {
+      wsConnected.current = true;
+      joinRoom();
+    }
 
-    const handleReconnect = () => {
-      console.log('🔄 WebSocket переподключился, заходим в сессию');
-      // Если сокет переподключился, заново заходим
-      webSocketService.joinStudySession(sessionId);
+    const onConnected = () => {
+      console.log('🔌 WebSocket подключился, входим в сессию');
+      wsConnected.current = true;
+      // Небольшая задержка на всякий случай
+      setTimeout(joinRoom, 100);
     };
-    const handleConnected = () => {
-      // При первом подключении тоже заходим, но только если ещё не зашли
-      if (!joinedRef.current) {
-        joinRoom();
-      }
+
+    const onReconnected = () => {
+      console.log('🔄 WebSocket переподключился, повторно входим в сессию');
+      joinSent.current = false; // разрешаем повторный join
+      setTimeout(joinRoom, 100);
     };
 
-    webSocketService.on('reconnected', handleReconnect);
-    webSocketService.on('connected', handleConnected);
+    webSocketService.on('connected', onConnected);
+    webSocketService.on('reconnected', onReconnected);
 
+    // Обработчики сообщений
     const handleStateUpdate = (data: any) => {
-      console.log('📦 Получено обновление состояния сессии:', data);
       if (data.session) setSession(data.session);
     };
 
@@ -117,7 +125,7 @@ const StudySessionRoom: React.FC = () => {
     };
 
     const handleNewMessage = (msg: any) => {
-      console.log('💬 Получено новое сообщение:', msg);
+      console.log('💬 Новое сообщение:', msg);
       const chatMsg: ChatMessage = {
         _id: msg._id || Date.now().toString(),
         userId: msg.userId,
@@ -128,40 +136,25 @@ const StudySessionRoom: React.FC = () => {
       setMessages(prev => [...prev, chatMsg]);
     };
 
-    const handleFlashcardChange = (data: any) => {
-      setSession(prev => prev ? { ...prev, currentFlashcardIndex: data.flashcardIndex } : prev);
-    };
-
-    const handleTimerUpdate = (data: any) => {
-      setSession(prev => prev ? { ...prev, timerState: data.timerState } : prev);
-    };
-
     const handleParticipantJoined = () => loadSession();
     const handleParticipantLeft = () => loadSession();
-    const handleError = (err: any) => console.error('❌ Ошибка учебной сессии:', err);
 
     webSocketService.on('study_session_state', handleStateUpdate);
     webSocketService.on('study_session_messages', handleInitialMessages);
     webSocketService.on('study_session_message', handleNewMessage);
-    webSocketService.on('study_session_flashcard_change', handleFlashcardChange);
-    webSocketService.on('study_session_timer_update', handleTimerUpdate);
     webSocketService.on('study_session_participant_joined', handleParticipantJoined);
     webSocketService.on('study_session_participant_left', handleParticipantLeft);
-    webSocketService.on('study_session_error', handleError);
 
     return () => {
-      webSocketService.leaveStudySession(sessionId);
-      webSocketService.off('reconnected', handleReconnect);
-      webSocketService.off('connected', handleConnected);
+      webSocketService.off('connected', onConnected);
+      webSocketService.off('reconnected', onReconnected);
       webSocketService.off('study_session_state', handleStateUpdate);
       webSocketService.off('study_session_messages', handleInitialMessages);
       webSocketService.off('study_session_message', handleNewMessage);
-      webSocketService.off('study_session_flashcard_change', handleFlashcardChange);
-      webSocketService.off('study_session_timer_update', handleTimerUpdate);
       webSocketService.off('study_session_participant_joined', handleParticipantJoined);
       webSocketService.off('study_session_participant_left', handleParticipantLeft);
-      webSocketService.off('study_session_error', handleError);
-      joinedRef.current = false;
+      webSocketService.leaveStudySession(sessionId);
+      joinSent.current = false;
     };
   }, [sessionId, loadSession]);
 
@@ -178,8 +171,6 @@ const StudySessionRoom: React.FC = () => {
       });
     } catch (err) { console.error(err); }
   };
-
-  const handleTimerComplete = async (type: 'work' | 'break') => {};
 
   const subjectName = session?.subjectId?.name || 'Без предмета';
   const flashcardList = session?.flashcards || [];
@@ -200,7 +191,6 @@ const StudySessionRoom: React.FC = () => {
   const sendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
-    console.log('📤 Отправка сообщения:', newMessage);
     webSocketService.sendStudySessionMessage(sessionId!, newMessage.trim());
     setNewMessage('');
   };
@@ -288,7 +278,6 @@ const StudySessionRoom: React.FC = () => {
                 timerType={session.timerState.type}
                 remainingSeconds={session.timerState.remaining}
                 onTimerUpdate={handleTimerUpdate}
-                onTimerComplete={handleTimerComplete}
                 disabled={!isHost && session.studyMode === 'host-controlled'}
               />
             </div>

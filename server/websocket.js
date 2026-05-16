@@ -22,9 +22,9 @@ class WebSocketServer {
       pingInterval: 25000
     });
 
-    this.connectedUsers = new Map(); // userId -> socketId[]
-    this.userRooms = new Map(); // userId -> room[]
-    this.studySessions = new Map(); // sessionId -> Set of userIds
+    this.connectedUsers = new Map();
+    this.userRooms = new Map();
+    this.studySessions = new Map();
 
     this.setupMiddleware();
     this.setupEventHandlers();
@@ -69,26 +69,22 @@ class WebSocketServer {
       socket.on('join_chat', (chatId) => {
         socket.join(`chat:${chatId}`);
         this.addUserToRoom(socket.userId, `chat:${chatId}`);
-        console.log(`User ${socket.userId} joined chat room: ${chatId}`);
       });
 
       socket.on('leave_chat', (chatId) => {
         socket.leave(`chat:${chatId}`);
         this.removeUserFromRoom(socket.userId, `chat:${chatId}`);
-        console.log(`User ${socket.userId} left chat room: ${chatId}`);
       });
 
       // ========== ГРУППОВЫЕ КОМНАТЫ ==========
       socket.on('join-group', (groupId) => {
         socket.join(`group:${groupId}`);
         this.addUserToRoom(socket.userId, `group:${groupId}`);
-        console.log(`User ${socket.userId} joined group room: ${groupId}`);
       });
 
       socket.on('leave-group', (groupId) => {
         socket.leave(`group:${groupId}`);
         this.removeUserFromRoom(socket.userId, `group:${groupId}`);
-        console.log(`User ${socket.userId} left group room: ${groupId}`);
       });
 
       // ========== ОБРАБОТКА КАРТОЧЕК ==========
@@ -96,10 +92,7 @@ class WebSocketServer {
         const { flashcardId, subjectId, isCorrect } = data;
         socket.to(`subject:${subjectId}`).emit('flashcard-updated', {
           flashcardId,
-          studiedBy: {
-            id: socket.userId,
-            name: socket.userName
-          },
+          studiedBy: { id: socket.userId, name: socket.userName },
           isCorrect,
           timestamp: new Date().toISOString()
         });
@@ -109,10 +102,7 @@ class WebSocketServer {
         const { groupId, flashcard } = data;
         this.io.to(`group:${groupId}`).emit('new-flashcard', {
           flashcard,
-          createdBy: {
-            id: socket.userId,
-            name: socket.userName
-          },
+          createdBy: { id: socket.userId, name: socket.userName },
           timestamp: new Date().toISOString()
         });
       });
@@ -121,10 +111,7 @@ class WebSocketServer {
         const { groupId, note } = data;
         this.io.to(`group:${groupId}`).emit('new-note', {
           note,
-          createdBy: {
-            id: socket.userId,
-            name: socket.userName
-          },
+          createdBy: { id: socket.userId, name: socket.userName },
           timestamp: new Date().toISOString()
         });
       });
@@ -133,17 +120,13 @@ class WebSocketServer {
         const { groupId, invitedUserId } = data;
         this.io.to(`user:${invitedUserId}`).emit('group-invitation', {
           groupId,
-          invitedBy: {
-            id: socket.userId,
-            name: socket.userName
-          },
+          invitedBy: { id: socket.userId, name: socket.userName },
           timestamp: new Date().toISOString()
         });
       });
 
       socket.on('user-activity', (data) => {
         const { subjectId, groupId, action } = data;
-        console.log(`User ${socket.userId} activity:`, { subjectId, groupId, action, timestamp: new Date().toISOString() });
         if (subjectId) {
           socket.to(`subject:${subjectId}`).emit('user-activity-update', {
             userId: socket.userId,
@@ -202,11 +185,14 @@ class WebSocketServer {
           });
 
           // Загружаем последние 50 сообщений чата
-          const lastMessages = await StudySessionMessage.find({ sessionId })
-            .sort({ createdAt: -1 })
-            .limit(50)
-            .populate('userId', 'name avatarUrl')
-            .lean();
+          const mongoose = require('mongoose'); // если ещё не объявлен вверху файла
+const objectId = new mongoose.Types.ObjectId(sessionId);
+const lastMessages = await StudySessionMessage.find({ sessionId: objectId })
+  .sort({ createdAt: -1 })
+  .limit(50)
+  .populate('userId', 'name avatarUrl')
+  .lean();
+            console.log(`📊 Найдено сообщений для сессии ${sessionId}: ${lastMessages.length}`);
           socket.emit('study_session_messages', lastMessages.reverse());
 
           socket.to(roomId).emit('study_session_participant_joined', {
@@ -244,50 +230,74 @@ class WebSocketServer {
         StudySession.findById(sessionId).then(session => {
           if (session) session.removeParticipant(socket.userId);
         }).catch(console.error);
-
-        console.log(`User ${socket.userId} left study session: ${sessionId}`);
       });
 
-      // Отправка сообщения в учебной сессии с сохранением в БД
+      // Отправка сообщения в учебной сессии (ИСПРАВЛЕНО)
       socket.on('study_session_message', async (data) => {
         const { sessionId, content } = data;
         const roomId = `study_session:${sessionId}`;
 
-        if (!socket.rooms.has(roomId)) return;
+        try {
+          // Проверяем, что пользователь является участником сессии
+          const session = await StudySession.findById(sessionId);
+          if (!session) {
+            socket.emit('study_session_error', { message: 'Сессия не найдена' });
+            return;
+          }
 
-        const message = {
-          userId: socket.userId,
-          userName: socket.userName,
-          userAvatar: socket.userAvatar,
-          userLevel: socket.userLevel,
-          content: content.substring(0, 1000),
-          timestamp: new Date().toISOString()
-        };
+          const isParticipant = session.participants.some(
+            p => p.user.toString() === socket.userId && p.status === 'active'
+          );
+          const isHost = session.host.toString() === socket.userId;
+          if (!isParticipant && !isHost) {
+            socket.emit('study_session_error', { message: 'Вы не являетесь участником сессии' });
+            return;
+          }
 
-        // Сохраняем сообщение в БД
-        const messageDoc = new StudySessionMessage({
-          sessionId,
-          userId: socket.userId,
-          content: content.substring(0, 1000)
-        });
-        await messageDoc.save().catch(err => console.error('Failed to save message:', err));
+          // Если сокет ещё не в комнате, добавляем его
+          if (!socket.rooms.has(roomId)) {
+            socket.join(roomId);
+            this.addUserToRoom(socket.userId, roomId);
+            if (!this.studySessions.has(sessionId)) this.studySessions.set(sessionId, new Set());
+            this.studySessions.get(sessionId).add(socket.userId);
+          }
 
-        // Рассылаем ВСЕМ участникам (включая отправителя) для мгновенного отображения
-        this.io.to(roomId).emit('study_session_message', message);
+          const message = {
+            _id: null, // заполним после сохранения
+            userId: socket.userId,
+            userName: socket.userName,
+            userAvatar: socket.userAvatar,
+            userLevel: socket.userLevel,
+            content: content.substring(0, 1000),
+            timestamp: new Date().toISOString()
+          };
+
+          // Сохраняем сообщение в БД
+          const messageDoc = new StudySessionMessage({
+            sessionId,
+            userId: socket.userId,
+            content: content.substring(0, 1000)
+          });
+          const savedMessage = await messageDoc.save();
+          message._id = savedMessage._id;
+
+          // Рассылаем ВСЕМ участникам (включая отправителя)
+          this.io.to(roomId).emit('study_session_message', message);
+        } catch (error) {
+          console.error('Failed to save/relay study session message:', error);
+          socket.emit('study_session_error', { message: 'Ошибка при отправке сообщения' });
+        }
       });
 
       // Обновление таймера Pomodoro
       socket.on('study_session_timer_update', async (data) => {
         const { sessionId, timerState } = data;
         const roomId = `study_session:${sessionId}`;
-
         try {
           const session = await StudySession.findById(sessionId);
           if (!session || session.host.toString() !== socket.userId) return;
-
           session.timerState = timerState;
           await session.save();
-
           this.io.to(roomId).emit('study_session_timer_update', {
             timerState,
             updatedBy: socket.userId,
@@ -302,19 +312,15 @@ class WebSocketServer {
       socket.on('study_session_flashcard_change', async (data) => {
         const { sessionId, flashcardIndex } = data;
         const roomId = `study_session:${sessionId}`;
-
         try {
           const session = await StudySession.findById(sessionId);
           if (!session) return;
-
           if (session.studyMode === 'host-controlled') {
             const participant = session.participants.find(p => p.user.toString() === socket.userId);
             if (!participant || (participant.role !== 'host' && participant.role !== 'co-host')) return;
           }
-
           session.currentFlashcardIndex = flashcardIndex;
           await session.save();
-
           this.io.to(roomId).emit('study_session_flashcard_change', {
             flashcardIndex,
             changedBy: socket.userId,
@@ -329,11 +335,9 @@ class WebSocketServer {
       socket.on('study_session_flashcard_answer', async (data) => {
         const { sessionId, flashcardId, isCorrect } = data;
         const roomId = `study_session:${sessionId}`;
-
         try {
           const session = await StudySession.findById(sessionId);
           if (!session) return;
-
           const participant = session.participants.find(p => p.user.toString() === socket.userId);
           if (participant) {
             participant.stats.cardsReviewed += 1;
@@ -344,7 +348,6 @@ class WebSocketServer {
               participant.stats.streak = 0;
             }
             await session.save();
-
             const flashcard = session.flashcards.find(f => f.flashcardId && f.flashcardId.toString() === flashcardId);
             if (flashcard) {
               flashcard.reviewedBy.push({
@@ -354,7 +357,6 @@ class WebSocketServer {
               });
               await session.save();
             }
-
             socket.to(roomId).emit('study_session_flashcard_answer', {
               userId: socket.userId,
               userName: socket.userName,
@@ -373,7 +375,6 @@ class WebSocketServer {
         const { sessionId, status } = data;
         const roomId = `study_session:${sessionId}`;
         if (!socket.rooms.has(roomId)) return;
-
         socket.to(roomId).emit('study_session_user_status', {
           userId: socket.userId,
           userName: socket.userName,
@@ -386,10 +387,7 @@ class WebSocketServer {
       socket.on('get-notification-stats', async () => {
         try {
           const unreadCount = await Notification.getUnreadCount(socket.userId);
-          socket.emit('notification-stats', {
-            unreadCount,
-            timestamp: new Date().toISOString()
-          });
+          socket.emit('notification-stats', { unreadCount, timestamp: new Date().toISOString() });
         } catch (error) {
           console.error('Error getting notification stats:', error);
         }
@@ -401,19 +399,16 @@ class WebSocketServer {
           socket.emit('study_session_participants', { participants: [] });
           return;
         }
-
         const participants = Array.from(this.studySessions.get(sessionId)).map(userId => ({
           userId,
           online: this.isUserOnline(userId)
         }));
-
         socket.emit('study_session_participants', { participants });
       });
 
       // ========== ОТКЛЮЧЕНИЕ ==========
       socket.on('disconnect', () => {
         console.log(`❌ WebSocket: User ${socket.userId} disconnected`);
-
         if (this.userRooms.has(socket.userId)) {
           this.userRooms.get(socket.userId).forEach(roomId => {
             if (roomId.startsWith('study_session:')) {
@@ -422,7 +417,6 @@ class WebSocketServer {
             }
           });
         }
-
         this.removeConnectedUser(socket.userId, socket.id);
       });
 
@@ -434,13 +428,9 @@ class WebSocketServer {
 
   // ========== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ==========
   addConnectedUser(userId, socketId) {
-    if (!this.connectedUsers.has(userId)) {
-      this.connectedUsers.set(userId, []);
-    }
+    if (!this.connectedUsers.has(userId)) this.connectedUsers.set(userId, []);
     const sockets = this.connectedUsers.get(userId);
-    if (!sockets.includes(socketId)) {
-      sockets.push(socketId);
-    }
+    if (!sockets.includes(socketId)) sockets.push(socketId);
   }
 
   removeConnectedUser(userId, socketId) {
@@ -456,9 +446,7 @@ class WebSocketServer {
   }
 
   addUserToRoom(userId, room) {
-    if (!this.userRooms.has(userId)) {
-      this.userRooms.set(userId, []);
-    }
+    if (!this.userRooms.has(userId)) this.userRooms.set(userId, []);
     const rooms = this.userRooms.get(userId);
     if (!rooms.includes(room)) rooms.push(room);
   }
@@ -471,12 +459,9 @@ class WebSocketServer {
     }
   }
 
-  // Методы для учебных сессий
   async canJoinStudySession(userId, session) {
-    // Хост и уже участники могут всегда
     if (session.host.toString() === userId) return true;
     if (session.participants.some(p => p.user.toString() === userId)) return true;
-
     if (session.accessType === 'public') return true;
     if (session.accessType === 'private') {
       return session.invitedUsers.some(id => id.toString() === userId);
@@ -499,20 +484,12 @@ class WebSocketServer {
         userId,
         timestamp: new Date().toISOString()
       });
-      if (this.studySessions.get(sessionId).size === 0) {
-        this.studySessions.delete(sessionId);
-      }
+      if (this.studySessions.get(sessionId).size === 0) this.studySessions.delete(sessionId);
     }
   }
 
-  // Методы для отправки событий
-  emitToUser(userId, event, data) {
-    this.io.to(`user:${userId}`).emit(event, data);
-  }
-
-  emitToGroup(groupId, event, data) {
-    this.io.to(`group:${groupId}`).emit(event, data);
-  }
+  emitToUser(userId, event, data) { this.io.to(`user:${userId}`).emit(event, data); }
+  emitToGroup(groupId, event, data) { this.io.to(`group:${groupId}`).emit(event, data); }
 
   emitToChat(chatId, event, data, excludeUserId = null) {
     const room = `chat:${chatId}`;
@@ -532,16 +509,12 @@ class WebSocketServer {
     }
   }
 
-  isUserOnline(userId) {
-    return this.connectedUsers.has(userId) && this.connectedUsers.get(userId).length > 0;
-  }
+  isUserOnline(userId) { return this.connectedUsers.has(userId) && this.connectedUsers.get(userId).length > 0; }
 
   getOnlineUsersInGroup(groupId) {
     const onlineUsers = [];
     for (const [userId, rooms] of this.userRooms) {
-      if (rooms.includes(`group:${groupId}`) && this.isUserOnline(userId)) {
-        onlineUsers.push(userId);
-      }
+      if (rooms.includes(`group:${groupId}`) && this.isUserOnline(userId)) onlineUsers.push(userId);
     }
     return onlineUsers;
   }
@@ -555,14 +528,9 @@ class WebSocketServer {
     return onlineParticipants;
   }
 
-  // Уведомления
   async sendNotification(userId, notificationData) {
     try {
-      const notification = await Notification.create({
-        userId,
-        ...notificationData
-      });
-
+      const notification = await Notification.create({ userId, ...notificationData });
       if (this.isUserOnline(userId)) {
         const notificationToSend = {
           id: notification._id,
@@ -575,9 +543,7 @@ class WebSocketServer {
           formattedDate: notification.formattedDate
         };
         this.emitToUser(userId, 'notification', notificationToSend);
-        console.log(`📬 Уведомление отправлено пользователю ${userId}: ${notification.title}`);
       }
-
       await this.sendNotificationStats(userId);
       return notification;
     } catch (error) {
@@ -586,27 +552,20 @@ class WebSocketServer {
     }
   }
 
-  // Отправка уведомления всем участникам группы
   async sendGroupNotification(groupId, notificationData, excludeUserId = null) {
     try {
       const group = await require('./models/Group').findById(groupId);
-      if (!group) {
-        console.error(`Группа ${groupId} не найдена`);
-        return [];
-      }
-
+      if (!group) return [];
       const notifications = [];
       for (const member of group.members) {
         const userId = member.user.toString();
         if (excludeUserId && userId === excludeUserId) continue;
         try {
-          const notification = await this.sendNotification(userId, notificationData);
-          notifications.push(notification);
+          notifications.push(await this.sendNotification(userId, notificationData));
         } catch (error) {
           console.error(`Ошибка при отправке уведомления участнику ${userId}:`, error);
         }
       }
-      console.log(`📢 Уведомление отправлено ${notifications.length} участникам группы ${groupId}`);
       return notifications;
     } catch (error) {
       console.error('Ошибка при отправке уведомления участникам группы:', error);
@@ -617,23 +576,17 @@ class WebSocketServer {
   async sendStudySessionNotification(sessionId, notificationData, excludeUserId = null) {
     try {
       const session = await StudySession.findById(sessionId);
-      if (!session) {
-        console.error(`Учебная сессия ${sessionId} не найдена`);
-        return [];
-      }
-
+      if (!session) return [];
       const notifications = [];
       for (const participant of session.participants) {
         if (excludeUserId && participant.user.toString() === excludeUserId) continue;
         if (participant.status !== 'active') continue;
         try {
-          const notification = await this.sendNotification(participant.user.toString(), notificationData);
-          notifications.push(notification);
+          notifications.push(await this.sendNotification(participant.user.toString(), notificationData));
         } catch (error) {
           console.error(`Ошибка при отправке уведомления участнику ${participant.user}:`, error);
         }
       }
-      console.log(`📢 Уведомление отправлено ${notifications.length} участникам учебной сессии ${sessionId}`);
       return notifications;
     } catch (error) {
       console.error('Ошибка при отправке уведомления участникам учебной сессии:', error);
@@ -642,35 +595,22 @@ class WebSocketServer {
   }
 
   sendNotificationToUser(userId, notification) {
-    this.emitToUser(userId, 'notification', {
-      ...notification,
-      timestamp: new Date().toISOString()
-    });
+    this.emitToUser(userId, 'notification', { ...notification, timestamp: new Date().toISOString() });
   }
 
   sendGroupNotificationToAll(groupId, notification) {
-    this.emitToGroup(groupId, 'group-notification', {
-      ...notification,
-      timestamp: new Date().toISOString()
-    });
+    this.emitToGroup(groupId, 'group-notification', { ...notification, timestamp: new Date().toISOString() });
   }
 
   updateStudyProgress(userId, subjectId, progress) {
-    this.emitToUser(userId, 'study-progress-update', {
-      subjectId,
-      progress,
-      timestamp: new Date().toISOString()
-    });
+    this.emitToUser(userId, 'study-progress-update', { subjectId, progress, timestamp: new Date().toISOString() });
   }
 
   async sendNotificationStats(userId) {
     try {
       const unreadCount = await Notification.getUnreadCount(userId);
       if (this.isUserOnline(userId)) {
-        this.emitToUser(userId, 'notification-stats', {
-          unreadCount,
-          timestamp: new Date().toISOString()
-        });
+        this.emitToUser(userId, 'notification-stats', { unreadCount, timestamp: new Date().toISOString() });
       }
       return unreadCount;
     } catch (error) {
@@ -681,12 +621,8 @@ class WebSocketServer {
 
   async sendStudySessionInvite(userId, sessionId, hostName) {
     try {
-      const session = await StudySession.findById(sessionId)
-        .populate('subjectId', 'name')
-        .populate('host', 'name');
-
+      const session = await StudySession.findById(sessionId).populate('subjectId', 'name').populate('host', 'name');
       if (!session) throw new Error('Сессия не найдена');
-
       const notification = await this.sendNotification(userId, {
         type: 'study_session_invite',
         title: 'Приглашение в учебную сессию',

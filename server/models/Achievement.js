@@ -1,3 +1,5 @@
+// server/models/Achievement.js
+
 const mongoose = require('mongoose');
 
 const achievementSchema = new mongoose.Schema({
@@ -35,16 +37,15 @@ const achievementSchema = new mongoose.Schema({
     required: [true, 'Категория достижения обязательна'],
     enum: {
       values: [
-        'study',      // Учеба
-        'group',      // Группы
-        'flashcard',  // Карточки
-        'note',       // Заметки
-        'social',     // Социальное
-        'system'      // Системное
+        'study',
+        'group',
+        'flashcard',
+        'note',
+        'social',
+        'system'
       ],
       message: 'Недопустимая категория достижения'
-    },
-    index: true
+    }
   },
   difficulty: {
     type: String,
@@ -53,8 +54,7 @@ const achievementSchema = new mongoose.Schema({
       values: ['bronze', 'silver', 'gold', 'platinum'],
       message: 'Сложность должна быть: bronze, silver, gold или platinum'
     },
-    default: 'bronze',
-    index: true
+    default: 'bronze'
   },
   points: {
     type: Number,
@@ -73,8 +73,7 @@ const achievementSchema = new mongoose.Schema({
   },
   isActive: {
     type: Boolean,
-    default: true,
-    index: true
+    default: true
   },
   sortOrder: {
     type: Number,
@@ -119,14 +118,12 @@ achievementSchema.statics.checkAchievement = async function(userId, achievementC
       throw new Error(`Achievement ${achievementCode} not found`);
     }
     
-    // Сначала попытаемся найти существующую запись
     let userAchievement = await UserAchievement.findOne({
       userId,
       achievementId: achievement._id
     });
     
     if (userAchievement) {
-      // Если достижение уже существует, обновляем прогресс при необходимости
       if (progress > userAchievement.progress) {
         userAchievement.progress = progress;
         await userAchievement.save();
@@ -134,7 +131,6 @@ achievementSchema.statics.checkAchievement = async function(userId, achievementC
       return userAchievement;
     }
     
-    // Пытаемся создать новую запись
     try {
       const newUserAchievement = new UserAchievement({
         userId,
@@ -145,35 +141,31 @@ achievementSchema.statics.checkAchievement = async function(userId, achievementC
       await newUserAchievement.save();
       return newUserAchievement;
     } catch (createError) {
-      // Если возник дубликат (код 11000), значит другой поток уже создал запись
       if (createError.code === 11000) {
-        // Повторно ищем и возвращаем существующую
         userAchievement = await UserAchievement.findOne({
           userId,
           achievementId: achievement._id
         });
         if (userAchievement) {
-          // Могло обновиться за время ожидания, проверяем прогресс
           if (progress > userAchievement.progress) {
             userAchievement.progress = progress;
             await userAchievement.save();
           }
           return userAchievement;
         }
-        // Если по какой-то причине не нашли (маловероятно), пробрасываем ошибку
         throw new Error('Concurrent achievement creation conflict');
       }
-      throw createError; // Пробрасываем другие ошибки
+      throw createError;
     }
   } catch (error) {
     console.error('Error checking achievement:', error);
-    throw error; // Пробрасываем для обработки выше (но теперь без дубликатов)
+    throw error;
   }
 };
 
 // Индексы для оптимизации запросов
+achievementSchema.index({ code: 1 }, { unique: true });
 achievementSchema.index({ category: 1, difficulty: 1, sortOrder: 1 });
 achievementSchema.index({ isActive: 1, sortOrder: 1 });
-achievementSchema.index({ code: 1 }, { unique: true });
 
 module.exports = mongoose.model('Achievement', achievementSchema);

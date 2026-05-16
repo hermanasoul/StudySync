@@ -29,14 +29,13 @@ const userSchema = new mongoose.Schema({
         return validator.isEmail(v);
       },
       message: 'Некорректный email адрес'
-    },
-    index: true
+    }
   },
   password: {
     type: String,
     required: [true, 'Пароль обязателен'],
     minlength: [6, 'Пароль должен быть не менее 6 символов'],
-    select: false, // Не возвращать пароль по умолчанию
+    select: false,
     validate: {
       validator: function(v) {
         return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(v);
@@ -49,7 +48,7 @@ const userSchema = new mongoose.Schema({
     default: '',
     validate: {
       validator: function(v) {
-        if (!v) return true; // Пустая строка разрешена
+        if (!v) return true;
         return validator.isURL(v, {
           protocols: ['http', 'https'],
           require_protocol: true
@@ -66,29 +65,22 @@ const userSchema = new mongoose.Schema({
     },
     default: 'student'
   },
-  
-  // Новые поля для системы уровней
   level: {
     type: Number,
     default: 1,
     min: [1, 'Уровень должен быть не менее 1'],
-    max: [100, 'Уровень не должен превышать 100'],
-    index: true
+    max: [100, 'Уровень не должен превышать 100']
   },
-  
   experiencePoints: {
     type: Number,
     default: 0,
-    min: [0, 'Опыт не может быть отрицательным'],
-    index: true
+    min: [0, 'Опыт не может быть отрицательным']
   },
-  
   totalAchievementPoints: {
     type: Number,
     default: 0,
     min: [0, 'Очки достижений не могут быть отрицательными']
   },
-  
   levelProgress: {
     currentLevel: { type: Number, default: 1 },
     nextLevel: { type: Number, default: 2 },
@@ -96,8 +88,6 @@ const userSchema = new mongoose.Schema({
     pointsToNextLevel: { type: Number, default: 100 },
     lastLevelUp: { type: Date }
   },
-  
-  // Новые поля для системы бейджей и заданий
   badges: {
     displayedBadges: [{
       achievementId: {
@@ -115,8 +105,6 @@ const userSchema = new mongoose.Schema({
       default: true
     }
   },
-  
-  // Система серий (streaks)
   streaks: {
     current: {
       type: Number,
@@ -138,8 +126,6 @@ const userSchema = new mongoose.Schema({
       default: 'daily'
     }
   },
-  
-  // Социальные связи
   friends: [{
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -155,31 +141,16 @@ const userSchema = new mongoose.Schema({
       default: Date.now
     }
   }],
-  
-  // Настройки профиля
   profileSettings: {
-    showLevel: {
-      type: Boolean,
-      default: true
-    },
-    showAchievements: {
-      type: Boolean,
-      default: true
-    },
-    showStreak: {
-      type: Boolean,
-      default: true
-    },
+    showLevel: { type: Boolean, default: true },
+    showAchievements: { type: Boolean, default: true },
+    showStreak: { type: Boolean, default: true },
     profileTheme: {
       type: String,
       enum: ['default', 'dark', 'premium', 'gradient', 'nebula', 'sunset', 'forest', 'ocean'],
       default: 'default'
     },
-    badgeDisplayMode: {
-      type: String,
-      enum: ['grid', 'list', 'compact'],
-      default: 'grid'
-    },
+    badgeDisplayMode: { type: String, enum: ['grid', 'list', 'compact'], default: 'grid' },
     avatarEffect: {
       type: String,
       default: 'none',
@@ -195,22 +166,11 @@ const userSchema = new mongoose.Schema({
       default: 'default',
       enum: ['default', 'particles', 'gradient-animated', 'stars', 'geometric']
     },
-    specialEffects: {
-      type: [String],
-      default: []
-    }
+    specialEffects: { type: [String], default: [] }
   },
-  
-  // Статистика для достижений
   achievementStats: {
-    totalUnlocked: {
-      type: Number,
-      default: 0
-    },
-    totalPoints: {
-      type: Number,
-      default: 0
-    },
+    totalUnlocked: { type: Number, default: 0 },
+    totalPoints: { type: Number, default: 0 },
     byCategory: {
       study: { type: Number, default: 0 },
       group: { type: Number, default: 0 },
@@ -225,84 +185,51 @@ const userSchema = new mongoose.Schema({
       gold: { type: Number, default: 0 },
       platinum: { type: Number, default: 0 }
     },
-    lastAchievementDate: {
-      type: Date
-    }
+    lastAchievementDate: { type: Date }
   },
-  
-  // Награды за уровни
   rewards: {
-    unlockedThemes: {
-      type: [String],
-      default: []
-    },
-    unlockedBadgeFrames: {
-      type: [String],
-      default: []
-    },
-    unlockedAvatarEffects: {
-      type: [String],
-      default: []
-    },
-    unlockedSpecialAbilities: {
-      type: [String],
-      default: []
-    },
-    unlockedProfileBackgrounds: {
-      type: [String],
-      default: []
-    },
-    unlockedOther: {
-      type: mongoose.Schema.Types.Mixed,
-      default: {}
-    }
+    unlockedThemes: { type: [String], default: [] },
+    unlockedBadgeFrames: { type: [String], default: [] },
+    unlockedAvatarEffects: { type: [String], default: [] },
+    unlockedSpecialAbilities: { type: [String], default: [] },
+    unlockedProfileBackgrounds: { type: [String], default: [] },
+    unlockedOther: { type: mongoose.Schema.Types.Mixed, default: {} }
   },
-  
   isActive: {
     type: Boolean,
     default: true
   },
-  lastLogin: {
-    type: Date
-  },
-  loginAttempts: {
-    type: Number,
-    default: 0
-  },
-  lockUntil: {
-    type: Date
-  }
+  lastLogin: { type: Date },
+  loginAttempts: { type: Number, default: 0 },
+  lockUntil: { type: Date }
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
 });
 
-// Виртуальное поле для полного имени
+// Виртуальные поля
 userSchema.virtual('fullName').get(function() {
   return this.name;
 });
 
-// Виртуальное поле для уровня с названием и деталями
 userSchema.virtual('levelDetails').get(function() {
-  // Этот метод будет заполняться при запросе пользователя
   return null;
 });
 
-// Индексы для оптимизации поиска
+// Индексы (без дублирования)
 userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ role: 1 });
 userSchema.index({ createdAt: -1 });
+userSchema.index({ level: 1 });
+userSchema.index({ experiencePoints: 1 });
+userSchema.index({ isActive: 1 });
 
 // Хеширование пароля перед сохранением
 userSchema.pre('save', async function(next) {
-  // Хешируем только если пароль был изменен
   if (!this.isModified('password')) return next();
-  
   try {
-    // Генерируем соль
     const salt = await bcrypt.genSalt(12);
-    // Хешируем пароль с солью
     this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
@@ -326,24 +253,18 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
 
 // Метод для блокировки аккаунта после неудачных попыток входа
 userSchema.methods.incrementLoginAttempts = async function() {
-  // Если аккаунт уже заблокирован и время блокировки еще не истекло
   if (this.lockUntil && this.lockUntil > Date.now()) {
     throw new Error('Аккаунт временно заблокирован. Попробуйте позже.');
   }
-  
-  // Сбрасываем счетчик, если прошло более 2 часов с последней неудачной попытки
   if (this.loginAttempts >= 5 && Date.now() - this.lockUntil > 2 * 60 * 60 * 1000) {
     this.loginAttempts = 1;
     this.lockUntil = undefined;
   } else {
     this.loginAttempts += 1;
   }
-  
-  // Блокируем на 15 минут после 5 неудачных попыток
   if (this.loginAttempts >= 5 && !this.lockUntil) {
-    this.lockUntil = Date.now() + 15 * 60 * 1000; // 15 минут
+    this.lockUntil = Date.now() + 15 * 60 * 1000;
   }
-  
   await this.save({ validateBeforeSave: false });
 };
 
@@ -358,13 +279,8 @@ userSchema.methods.resetLoginAttempts = async function() {
 userSchema.methods.addExperience = async function(points, reason) {
   this.experiencePoints += points;
   this.totalAchievementPoints += points;
-  
-  // Проверяем, не повысился ли уровень
   await this.checkLevelUp();
-  
   await this.save();
-  
-  // Создаем запись в истории опыта
   const ExperienceHistory = require('./ExperienceHistory');
   await ExperienceHistory.create({
     userId: this._id,
@@ -372,7 +288,6 @@ userSchema.methods.addExperience = async function(points, reason) {
     reason,
     newTotal: this.experiencePoints
   });
-  
   return this;
 };
 
@@ -380,16 +295,11 @@ userSchema.methods.addExperience = async function(points, reason) {
 userSchema.methods.checkLevelUp = async function() {
   const UserLevel = require('./UserLevel');
   const currentLevelData = await UserLevel.getLevelByPoints(this.experiencePoints);
-  
   if (currentLevelData.level > this.level) {
     const oldLevel = this.level;
     this.level = currentLevelData.level;
     this.levelProgress.lastLevelUp = new Date();
-    
-    // Обновляем прогресс уровня
     await this.updateLevelProgress();
-    
-    // Добавляем награды за уровень, если они есть
     if (currentLevelData.unlocks) {
       const unlocks = currentLevelData.unlocks;
       if (unlocks.themes && unlocks.themes.length > 0) {
@@ -421,12 +331,9 @@ userSchema.methods.checkLevelUp = async function() {
         });
       }
       if (unlocks.other) {
-        // Для других наград просто мерджим объекты
         this.rewards.unlockedOther = { ...this.rewards.unlockedOther, ...unlocks.other };
       }
     }
-    
-    // Создаем уведомление о повышении уровня
     const Notification = require('./Notification');
     await Notification.create({
       userId: this._id,
@@ -442,7 +349,6 @@ userSchema.methods.checkLevelUp = async function() {
         unlocks: currentLevelData.unlocks
       }
     });
-    
     return {
       leveledUp: true,
       oldLevel,
@@ -450,10 +356,7 @@ userSchema.methods.checkLevelUp = async function() {
       levelData: currentLevelData
     };
   }
-  
-  // Обновляем прогресс уровня даже если уровень не изменился
   await this.updateLevelProgress();
-  
   return {
     leveledUp: false,
     currentLevel: this.level
@@ -464,7 +367,6 @@ userSchema.methods.checkLevelUp = async function() {
 userSchema.methods.updateLevelProgress = async function() {
   const UserLevel = require('./UserLevel');
   const progress = await UserLevel.getProgressToNextLevel(this.experiencePoints, this.level);
-  
   this.levelProgress = {
     currentLevel: progress.currentLevel.level,
     nextLevel: progress.nextLevel ? progress.nextLevel.level : progress.currentLevel.level,
@@ -472,7 +374,6 @@ userSchema.methods.updateLevelProgress = async function() {
     pointsToNextLevel: progress.pointsToNextLevel,
     lastLevelUp: this.levelProgress.lastLevelUp
   };
-  
   await this.save();
   return this.levelProgress;
 };
@@ -480,30 +381,23 @@ userSchema.methods.updateLevelProgress = async function() {
 // Метод для обновления статистики достижений
 userSchema.methods.updateAchievementStats = async function() {
   const UserAchievement = require('./UserAchievement');
-  
   const stats = await UserAchievement.getUserProgress(this._id);
-  
   this.achievementStats = {
     totalUnlocked: stats.unlockedCount || 0,
     totalPoints: stats.totalPoints || 0,
     byCategory: {},
     byDifficulty: {}
   };
-  
-  // Заполняем статистику по категориям
   if (stats.byCategory && Array.isArray(stats.byCategory)) {
     stats.byCategory.forEach(cat => {
       this.achievementStats.byCategory[cat.category] = cat.unlocked || 0;
     });
   }
-  
-  // Заполняем статистику по сложности
   if (stats.byDifficulty && Array.isArray(stats.byDifficulty)) {
     stats.byDifficulty.forEach(diff => {
       this.achievementStats.byDifficulty[diff.difficulty] = diff.unlocked || 0;
     });
   }
-  
   await this.save();
   return this.achievementStats;
 };
@@ -513,31 +407,22 @@ userSchema.methods.updateStreak = async function() {
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
-  
-  // Проверяем, был ли пользователь активен вчера
   if (this.streaks.lastActiveDate) {
     const lastActive = new Date(this.streaks.lastActiveDate);
     const diffDays = Math.floor((today - lastActive) / (1000 * 60 * 60 * 24));
-    
     if (diffDays === 1) {
-      // Продолжаем серию
       this.streaks.current += 1;
       if (this.streaks.current > this.streaks.longest) {
         this.streaks.longest = this.streaks.current;
       }
     } else if (diffDays > 1) {
-      // Сбрасываем серию
       this.streaks.current = 1;
     }
   } else {
-    // Первая активность
     this.streaks.current = 1;
   }
-  
   this.streaks.lastActiveDate = today;
   await this.save();
-  
-  // Проверяем достижения для серий
   const Achievement = require('./Achievement');
   if (this.streaks.current >= 3) {
     await Achievement.checkAchievement(this._id, 'STREAK_3');
@@ -548,74 +433,53 @@ userSchema.methods.updateStreak = async function() {
   if (this.streaks.current >= 30) {
     await Achievement.checkAchievement(this._id, 'STREAK_30');
   }
-  
   return this.streaks;
 };
 
 // Метод для добавления бейджа в отображаемые
 userSchema.methods.addDisplayedBadge = async function(achievementId, position = null) {
   if (!this.badges) {
-    this.badges = {
-      displayedBadges: [],
-      showBadges: true
-    };
+    this.badges = { displayedBadges: [], showBadges: true };
   }
-  
-  // Проверяем, не добавлен ли уже этот бейдж
   const existingIndex = this.badges.displayedBadges.findIndex(
     badge => badge.achievementId.toString() === achievementId.toString()
   );
-  
   if (existingIndex !== -1) {
-    // Обновляем позицию
     if (position !== null) {
       this.badges.displayedBadges[existingIndex].position = position;
     }
   } else {
-    // Добавляем новый бейдж
     const newBadge = {
       achievementId,
       position: position || (this.badges.displayedBadges.length + 1)
     };
     this.badges.displayedBadges.push(newBadge);
   }
-  
-  // Ограничиваем количество отображаемых бейджей (максимум 6)
   if (this.badges.displayedBadges.length > 6) {
     this.badges.displayedBadges = this.badges.displayedBadges.slice(0, 6);
   }
-  
   await this.save();
   return this.badges;
 };
 
 // Метод для удаления бейджа из отображаемых
 userSchema.methods.removeDisplayedBadge = async function(achievementId) {
-  if (!this.badges || !this.badges.displayedBadges) {
-    return;
-  }
-  
+  if (!this.badges || !this.badges.displayedBadges) return;
   this.badges.displayedBadges = this.badges.displayedBadges.filter(
     badge => badge.achievementId.toString() !== achievementId.toString()
   );
-  
   await this.save();
   return this.badges;
 };
 
 // Метод для получения отображаемых бейджей с деталями
 userSchema.methods.getDisplayedBadges = async function() {
-  if (!this.badges || !this.badges.displayedBadges || this.badges.displayedBadges.length === 0) {
-    return [];
-  }
-  
+  if (!this.badges || !this.badges.displayedBadges || this.badges.displayedBadges.length === 0) return [];
   const Achievement = require('./Achievement');
   const displayedBadges = [];
-  
   for (const badge of this.badges.displayedBadges) {
     const achievement = await Achievement.findById(badge.achievementId)
       .select('name icon difficulty difficultyColor points category');
-    
     if (achievement) {
       displayedBadges.push({
         achievementId: badge.achievementId,
@@ -629,10 +493,7 @@ userSchema.methods.getDisplayedBadges = async function() {
       });
     }
   }
-  
-  // Сортируем по позиции
   displayedBadges.sort((a, b) => a.position - b.position);
-  
   return displayedBadges;
 };
 
@@ -641,7 +502,6 @@ userSchema.methods.applyTheme = async function(theme) {
   if (!this.rewards.unlockedThemes.includes(theme)) {
     throw new Error('Тема не разблокирована');
   }
-  
   this.profileSettings.profileTheme = theme;
   await this.save();
   return this.profileSettings;
@@ -652,7 +512,6 @@ userSchema.methods.applyAvatarEffect = async function(effect) {
   if (!this.rewards.unlockedAvatarEffects.includes(effect)) {
     throw new Error('Эффект не разблокирован');
   }
-  
   this.profileSettings.avatarEffect = effect;
   await this.save();
   return this.profileSettings;
@@ -663,7 +522,6 @@ userSchema.methods.applyBadgeFrame = async function(frame) {
   if (!this.rewards.unlockedBadgeFrames.includes(frame)) {
     throw new Error('Рамка не разблокирована');
   }
-  
   this.profileSettings.badgeFrame = frame;
   await this.save();
   return this.profileSettings;
@@ -674,7 +532,6 @@ userSchema.methods.applyProfileBackground = async function(background) {
   if (!this.rewards.unlockedProfileBackgrounds.includes(background)) {
     throw new Error('Фон не разблокирован');
   }
-  
   this.profileSettings.profileBackground = background;
   await this.save();
   return this.profileSettings;
@@ -692,25 +549,19 @@ userSchema.methods.getActiveRewards = function() {
 
 // Предварительная валидация перед сохранением
 userSchema.pre('validate', function(next) {
-  // Убеждаемся, что email в нижнем регистре
   if (this.email) {
     this.email = this.email.toLowerCase().trim();
   }
-  
-  // Убеждаемся, что имя правильно отформатировано
   if (this.name) {
     this.name = this.name.trim().replace(/\s+/g, ' ');
   }
-  
   next();
 });
 
-// Статический метод для поиска по email с обработкой ошибок
+// Статический метод для поиска по email
 userSchema.statics.findByEmail = async function(email) {
   try {
-    const user = await this.findOne({ 
-      email: email.toLowerCase().trim() 
-    });
+    const user = await this.findOne({ email: email.toLowerCase().trim() });
     return user;
   } catch (error) {
     throw new Error(`Ошибка при поиске пользователя: ${error.message}`);
