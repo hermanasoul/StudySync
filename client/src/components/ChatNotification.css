@@ -1,6 +1,7 @@
-/* client\src\components\ChatNotification.css */
 .chat-notification {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .notification-button {
@@ -8,9 +9,14 @@
   border: none;
   cursor: pointer;
   position: relative;
-  padding: 8px;
+  padding: 0;
+  margin: 0;
   border-radius: 6px;
   transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* размеры будут задаваться из Header.css */
 }
 
 .notification-button:hover {
@@ -18,13 +24,16 @@
 }
 
 .notification-icon {
-  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .notification-badge {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: -5px;
+  right: -5px;
   min-width: 18px;
   height: 18px;
   padding: 0 4px;
@@ -39,6 +48,7 @@
   border: 2px solid white;
 }
 
+/* Остальные стили дропдауна без изменений */
 .dropdown-overlay {
   position: fixed;
   top: 0;

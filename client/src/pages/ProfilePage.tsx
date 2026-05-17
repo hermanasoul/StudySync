@@ -197,7 +197,7 @@ const ProfilePage: React.FC = () => {
   };
 
   const renderOverview = () => (
-    <>
+    <div className="overview-grid">
       {/* Секция прогресса уровня */}
       {progress && (
         <div className="profile-section">
@@ -246,7 +246,7 @@ const ProfilePage: React.FC = () => {
           <div className="section-header">
             <h3>🏆 Мои бейджи</h3>
             <button 
-              className="btn-outline"
+              className="btn-outline small"
               onClick={() => setActiveTab('badges')}
             >
               Управление →
@@ -265,10 +265,6 @@ const ProfilePage: React.FC = () => {
                 >
                   {badge.icon}
                 </div>
-                <div className="badge-tooltip">
-                  <strong>{badge.name}</strong>
-                  <span>{badge.points} очков</span>
-                </div>
               </div>
             ))}
           </div>
@@ -281,7 +277,7 @@ const ProfilePage: React.FC = () => {
           <div className="section-header">
             <h3>🎯 Ежедневные задания</h3>
             <button 
-              className="btn-outline"
+              className="btn-outline small"
               onClick={() => setActiveTab('quests')}
             >
               Все задания →
@@ -318,7 +314,7 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 
   const renderBadgesTab = () => (

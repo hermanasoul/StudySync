@@ -77,14 +77,13 @@ services:
       - studysync-network
     command: >
       sh -c "
-        echo '⏳ Ожидание готовности MongoDB...' &&
+        echo 'Ожидание MongoDB...' &&
         sleep 10 &&
-        echo '📦 Заполнение демо-данными...' &&
         node scripts/seedDemoData.js &&
-        node scripts/seedFriendsOnly.js ; 
+        node scripts/seedFriendsOnly.js ;
         node scripts/seedAchievements.js &&
-        echo '✅ Демо-данные успешно загружены!' &&
-        exit 0
+        node scripts/seedExtraSubjects.js &&
+        echo 'Все демо-данные загружены!'
       "
 
 volumes:

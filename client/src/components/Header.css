@@ -84,23 +84,34 @@
   text-overflow: ellipsis;
 }
 
-/* Компактные иконки уведомлений и сообщений */
+/* Сброс лишних отступов у контейнеров уведомлений и чата */
+.header-buttons .notifications-container,
+.header-buttons .ChatNotification {
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Мини-иконки уведомлений и сообщений – совсем компактные */
 .header-buttons .notifications-button,
 .header-buttons .ChatNotification button {
-  width: 28px !important;
-  height: 28px !important;
+  width: 14px !important;
+  height: 14px !important;
   padding: 0 !important;
+  margin: 0 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 0.9rem !important;
-  border-radius: 8px !important;
+  font-size: 0.55rem !important;
+  border-radius: 3px !important;
   background: #f3f4f6 !important;
   border: none !important;
   cursor: pointer !important;
   color: #374151 !important;
   min-width: auto !important;
   box-shadow: none !important;
+  line-height: 1 !important;
 }
 
 .header-buttons .notifications-button:hover,
@@ -108,16 +119,16 @@
   background: #e5e7eb !important;
 }
 
-/* Переключатель темы – чуть крупнее и справа */
+/* Переключатель темы – компактный, прижат вправо */
 .theme-toggle {
-  width: 32px !important;
-  height: 32px !important;
+  width: 18px !important;
+  height: 18px !important;
   padding: 0 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 1rem !important;
-  border-radius: 8px !important;
+  font-size: 0.65rem !important;
+  border-radius: 3px !important;
   background: #f3f4f6 !important;
   border: none !important;
   cursor: pointer !important;
@@ -125,11 +136,18 @@
   min-width: auto !important;
   box-shadow: none !important;
   margin-left: auto;
+  margin-right: 10px;
 }
 
 .theme-toggle:hover {
   background: #e5e7eb !important;
 }
+
+/* Увеличенные отступы между элементами правой группы */
+.header-buttons {
+  gap: 22px;
+}
+
 /* Единый стиль для кнопок Профиль и Выйти */
 .header-buttons .btn {
   padding: 0 16px !important;

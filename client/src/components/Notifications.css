@@ -1,5 +1,7 @@
 .notifications-container {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .notifications-button {
@@ -7,10 +9,14 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
+  padding: 0;
+  margin: 0;
+  border-radius: 6px;
   transition: background-color 0.2s;
-  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* размеры будут задаваться из Header.css */
 }
 
 .notifications-button:hover {
@@ -18,8 +24,11 @@
 }
 
 .notification-icon {
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
+  line-height: 1;
 }
 
 .notification-badge {
@@ -28,7 +37,7 @@
   right: -5px;
   background-color: #ef4444;
   color: white;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: bold;
   border-radius: 50%;
   width: 18px;
@@ -37,6 +46,7 @@
   align-items: center;
   justify-content: center;
   animation: pulse 2s infinite;
+  border: 2px solid white;
 }
 
 @keyframes pulse {
@@ -54,6 +64,7 @@
   }
 }
 
+/* Дропдаун и остальные стили остаются без изменений */
 .notifications-dropdown {
   position: absolute;
   top: 100%;
@@ -239,14 +250,11 @@
   font-size: 0.85rem;
   color: #6b7280;
   line-height: 1.4;
-  /* Исправляем line-clamp для совместимости */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  line-clamp: 2; /* Стандартное свойство */
   overflow: hidden;
   text-overflow: ellipsis;
-  max-height: 2.8em; /* Примерная высота для 2 строк */
 }
 
 .notification-footer {
@@ -340,55 +348,5 @@
   
   .notification-title {
     max-width: 200px;
-  }
-}
-
-/* Стили для прокрутки */
-.notifications-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.notifications-list::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.notifications-list::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
-}
-
-.notifications-list::-webkit-scrollbar-thumb:hover {
-  background: #a1a1a1;
-}
-
-/* Альтернатива для ограничения строк */
-.truncate-2-lines {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.4;
-  max-height: 2.8em;
-}
-
-/* Для Firefox и других браузеров */
-@supports not (-webkit-line-clamp: 2) {
-  .notification-message {
-    display: block;
-    max-height: 2.8em;
-    overflow: hidden;
-    position: relative;
-    line-height: 1.4;
-  }
-  
-  .notification-message::after {
-    content: '...';
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    background: white;
-    padding: 0 5px;
   }
 }

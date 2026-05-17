@@ -106,7 +106,14 @@ const SubjectsPage: React.FC = () => {
                     <span className="progress-percent">{subject.progress}%</span>
                   </div>
                   <p className="subject-description">{subject.description}</p>
-                  <ProgressBar progress={subject.progress} color={subject.color} />
+                  <ProgressBar
+                  progress={subject.progress}
+                  color={
+                    subject.color === 'white' || !['green','blue','purple','red','yellow'].includes(subject.color)
+                    ? 'yellow'
+                    : subject.color
+                    }
+                    />
                   <div className="subject-actions button-group">
                     <Button variant="outline" href={`/subjects/${subject.id}`}>
                       Заметки
