@@ -6,7 +6,7 @@
 .profile-container {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 90px 24px 40px;
+  padding: 140px 24px 40px;
 }
 
 .profile-header {
@@ -141,7 +141,7 @@
   color: #6b7280;
 }
 
-/* Кнопки действий – горизонтально, компактно */
+/* Кнопки действий */
 .profile-actions {
   display: flex;
   gap: 12px;
@@ -164,9 +164,9 @@
   justify-content: center;
   box-sizing: border-box;
   border: 2px solid transparent;
-  margin: 0;                   /* сброс внешних отступов */
-  width: auto;                 /* не растягиваться */
-  min-width: auto;             /* убираем min-width: 140px */
+  margin: 0;
+  width: auto;
+  min-width: auto;
   flex-shrink: 0;
 }
 
@@ -198,7 +198,7 @@
   gap: 20px;
 }
 
-/* Каждая секция в обзоре */
+/* Каждая секция */
 .profile-section {
   background: white;
   border-radius: 12px;
@@ -237,6 +237,22 @@
 .btn-outline.small:hover {
   background: #4f46e5;
   color: white;
+}
+
+/* Центрированная статистика */
+.centered-stats {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: #374151;
+}
+
+.centered-stats .stat-item {
+  background: #f3f4f6;
+  padding: 8px 18px;
+  border-radius: 8px;
 }
 
 /* Streak */
@@ -339,6 +355,106 @@
   height: 100%;
   border-radius: 3px;
   background: #10b981;
+}
+
+/* Кнопка сброса в наградах */
+.reset-btn-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.reset-btn-container .btn-outline {
+  width: auto !important;
+  min-width: auto !important;
+  padding: 6px 16px !important;
+  font-size: 0.85rem !important;
+}
+
+/* Сетка для наград */
+.active-rewards-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.reward-items {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.reward-category {
+  margin-bottom: 24px;
+}
+
+/* Визуализация карточек наград */
+.reward-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.reward-item:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.reward-item.unlocked {
+  background: #f0fdf4;
+  border-color: #10b981;
+}
+
+.reward-item.locked {
+  opacity: 0.7;
+}
+
+.reward-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid #e5e7eb;
+}
+
+.reward-info {
+  flex: 1;
+}
+
+.reward-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+
+.reward-description {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.reward-applied {
+  font-size: 12px;
+  background: #10b981;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.reward-locked {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #9ca3af;
+  font-size: 14px;
 }
 
 /* Адаптация */

@@ -3,63 +3,41 @@
   width: 100%;
 }
 
+/* Фильтры – компактно, справа */
 .achievements-filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  justify-content: flex-end;   /* выравнивание вправо */
+  gap: 10px;
   background: white;
-  padding: 20px;
+  padding: 12px 16px;
   border-radius: 12px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   border: 1px solid #e5e7eb;
 }
 
-.filter-group {
-  flex: 1;
-  min-width: 200px;
-}
-
-.filter-group label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 6px;
-}
-
-.filter-select {
-  width: 100%;
-  padding: 10px 12px;
+.achievements-filters select {
+  padding: 8px 12px;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   font-size: 14px;
   color: #374151;
   background: white;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color 0.2s;
+  width: auto;            /* не растягивать */
+  min-width: 150px;
 }
 
-.filter-select:hover {
+.achievements-filters select:hover {
   border-color: #9ca3af;
 }
 
-.filter-select:focus {
+.achievements-filters select:focus {
   outline: none;
   border-color: #8b5cf6;
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-}
-
-.filter-stats {
-  display: flex;
-  align-items: flex-end;
-  min-width: 200px;
-}
-
-.filter-count {
-  font-size: 14px;
-  color: #6b7280;
-  padding: 8px 0;
 }
 
 .achievements-grid {
@@ -68,6 +46,7 @@
   gap: 20px;
 }
 
+/* Загрузка, пусто, без результатов – без изменений */
 .achievements-loading {
   display: flex;
   flex-direction: column;
@@ -174,15 +153,10 @@
   
   .achievements-filters {
     flex-direction: column;
-    gap: 12px;
+    align-items: stretch;
   }
   
-  .filter-group {
+  .achievements-filters select {
     min-width: 100%;
-  }
-  
-  .filter-stats {
-    min-width: 100%;
-    justify-content: center;
   }
 }

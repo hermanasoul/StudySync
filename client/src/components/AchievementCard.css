@@ -126,22 +126,30 @@
   color: #8b5cf6;
 }
 
+/* Прогресс внутри карточки – полный сброс глобальных стилей */
 .achievement-progress {
   margin-top: 12px;
 }
 
-.progress-bar {
-  height: 8px;
+.achievement-progress .progress-bar {
+  position: static !important;
+  height: 8px !important;
+  width: 100%;
   background: #f3f4f6;
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 4px;
+  padding: 0 !important;
 }
 
-.progress-fill {
-  height: 100%;
+.achievement-progress .progress-fill {
+  height: 100% !important;
   border-radius: 4px;
   transition: width 0.3s ease;
+  width: var(--progress-width, 0%);
+  position: static !important;   /* убираем absolute */
+  left: auto !important;
+  top: auto !important;
 }
 
 .progress-text {
@@ -160,7 +168,7 @@
   margin-top: 4px;
 }
 
-/* Стили для разных уровней сложности */
+/* Стили для разных уровней сложности (без изменений) */
 .achievement-bronze .achievement-icon {
   border-color: #cd7f32;
 }

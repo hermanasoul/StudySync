@@ -36,13 +36,11 @@ const ProfilePage: React.FC = () => {
     try {
       setLoading(true);
       
-      // Загружаем прогресс уровня
       const progressResponse = await levelsAPI.getMyProgress();
       if (progressResponse.data.success) {
         setProgress(progressResponse.data.progress);
       }
       
-      // Загружаем последние достижения
       const achievementsResponse = await achievementsAPI.getMy();
       if (achievementsResponse.data.success) {
         const unlocked = achievementsResponse.data.achievements
@@ -54,19 +52,16 @@ const ProfilePage: React.FC = () => {
         setRecentAchievements(unlocked);
       }
       
-      // Загружаем бейджи
       const badgesResponse = await badgesAPI.getMyBadges();
       if (badgesResponse.data.success) {
         setBadges(badgesResponse.data.badges);
       }
       
-      // Загружаем серию
       const streakResponse = await badgesAPI.getStreak();
       if (streakResponse.data.success) {
         setStreak(streakResponse.data.streak);
       }
       
-      // Загружаем ежедневные задания
       const questsResponse = await questsAPI.getMyQuests();
       if (questsResponse.data.success) {
         const daily = questsResponse.data.quests
@@ -102,7 +97,6 @@ const ProfilePage: React.FC = () => {
 
   const handleBadgeClick = (badge: any) => {
     console.log('Badge clicked:', badge);
-    // Можно открыть модальное окно с деталями бейджа
   };
 
   const handleApplyTheme = async (theme: string) => {
@@ -198,7 +192,6 @@ const ProfilePage: React.FC = () => {
 
   const renderOverview = () => (
     <div className="overview-grid">
-      {/* Секция прогресса уровня */}
       {progress && (
         <div className="profile-section">
           <div className="section-header">
@@ -211,7 +204,6 @@ const ProfilePage: React.FC = () => {
         </div>
       )}
       
-      {/* Секция серии */}
       {streak && (
         <div className="profile-section">
           <div className="section-header">
@@ -240,7 +232,6 @@ const ProfilePage: React.FC = () => {
         </div>
       )}
       
-      {/* Секция отображаемых бейджей */}
       {badges && badges.displayed && badges.displayed.length > 0 && (
         <div className="profile-section">
           <div className="section-header">
@@ -271,7 +262,6 @@ const ProfilePage: React.FC = () => {
         </div>
       )}
       
-      {/* Секция ежедневных заданий */}
       {dailyQuests.length > 0 && (
         <div className="profile-section">
           <div className="section-header">
@@ -319,16 +309,16 @@ const ProfilePage: React.FC = () => {
 
   const renderBadgesTab = () => (
     <div className="profile-section">
-      <div className="section-header">
+      <div className="section-header" style={{ justifyContent: 'center' }}>
         <h3>🏆 Моя коллекция бейджей</h3>
-        <div className="badge-stats">
-          <span className="stat-item">
-            <strong>{badges?.stats?.total || 0}</strong> всего
-          </span>
-          <span className="stat-item">
-            <strong>{badges?.stats?.displayedCount || 0}</strong> отображается
-          </span>
-        </div>
+      </div>
+      <div className="centered-stats">
+        <span className="stat-item">
+          <strong>{badges?.stats?.total || 0}</strong> всего
+        </span>
+        <span className="stat-item">
+          <strong>{badges?.stats?.displayedCount || 0}</strong> отображается
+        </span>
       </div>
       
       {badges ? (
@@ -376,11 +366,14 @@ const ProfilePage: React.FC = () => {
     <div className="profile-section">
       <div className="section-header">
         <h3>🎯 Задания и квесты</h3>
-        <button className="btn-primary" onClick={handleGenerateDailyQuests}>
+        <button
+          className="btn-primary btn-sm"
+          style={{ padding: '6px 14px', fontSize: '0.85rem', width: 'auto', minWidth: 'auto' }}
+          onClick={handleGenerateDailyQuests}
+        >
           Новые задания
         </button>
       </div>
-      {/* Здесь будет компонент квестов */}
       <div className="coming-soon">
         <p>Система заданий скоро будет доступна!</p>
       </div>
@@ -389,21 +382,20 @@ const ProfilePage: React.FC = () => {
 
   const renderRewardsTab = () => (
     <div className="profile-section">
-      <div className="section-header">
+      <div className="section-header" style={{ justifyContent: 'center' }}>
         <h3>🎁 Награды и визуальные эффекты</h3>
-        <div className="rewards-stats">
-          <span className="stat-item">
-            <strong>{rewards?.stats?.totalUnlocked || 0}</strong> разблокировано
-          </span>
-          <span className="stat-item">
-            Уровень <strong>{rewards?.stats?.level || 1}</strong>
-          </span>
-        </div>
+      </div>
+      <div className="centered-stats">
+        <span className="stat-item">
+          <strong>{rewards?.stats?.totalUnlocked || 0}</strong> разблокировано
+        </span>
+        <span className="stat-item">
+          Уровень <strong>{rewards?.stats?.level || 1}</strong>
+        </span>
       </div>
       
       {rewards ? (
         <div className="rewards-container">
-          {/* Активные награды */}
           <div className="active-rewards">
             <h4>Активные настройки</h4>
             <div className="active-rewards-grid">
@@ -454,31 +446,22 @@ const ProfilePage: React.FC = () => {
                 </div>
               </div>
             </div>
-            <button 
-              className="btn-outline reset-btn"
-              onClick={handleResetDefaults}
-            >
-              Сбросить к стандартным
-            </button>
+            <div className="reset-btn-container">
+              <button 
+                className="btn-outline btn-sm"
+                onClick={handleResetDefaults}
+              >
+                Сбросить к стандартным
+              </button>
+            </div>
           </div>
           
-          {/* Темы профиля */}
           <div className="reward-category">
             <h4>Темы профиля</h4>
             <div className="reward-items">
               {rewards.available.themes.map((theme: any) => (
                 <div key={theme.id} className={`reward-item ${theme.unlocked ? 'unlocked' : 'locked'}`}>
-                  <div 
-                    className="reward-icon" 
-                    style={{ 
-                      backgroundColor: theme.color,
-                      background: theme.id === 'gradient' ? 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)' :
-                                 theme.id === 'nebula' ? 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%)' :
-                                 theme.id === 'sunset' ? 'linear-gradient(135deg, #ec4899 0%, #f97316 100%)' :
-                                 theme.id === 'forest' ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' :
-                                 theme.id === 'ocean' ? 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)' : theme.color
-                    }}
-                  ></div>
+                  <div className="reward-icon" style={{ backgroundColor: theme.color }}></div>
                   <div className="reward-info">
                     <div className="reward-name">{theme.name}</div>
                     <div className="reward-description">
@@ -489,10 +472,7 @@ const ProfilePage: React.FC = () => {
                     <div className="reward-applied">Применено</div>
                   )}
                   {theme.unlocked && rewards.active.theme !== theme.id && (
-                    <button 
-                      className="btn-outline"
-                      onClick={() => handleApplyTheme(theme.id)}
-                    >
+                    <button className="btn-outline btn-sm" onClick={() => handleApplyTheme(theme.id)}>
                       Применить
                     </button>
                   )}
@@ -506,7 +486,6 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
           
-          {/* Эффекты аватара */}
           <div className="reward-category">
             <h4>Эффекты аватара</h4>
             <div className="reward-items">
@@ -523,10 +502,7 @@ const ProfilePage: React.FC = () => {
                     <div className="reward-applied">Применено</div>
                   )}
                   {effect.unlocked && rewards.active.avatarEffect !== effect.id && (
-                    <button 
-                      className="btn-outline"
-                      onClick={() => handleApplyAvatarEffect(effect.id)}
-                    >
+                    <button className="btn-outline btn-sm" onClick={() => handleApplyAvatarEffect(effect.id)}>
                       Применить
                     </button>
                   )}
@@ -540,7 +516,6 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
           
-          {/* Рамки для бейджей */}
           <div className="reward-category">
             <h4>Рамки для бейджей</h4>
             <div className="reward-items">
@@ -557,10 +532,7 @@ const ProfilePage: React.FC = () => {
                     <div className="reward-applied">Применено</div>
                   )}
                   {frame.unlocked && rewards.active.badgeFrame !== frame.id && (
-                    <button 
-                      className="btn-outline"
-                      onClick={() => handleApplyBadgeFrame(frame.id)}
-                    >
+                    <button className="btn-outline btn-sm" onClick={() => handleApplyBadgeFrame(frame.id)}>
                       Применить
                     </button>
                   )}
@@ -574,7 +546,6 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
           
-          {/* Фоны профиля */}
           <div className="reward-category">
             <h4>Фоны профиля</h4>
             <div className="reward-items">
@@ -591,10 +562,7 @@ const ProfilePage: React.FC = () => {
                     <div className="reward-applied">Применено</div>
                   )}
                   {background.unlocked && rewards.active.profileBackground !== background.id && (
-                    <button 
-                      className="btn-outline"
-                      onClick={() => handleApplyProfileBackground(background.id)}
-                    >
+                    <button className="btn-outline btn-sm" onClick={() => handleApplyProfileBackground(background.id)}>
                       Применить
                     </button>
                   )}
@@ -608,7 +576,6 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
           
-          {/* Особые возможности */}
           <div className="reward-category">
             <h4>Особые возможности</h4>
             <div className="reward-items">
@@ -667,7 +634,6 @@ const ProfilePage: React.FC = () => {
           <p>Управление вашей учетной записью</p>
         </div>
         
-        {/* Вкладки профиля */}
         <div className="profile-tabs">
           <button
             className={`profile-tab ${activeTab === 'overview' ? 'active' : ''}`}
@@ -702,7 +668,6 @@ const ProfilePage: React.FC = () => {
         </div>
         
         <div className="profile-content">
-          {/* Основная информация профиля */}
           <div className="profile-card">
             <div className="profile-info">
               <div className="profile-avatar">
@@ -752,7 +717,6 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
           
-          {/* Контент вкладок */}
           {activeTab === 'overview' && renderOverview()}
           {activeTab === 'badges' && renderBadgesTab()}
           {activeTab === 'quests' && renderQuestsTab()}

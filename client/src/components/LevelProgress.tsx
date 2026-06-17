@@ -27,15 +27,12 @@ const LevelProgress: React.FC<LevelProgressProps> = ({
   const [unlockedItems, setUnlockedItems] = useState<any[]>([]);
 
   useEffect(() => {
-    // Симуляция получения разблокированных предметов
     const mockUnlocked = [];
     if (currentLevel >= 5) mockUnlocked.push({ type: 'theme', name: 'Темная тема' });
     if (currentLevel >= 10) mockUnlocked.push({ type: 'effect', name: 'Эффект огня' });
     if (currentLevel >= 15) mockUnlocked.push({ type: 'ability', name: 'Расширенная аналитика' });
-    
     setUnlockedItems(mockUnlocked);
 
-    // Определяем следующую награду
     if (currentLevel < 5) {
       setNextUnlock({ level: 5, reward: 'Темная тема', type: 'theme' });
     } else if (currentLevel < 10) {
@@ -81,14 +78,9 @@ const LevelProgress: React.FC<LevelProgressProps> = ({
             До уровня {nextLevel}: {pointsToNextLevel} XP
           </div>
         </div>
-        
         <div className="progress-bar">
-          <div 
-            className="progress-fill"
-            style={{ width: `${progressPercentage}%` }}
-          />
+          <div className="progress-fill" style={{ width: `${progressPercentage}%` }} />
         </div>
-        
         <div className="progress-footer">
           <div className="progress-percentage">{Math.round(progressPercentage)}%</div>
           {nextUnlock && (
@@ -125,15 +117,18 @@ const LevelProgress: React.FC<LevelProgressProps> = ({
             </div>
             
             <div className="progress-bar-large">
-              <div 
+              <div
                 className="progress-fill-large"
                 style={{ width: `${progressPercentage}%` }}
               />
-            </div>
-            
-            <div className="progress-info">
-              <span className="progress-percentage-large">{Math.round(progressPercentage)}%</span>
-              <span className="next-level-info">Уровень {nextLevel}</span>
+              <div className="progress-info">
+                <span className="progress-percentage-large">
+                  {Math.round(progressPercentage)}%
+                </span>
+                <span className="next-level-info">
+                  Уровень {nextLevel}
+                </span>
+              </div>
             </div>
           </div>
           
@@ -151,7 +146,7 @@ const LevelProgress: React.FC<LevelProgressProps> = ({
                 <div className="rewards-list">
                   {unlockedItems.map((item, index) => (
                     <div key={index} className="reward-item-small">
-                      <span 
+                      <span
                         className="reward-icon-small"
                         style={{ backgroundColor: getRewardColor(item.type) + '20', color: getRewardColor(item.type) }}
                       >
@@ -170,9 +165,9 @@ const LevelProgress: React.FC<LevelProgressProps> = ({
               <div className="next-reward-info">
                 <h4>Следующая награда</h4>
                 <div className="next-reward-card">
-                  <div 
+                  <div
                     className="reward-icon-large"
-                    style={{ 
+                    style={{
                       backgroundColor: getRewardColor(nextUnlock.type) + '20',
                       borderColor: getRewardColor(nextUnlock.type)
                     }}
@@ -184,9 +179,9 @@ const LevelProgress: React.FC<LevelProgressProps> = ({
                     <div className="reward-name-large">{nextUnlock.reward}</div>
                     <div className="reward-progress">
                       <div className="progress-bar-small">
-                        <div 
+                        <div
                           className="progress-fill-small"
-                          style={{ 
+                          style={{
                             width: `${Math.min((currentLevel / nextUnlock.level) * 100, 100)}%`,
                             backgroundColor: getRewardColor(nextUnlock.type)
                           }}

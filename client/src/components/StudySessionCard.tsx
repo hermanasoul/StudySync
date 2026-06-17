@@ -117,7 +117,6 @@ const StudySessionCard: React.FC<StudySessionCardProps> = ({ session, onJoin, on
   const handleQuickJoin = async () => {
     if (loading) return;
     
-    // Если уже участник или хост, просто переходим в сессию
     if (isAlreadyJoined || isHost) {
       navigate(`/study-session/${session._id}`);
       return;
@@ -144,14 +143,12 @@ const StudySessionCard: React.FC<StudySessionCardProps> = ({ session, onJoin, on
         <div className="session-status-badge" style={{ backgroundColor: getStatusColor() }}>
           {getStatusText()}
         </div>
-        
         <div className="session-access-badge">
           {session.accessType === 'private' && '🔒'}
           {session.accessType === 'friends' && '👥'}
           {session.accessType === 'public' && '🌐'}
           <span className="access-text">{getAccessTypeText()}</span>
         </div>
-
         {isHost && (
           <div className="host-badge">
             👑 Ваша сессия
@@ -179,14 +176,12 @@ const StudySessionCard: React.FC<StudySessionCardProps> = ({ session, onJoin, on
             <span className="info-icon">📚</span>
             <span className="info-label">{session.subjectId.name}</span>
           </div>
-          
           <div className="info-item">
             <span className="info-icon">👥</span>
             <span className="info-label">
               {activeParticipants.length} из {session.participantCount}
             </span>
           </div>
-          
           <div className="info-item">
             <span className="info-icon">⚙️</span>
             <span className="info-label">{getStudyModeText()}</span>

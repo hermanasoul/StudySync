@@ -1,5 +1,3 @@
-/* client/src/components/LevelProgress.css */
-
 /* ---------- КОМПАКТНЫЙ РЕЖИМ (дашборд, профиль) ---------- */
 .level-progress-compact {
   background: white;
@@ -13,7 +11,6 @@
   min-width: 0;
 }
 
-/* Заголовок */
 .level-progress-compact .progress-header {
   display: flex;
   justify-content: space-between;
@@ -53,12 +50,11 @@
   flex-shrink: 0;
 }
 
-/* Прогресс-бар – СБРОС ГЛОБАЛЬНЫХ СТИЛЕЙ */
 .level-progress-compact .progress-bar {
-  position: static !important;       /* убираем absolute */
-  height: 16px !important;           /* фиксированная высота */
-  padding: 0 !important;             /* убираем лишние отступы */
-  background: #f3f4f6 !important;    /* фон как у предметов */
+  position: static !important;
+  height: 16px !important;
+  padding: 0 !important;
+  background: #f3f4f6 !important;
   border-radius: 8px !important;
   overflow: hidden;
   margin-bottom: 10px;
@@ -67,15 +63,14 @@
 }
 
 .level-progress-compact .progress-fill {
-  position: static;                  /* обычный поток */
+  position: static;
   height: 100%;
-  background: #8b5cf6;              /* фиолетовый */
+  background: #8b5cf6;
   border-radius: 8px;
   transition: width 0.5s ease;
   max-width: 100%;
 }
 
-/* Нижняя строка */
 .level-progress-compact .progress-footer {
   display: flex;
   justify-content: space-between;
@@ -119,6 +114,12 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+.level-progress .progress-container {
+  height: auto !important;
+  min-height: 0;
+  padding: 0 10px;
+}
+
 .level-progress .level-display {
   display: flex;
   align-items: center;
@@ -134,9 +135,10 @@
   min-width: 100px;
 }
 
+/* Боковые цифры уменьшены */
 .level-progress .level-number,
 .level-progress .next-level-number {
-  font-size: 48px;
+  font-size: 38px;
   font-weight: 800;
   color: #8b5cf6;
   line-height: 1;
@@ -171,48 +173,50 @@
 }
 
 .level-progress .xp-current {
-  font-size: 24px;
+  font-size: 16px;
   font-weight: 700;
   color: #1f2937;
 }
 
 .level-progress .xp-separator {
-  font-size: 20px;
+  font-size: 14px;
   color: #d1d5db;
 }
 
 .level-progress .xp-next {
-  font-size: 20px;
+  font-size: 14px;
   color: #9ca3af;
 }
 
 .level-progress .xp-label {
-  font-size: 14px;
+  font-size: 11px;
   color: #6b7280;
   margin-left: 8px;
 }
 
 .level-progress .xp-to-next {
-  font-size: 14px;
+  font-size: 13px;
   color: #8b5cf6;
   background: #f5f3ff;
-  padding: 8px 16px;
+  padding: 6px 12px;
   border-radius: 20px;
   font-weight: 500;
 }
 
+/* Прогресс-бар */
 .level-progress .progress-bar-large {
-  height: 12px;
+  height: 24px;
   background: #e5e7eb;
-  border-radius: 6px;
+  border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 10px;
+  position: relative;
+  margin-bottom: 8px;
 }
 
 .level-progress .progress-fill-large {
   height: 100%;
   background: linear-gradient(90deg, #8b5cf6, #6366f1, #a78bfa);
-  border-radius: 6px;
+  border-radius: 10px;
   transition: width 0.5s ease;
   position: relative;
 }
@@ -224,11 +228,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(90deg, 
-    transparent, 
-    rgba(255, 255, 255, 0.3), 
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   animation: shimmer 2s infinite;
 }
 
@@ -237,34 +237,54 @@
   100% { transform: translateX(100%); }
 }
 
+/* Текст внутри прогресс-бара – центрирование по вертикали */
 .level-progress .progress-info {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;                  /* добавили явную высоту */
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f2937;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.level-progress .progress-percentage-large,
+.level-progress .next-level-info {
+  background: rgba(255,255,255,0.8);
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1.2;
 }
 
 .level-progress .progress-percentage-large {
-  font-size: 16px;
-  font-weight: 700;
   color: #8b5cf6;
 }
 
 .level-progress .next-level-info {
-  font-size: 14px;
-  color: #6b7280;
+  color: #374151;
 }
 
-.level-progress .level-details {
-  border-top: 1px solid #e5e7eb;
-  padding-top: 30px;
-}
-
+/* Центрирование заголовков наград */
 .level-progress .unlocked-rewards h4,
 .level-progress .next-reward-info h4 {
   font-size: 18px;
   font-weight: 600;
   color: #1f2937;
   margin: 0 0 15px 0;
+  text-align: center;
+}
+
+.level-progress .level-details {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 30px;
 }
 
 .level-progress .rewards-list {

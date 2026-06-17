@@ -165,89 +165,87 @@ const FlashcardsPage: React.FC = () => {
   return (
     <div className="flashcards-page">
       <Header />
-      <div className="page-with-header">
+      <div className="flashcards-container">
         {error && (
           <div className="error-message">
             {error}
             <button onClick={() => setError(null)} className="error-close">×</button>
           </div>
         )}
-        <div className="flashcards-container">
-          <div className="flashcards-header">
-            <h1>Карточки</h1>
-            <div className="flashcards-actions">
-              {mode === 'view' && (
-                <>
-                  <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>+ Создать карточку</button>
-                  {flashcards.length > 0 && (
-                    <button className="btn btn-success" onClick={startStudy}>🎯 Начать изучение</button>
-                  )}
-                </>
-              )}
-              {mode === 'study' && (
-                <button className="btn btn-outline" onClick={exitStudy}>← Вернуться к просмотру</button>
-              )}
-            </div>
+        <div className="flashcards-header">
+          <h1>Карточки</h1>
+          <div className="flashcards-actions">
+            {mode === 'view' && (
+              <>
+                <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>+ Создать карточку</button>
+                {flashcards.length > 0 && (
+                  <button className="btn btn-success" onClick={startStudy}>🎯 Начать изучение</button>
+                )}
+              </>
+            )}
+            {mode === 'study' && (
+              <button className="btn btn-outline" onClick={exitStudy}>← Вернуться к просмотру</button>
+            )}
           </div>
+        </div>
 
-          {mode === 'view' && (
-            <>
-              {flashcards.length === 0 ? (
-                <div className="empty-state">
-                  <div className="empty-icon">📚</div>
-                  <h3>Пока нет карточек</h3>
-                  <p>Создайте первую карточку для изучения</p>
-                  <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>Создать карточку</button>
-                </div>
-              ) : (
-                <div className="flashcards-grid">
-                  {flashcards.map(card => (
-                    <div key={card._id} className="flashcard-card">
-                      <div className="flashcard-content">
-                        <div className="flashcard-question"><h3>{card.question}</h3>{card.hint && <div className="flashcard-hint">💡 {card.hint}</div>}</div>
-                        <div className="flashcard-answer"><p>{card.answer}</p></div>
-                      </div>
-                      <div className="flashcard-actions">
-                        <button className="btn btn-outline" onClick={() => { setEditingFlashcard(card); setShowEditModal(true); }}>
-                          Редактировать
-                        </button>
-                        <button className="btn btn-danger" onClick={() => handleDeleteCard(card._id)}>
-                          Удалить
-                        </button>
-                      </div>
+        {mode === 'view' && (
+          <>
+            {flashcards.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">📚</div>
+                <h3>Пока нет карточек</h3>
+                <p>Создайте первую карточку для изучения</p>
+                <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>Создать карточку</button>
+              </div>
+            ) : (
+              <div className="flashcards-grid">
+                {flashcards.map(card => (
+                  <div key={card._id} className="flashcard-card">
+                    <div className="flashcard-content">
+                      <div className="flashcard-question"><h3>{card.question}</h3>{card.hint && <div className="flashcard-hint">💡 {card.hint}</div>}</div>
+                      <div className="flashcard-answer"><p>{card.answer}</p></div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
+                    <div className="flashcard-actions">
+                      <button className="btn btn-sm btn-outline" onClick={() => { setEditingFlashcard(card); setShowEditModal(true); }}>Редактировать</button>
+                      <button className="btn btn-sm btn-danger" onClick={() => handleDeleteCard(card._id)}>Удалить</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
 
-          {mode === 'study' && flashcards.length > 0 && (
-            <div className="study-mode">
-              <div className="study-progress">Прогресс: {currentCard + 1} / {flashcards.length}</div>
-              <div className="flashcard-study">
-                <div className="study-card">
-                  <div className="card-question">
-                    <h2>{flashcards[currentCard].question}</h2>
-                    {flashcards[currentCard].hint && <div className="card-hint">💡 {flashcards[currentCard].hint}</div>}
-                  </div>
-                  {showAnswer && (
-                    <div className="card-answer"><h3>Ответ:</h3><p>{flashcards[currentCard].answer}</p></div>
+        {mode === 'study' && flashcards.length > 0 && (
+          <div className="study-mode">
+            <div className="study-progress">Прогресс: {currentCard + 1} / {flashcards.length}</div>
+            <div className="flashcard-study">
+              <div className="study-card">
+                <div className="card-question">
+                  <h2>{flashcards[currentCard].question}</h2>
+                  {flashcards[currentCard].hint && <div className="card-hint">💡 {flashcards[currentCard].hint}</div>}
+                </div>
+                {showAnswer && (
+                  <div className="card-answer"><h3>Ответ:</h3><p>{flashcards[currentCard].answer}</p></div>
+                )}
+                <div className="study-actions">
+                  {!showAnswer ? (
+                    <button className="btn btn-primary" onClick={() => setShowAnswer(true)}>Показать ответ</button>
+                  ) : (
+                    <div className="knowledge-actions">
+                      <button className="btn btn-success" onClick={handleKnow}>Знаю ✅</button>
+                      <button className="btn btn-danger" onClick={handleDontKnow}>Не знаю ❌</button>
+                    </div>
                   )}
-                  <div className="study-actions">
-                    {!showAnswer ? (
-                      <button className="btn btn-primary" onClick={() => setShowAnswer(true)}>Показать ответ</button>
-                    ) : (
-                      <div className="knowledge-actions">
-                        <button className="btn btn-success" onClick={handleKnow}>Знаю ✅</button>
-                        <button className="btn btn-danger" onClick={handleDontKnow}>Не знаю ❌</button>
-                      </div>
-                    )}
-                  </div>
                 </div>
               </div>
             </div>
-          )}
+          </div>
+        )}
+
+        <div className="page-actions">
+          <Link to="/subjects" className="btn btn-outline">← Назад к предметам</Link>
         </div>
       </div>
 

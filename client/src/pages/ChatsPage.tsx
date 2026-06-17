@@ -131,10 +131,18 @@ const ChatsPage: React.FC = () => {
           <div className="chats-sidebar">
             <div className="chats-sidebar-header">
               <h3>Чаты</h3>
-              <button className="btn btn-primary btn-sm" onClick={() => setShowCreateForm(!showCreateForm)}>
+            </div>
+
+            {/* Кнопка создания чата теперь под заголовком */}
+            <div className="create-chat-button-container">
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => setShowCreateForm(!showCreateForm)}
+              >
                 {showCreateForm ? '– Скрыть' : '+ Новый чат'}
               </button>
             </div>
+
             {showCreateForm && (
               <div className="create-chat-form">
                 <div className="form-group">

@@ -1,3 +1,4 @@
+/* GroupPage.css */
 .group-page {
   min-height: 100vh;
   background: #f8fafc;
@@ -40,6 +41,10 @@
   margin-bottom: 20px;
 }
 
+.group-info {
+  flex: 1;
+}
+
 .group-info h1 {
   font-size: 32px;
   font-weight: 700;
@@ -48,11 +53,11 @@
 }
 
 .group-meta {
-  margin-top: 20px;
   display: flex;
   gap: 15px !important;
   align-items: center;
   flex-wrap: wrap;
+  margin-top: 10px;
 }
 
 .subject-tag {
@@ -71,11 +76,9 @@
 .subject-tag.green {
   background: #10b981;
 }
-
 .subject-tag.blue {
   background: #3b82f6;
 }
-
 .subject-tag.red {
   background: #ef4444;
 }
@@ -108,19 +111,14 @@
   color: white !important;
 }
 
-.group-actions-header {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-}
-
 .invite-section {
+  margin-top: 15px;
   font-size: 16px;
   color: #6b7280;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
 .invite-label {
@@ -132,6 +130,17 @@
   font-size: 18px;
   font-weight: 700;
   color: #4f46e5;
+  background: #f5f3ff;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.group-actions-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .btn-danger {
@@ -297,6 +306,114 @@
   background: #d97706 !important;
 }
 
+/* Вкладка flashcards */
+.flashcards-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.flashcards-header h3 {
+  margin: 0;
+}
+
+.flashcards-header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Обе кнопки одинаковой высоты */
+.flashcards-header-actions .btn {
+  height: 44px !important;
+  min-width: 180px;
+  padding: 0 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  white-space: nowrap;
+  font-size: 14px !important;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1.2 !important;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.flashcards-header-actions .btn-outline {
+  border: 1px solid #4f46e5;
+  background: transparent;
+  color: #4f46e5;
+}
+.flashcards-header-actions .btn-outline:hover {
+  background: #4f46e5;
+  color: white;
+}
+
+.flashcards-header-actions .btn-primary {
+  background: #4f46e5;
+  color: white;
+}
+.flashcards-header-actions .btn-primary:hover {
+  background: #4338ca;
+}
+
+.flashcards-list {
+  display: grid;
+  gap: 15px;
+}
+
+.flashcard-card {
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.flashcard-content {
+  flex: 1;
+}
+
+.flashcard-question h4 {
+  margin: 0 0 5px;
+}
+
+.flashcard-hint {
+  background: #fef3c7;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.flashcard-answer p {
+  margin: 0;
+  color: #4a5568;
+}
+
+.flashcard-actions {
+  margin-left: 15px;
+}
+
+.edit-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #6b7280;
+  transition: color 0.2s;
+}
+
+.edit-btn:hover {
+  color: #4f46e5;
+}
+
 .members-list {
   display: grid;
   gap: 15px;
@@ -379,10 +496,6 @@
   margin-bottom: 20px;
 }
 
-.create-note-btn, .btn-primary {
-  height: 44px !important;
-}
-
 .notes-list {
   display: grid;
   gap: 15px;
@@ -405,19 +518,6 @@
   font-size: 18px;
   font-weight: 600;
   color: #1f2937;
-}
-
-.edit-btn {
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  color: #6b7280;
-  transition: color 0.2s;
-}
-
-.edit-btn:hover {
-  color: #4f46e5;
 }
 
 .note-meta {

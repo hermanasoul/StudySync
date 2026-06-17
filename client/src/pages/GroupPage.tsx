@@ -6,7 +6,7 @@ import Header from '../components/Header';
 import CreateGroupFlashcardModal from '../components/CreateGroupFlashcardModal';
 import CreateGroupNoteModal from '../components/CreateGroupNoteModal';
 import EditGroupNoteModal from '../components/EditGroupNoteModal';
-import EditFlashcardModal from '../components/EditFlashcardModal';   // <-- новый импорт
+import EditFlashcardModal from '../components/EditFlashcardModal';
 import InviteMembersModal from '../components/InviteMembersModal';
 import Button from '../components/Button';
 import { groupsAPI } from '../services/api';
@@ -42,7 +42,7 @@ interface Flashcard {
   answer: string;
   hint?: string;
   subjectId: string;
-  groupId?: string;   // <-- сделали необязательным
+  groupId?: string;
 }
 
 const GroupPage: React.FC = () => {
@@ -57,15 +57,14 @@ const GroupPage: React.FC = () => {
   const [showCreateFlashcardModal, setShowCreateFlashcardModal] = useState(false);
   const [showCreateNoteModal, setShowCreateNoteModal] = useState(false);
   const [showEditNoteModal, setShowEditNoteModal] = useState(false);
-  const [showEditFlashcardModal, setShowEditFlashcardModal] = useState(false);   // новое состояние
+  const [showEditFlashcardModal, setShowEditFlashcardModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
-  const [editingFlashcard, setEditingFlashcard] = useState<Flashcard | null>(null); // новое
+  const [editingFlashcard, setEditingFlashcard] = useState<Flashcard | null>(null);
   const [members, setMembers] = useState<Group['members']>([]);
 
   const isValidGroupId = !!groupId && groupId !== 'undefined';
 
-  // Загрузка всех данных (гарантированно через HTTP)
   const loadAllData = useCallback(async () => {
     if (!isValidGroupId) return;
     try {
@@ -128,7 +127,6 @@ const GroupPage: React.FC = () => {
     }
   }, [isValidGroupId, loadAllData]);
 
-  // WebSocket-подписки (фоновое обновление)
   useEffect(() => {
     if (!group?._id) return;
 
@@ -213,7 +211,7 @@ const GroupPage: React.FC = () => {
   };
 
   const handleFlashcardDeleted = () => {
-    loadAllData(); // проще перезагрузить список после удаления
+    loadAllData();
   };
 
   const handleNoteUpdated = (updatedNote?: Note) => {
@@ -248,9 +246,13 @@ const GroupPage: React.FC = () => {
                   {group.isPublic && <span className="public-badge">Публичная</span>}
                   <span className="member-count">{members.length} участников</span>
                 </div>
+                {/* Код приглашения теперь под названием */}
+                <div className="invite-section">
+                  <div className="invite-label">Код приглашения:</div>
+                  <div className="invite-code-display">{group.inviteCode}</div>
+                </div>
               </div>
               <div className="group-actions-header">
-                <div className="invite-section"><div className="invite-label">Код приглашения:</div><div className="invite-code-display">{group.inviteCode}</div></div>
                 {isUserOwner() && <Button variant="danger" onClick={() => setShowDeleteConfirm(true)}>Удалить группу</Button>}
               </div>
             </div>
@@ -293,10 +295,10 @@ const GroupPage: React.FC = () => {
                 <div className="flashcards-tab">
                   <div className="flashcards-header">
                     <h3>Карточки группы ({flashcards.length})</h3>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div className="flashcards-header-actions">
                       {subjectIdUnified && (
                         <Button variant="outline" href={`/subjects/${subjectIdUnified}/flashcards`}>
-                          Изучать все карточки предмета
+                          Изучать все карточки
                         </Button>
                       )}
                       <Button variant="primary" onClick={()=>setShowCreateFlashcardModal(true)}>+ Создать карточку</Button>
@@ -312,7 +314,6 @@ const GroupPage: React.FC = () => {
                             <div className="flashcard-question"><h4>{f.question}</h4>{f.hint&&<div className="flashcard-hint">💡 {f.hint}</div>}</div>
                             <div className="flashcard-answer"><p>{f.answer}</p></div>
                           </div>
-                          {/* Кнопка редактирования/удаления */}
                           <div className="flashcard-actions">
                             <button
                               className="edit-btn"

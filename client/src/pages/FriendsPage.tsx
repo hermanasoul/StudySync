@@ -23,10 +23,21 @@ interface FriendRequest {
   createdAt: string;
 }
 
+interface FriendStats {
+  totalFriends: number;
+  incomingRequests: number;
+  outgoingRequests: number;
+}
+
 const FriendsPage: React.FC = () => {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [incoming, setIncoming] = useState<FriendRequest[]>([]);
   const [outgoing, setOutgoing] = useState<FriendRequest[]>([]);
+  const [stats, setStats] = useState<FriendStats>({
+    totalFriends: 0,
+    incomingRequests: 0,
+    outgoingRequests: 0,
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,14 +49,14 @@ const FriendsPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const [friendsRes, incomingRes, outgoingRes] = await Promise.all([
+      const [friendsRes, incomingRes, outgoingRes, statsRes] = await Promise.all([
         friendsAPI.getFriends(),
         friendsAPI.getIncomingRequests(),
-        friendsAPI.getOutgoingRequests()
+        friendsAPI.getOutgoingRequests(),
+        friendsAPI.getFriendsStats(),
       ]);
 
       if (friendsRes.data.success) {
-        // Фильтрация дубликатов на клиенте
         const unique = friendsRes.data.friends.filter(
           (friend: Friend, index: number, self: Friend[]) =>
             index === self.findIndex(f => f._id === friend._id)
@@ -60,6 +71,10 @@ const FriendsPage: React.FC = () => {
 
       if (outgoingRes.data.success) setOutgoing(outgoingRes.data.requests);
       else setError(prev => prev || 'Не удалось загрузить исходящие заявки');
+
+      if (statsRes.data.success) {
+        setStats(statsRes.data.stats);
+      }
     } catch (err) {
       console.error(err);
       setError('Ошибка загрузки данных друзей');
@@ -92,7 +107,6 @@ const FriendsPage: React.FC = () => {
     setLoadingState(userId, true);
     try {
       await friendsAPI.sendRequest(userId);
-      alert('Заявка отправлена');
       setSearchResults(prev => prev.filter(u => u._id !== userId));
       loadData();
     } catch (err: any) {
@@ -132,6 +146,7 @@ const FriendsPage: React.FC = () => {
     try {
       await friendsAPI.removeFriend(friendshipId);
       setFriends(prev => prev.filter(f => f.friendshipId !== friendshipId));
+      loadData();
     } catch (err: any) {
       alert(err.response?.data?.error || 'Ошибка удаления');
     } finally {
@@ -165,118 +180,196 @@ const FriendsPage: React.FC = () => {
               <button onClick={() => setError(null)} className="error-close">×</button>
             </div>
           )}
+
           <div className="friends-tabs">
-            <button className={`tab ${activeTab === 'friends' ? 'active' : ''}`} onClick={() => setActiveTab('friends')}>Друзья ({friends.length})</button>
-            <button className={`tab ${activeTab === 'requests' ? 'active' : ''}`} onClick={() => setActiveTab('requests')}>Заявки ({incoming.length})</button>
-            <button className={`tab ${activeTab === 'search' ? 'active' : ''}`} onClick={() => setActiveTab('search')}>Поиск</button>
+            <button
+              className={`tab ${activeTab === 'friends' ? 'active' : ''}`}
+              onClick={() => setActiveTab('friends')}
+            >
+              Друзья ({friends.length})
+            </button>
+            <button
+              className={`tab ${activeTab === 'requests' ? 'active' : ''}`}
+              onClick={() => setActiveTab('requests')}
+            >
+              Заявки ({incoming.length})
+            </button>
+            <button
+              className={`tab ${activeTab === 'search' ? 'active' : ''}`}
+              onClick={() => setActiveTab('search')}
+            >
+              Поиск
+            </button>
           </div>
 
-          {activeTab === 'friends' && (
-            <div className="friends-list">
-              {friends.length === 0 ? (
-                <p>У вас пока нет друзей.</p>
-              ) : (
-                friends.map(friend => (
-                  <div key={friend._id} className="friend-card">
-                    <div className="friend-info">
-                      <div className="friend-avatar">{friend.name?.charAt(0)?.toUpperCase() || '?'}</div>
-                      <div>
-                        <div className="friend-name">{friend.name}</div>
-                        <div className="friend-email">{friend.email}</div>
-                      </div>
+          <div className="friends-content">
+            <div className="friends-main">
+              {activeTab === 'friends' && (
+                <div className="tab-panel friends-list-panel">
+                  {friends.length === 0 ? (
+                    <div className="empty-state">
+                      <div className="empty-icon">👥</div>
+                      <h3>У вас пока нет друзей</h3>
+                      <p>Найдите друзей через поиск или примите входящие заявки</p>
                     </div>
-                    <button
-                      className="btn btn-danger"
-                      disabled={!!requestLoading[friend.friendshipId || friend._id]}
-                      onClick={() => handleRemoveFriend(friend.friendshipId || friend._id)}
-                    >
-                      Удалить
+                  ) : (
+                    friends.map(friend => (
+                      <div key={friend._id} className="friend-card">
+                        <div className="friend-info">
+                          <div className="friend-avatar">
+                            {friend.name?.charAt(0)?.toUpperCase() || '?'}
+                          </div>
+                          <div className="friend-details">
+                            <div className="friend-name">{friend.name}</div>
+                            <div className="friend-email">{friend.email}</div>
+                            {friend.level && (
+                              <span className="friend-level">Уровень {friend.level}</span>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          className="btn btn-danger"
+                          disabled={!!requestLoading[friend.friendshipId || friend._id]}
+                          onClick={() => handleRemoveFriend(friend.friendshipId || friend._id)}
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'requests' && (
+                <div className="tab-panel requests-panel">   {/* обёртка добавлена */}
+                  <h3 className="subsection-title">Входящие заявки</h3>
+                  {incoming.length === 0 ? (
+                    <p className="empty-message">Нет входящих заявок.</p>
+                  ) : (
+                    incoming.map(request => (
+                      <div key={request._id} className="request-card">
+                        <div className="friend-info">
+                          <div className="friend-avatar">
+                            {request.requester?.name?.charAt(0) || '?'}
+                          </div>
+                          <div className="friend-details">
+                            <div className="friend-name">{request.requester?.name}</div>
+                            <div className="friend-email">{request.requester?.email}</div>
+                          </div>
+                        </div>
+                        <div className="request-actions">
+                          <button
+                            className="btn btn-success"
+                            disabled={!!requestLoading[request._id]}
+                            onClick={() => handleAccept(request._id)}
+                          >
+                            Принять
+                          </button>
+                          <button
+                            className="btn btn-outline"
+                            disabled={!!requestLoading[request._id]}
+                            onClick={() => handleReject(request._id)}
+                          >
+                            Отклонить
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+
+                  <h3 className="subsection-title">Исходящие заявки</h3>
+                  {outgoing.length === 0 ? (
+                    <p className="empty-message">Нет исходящих заявок.</p>
+                  ) : (
+                    outgoing.map(request => (
+                      <div key={request._id} className="request-card">
+                        <div className="friend-info">
+                          <div className="friend-avatar">
+                            {request.recipient?.name?.charAt(0) || '?'}
+                          </div>
+                          <div className="friend-details">
+                            <div className="friend-name">{request.recipient?.name}</div>
+                            <div className="friend-email">{request.recipient?.email}</div>
+                          </div>
+                        </div>
+                        <span className="pending-badge">Ожидание</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'search' && (
+                <div className="tab-panel search-panel">   {/* обёртка добавлена */}
+                  <div className="search-bar">
+                    <input
+                      type="text"
+                      placeholder="Поиск пользователей..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    />
+                    <button className="btn btn-primary" onClick={handleSearch}>
+                      Найти
                     </button>
                   </div>
-                ))
+                  <div className="search-results">
+                    {searchResults.map(user => (
+                      <div key={user._id} className="user-card">
+                        <div className="friend-info">
+                          <div className="friend-avatar">
+                            {user.name?.charAt(0)?.toUpperCase() || '?'}
+                          </div>
+                          <div className="friend-details">
+                            <div className="friend-name">{user.name}</div>
+                            <div className="friend-email">{user.email}</div>
+                          </div>
+                        </div>
+                        <button
+                          className="btn btn-primary"
+                          disabled={!!requestLoading[user._id]}
+                          onClick={() => handleSendRequest(user._id)}
+                        >
+                          Добавить
+                        </button>
+                      </div>
+                    ))}
+                    {searchResults.length === 0 && searchQuery && (
+                      <p className="empty-message">Пользователи не найдены.</p>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
-          )}
 
-          {activeTab === 'requests' && (
-            <div>
-              <h3>Входящие заявки</h3>
-              {incoming.length === 0 ? (
-                <p>Нет входящих заявок.</p>
-              ) : (
-                incoming.map(request => (
-                  <div key={request._id} className="request-card">
-                    <div className="friend-info">
-                      <div className="friend-avatar">{request.requester?.name?.charAt(0) || '?'}</div>
-                      <div>
-                        <div className="friend-name">{request.requester?.name}</div>
-                        <div className="friend-email">{request.requester?.email}</div>
-                      </div>
-                    </div>
-                    <div className="request-actions">
-                      <button className="btn btn-success" disabled={!!requestLoading[request._id]} onClick={() => handleAccept(request._id)}>Принять</button>
-                      <button className="btn btn-outline" disabled={!!requestLoading[request._id]} onClick={() => handleReject(request._id)}>Отклонить</button>
-                    </div>
+            <aside className="friends-sidebar">
+              <div className="sidebar-card stats-card">
+                <h3>📊 Статистика</h3>
+                <div className="stats-grid">
+                  <div className="stat-item">
+                    <span className="stat-value">{stats.totalFriends}</span>
+                    <span className="stat-label">Друзей</span>
                   </div>
-                ))
-              )}
-              <h3>Исходящие заявки</h3>
-              {outgoing.length === 0 ? (
-                <p>Нет исходящих заявок.</p>
-              ) : (
-                outgoing.map(request => (
-                  <div key={request._id} className="request-card">
-                    <div className="friend-info">
-                      <div className="friend-avatar">{request.recipient?.name?.charAt(0) || '?'}</div>
-                      <div>
-                        <div className="friend-name">{request.recipient?.name}</div>
-                        <div className="friend-email">{request.recipient?.email}</div>
-                      </div>
-                    </div>
-                    <span className="pending">Ожидание</span>
+                  <div className="stat-item">
+                    <span className="stat-value">{stats.incomingRequests}</span>
+                    <span className="stat-label">Входящих</span>
                   </div>
-                ))
-              )}
-            </div>
-          )}
-
-          {activeTab === 'search' && (
-            <div className="search-section">
-              <div className="search-bar">
-                <input
-                  type="text"
-                  placeholder="Поиск пользователей..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                />
-                <button className="btn btn-primary" onClick={handleSearch}>Найти</button>
+                  <div className="stat-item">
+                    <span className="stat-value">{stats.outgoingRequests}</span>
+                    <span className="stat-label">Исходящих</span>
+                  </div>
+                </div>
               </div>
-              <div className="search-results">
-                {searchResults.map(user => (
-                  <div key={user._id} className="user-card">
-                    <div className="friend-info">
-                      <div className="friend-avatar">{user.name?.charAt(0)?.toUpperCase() || '?'}</div>
-                      <div>
-                        <div className="friend-name">{user.name}</div>
-                        <div className="friend-email">{user.email}</div>
-                      </div>
-                    </div>
-                    <button
-                      className="btn btn-primary"
-                      disabled={!!requestLoading[user._id]}
-                      onClick={() => handleSendRequest(user._id)}
-                    >
-                      Добавить
-                    </button>
-                  </div>
-                ))}
-                {searchResults.length === 0 && searchQuery && (
-                  <p>Пользователи не найдены.</p>
-                )}
+              <div className="sidebar-card tips-card">
+                <h3>💡 Советы</h3>
+                <ul className="tips-list">
+                  <li>Добавляйте друзей для совместных занятий</li>
+                  <li>Следите за входящими заявками</li>
+                  <li>Используйте поиск по email или имени</li>
+                </ul>
               </div>
-            </div>
-          )}
+            </aside>
+          </div>
         </div>
       </div>
     </div>

@@ -7,7 +7,7 @@
 .levels-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 90px 20px 40px;
+  padding: 140px 20px 40px;   /* увеличен верхний отступ */
 }
 
 .levels-header {
@@ -503,23 +503,29 @@
 }
 
 .tips-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
 .tip-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;   /* центрируем по горизонтали */
+  gap: 12px !important;
+  padding: 12px !important;
   background: #f9fafb;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
   transition: transform 0.2s;
+}
+
+/* Если у элемента есть псевдоэлемент, сбрасываем его */
+.tip-item::before {
+  display: none !important;
 }
 
 .tip-item:hover {
@@ -538,6 +544,7 @@
   background: white;
   border: 1px solid #e5e7eb;
   flex-shrink: 0;
+  margin-left: 0 !important;        /* убираем возможный минус */
 }
 
 .tip-text {

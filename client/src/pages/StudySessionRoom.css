@@ -128,10 +128,16 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
+/* Индикатор статуса – жёсткое переопределение глобального стиля */
 .status-indicator {
+  width: auto !important;
+  height: auto !important;
+  border-radius: 20px !important;
+  cursor: default;
+  box-shadow: none;
+  display: inline-block;
   font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 20px;
+  padding: 6px 16px;
 }
 
 .status-indicator.waiting {
@@ -180,6 +186,43 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
+/* Единый стиль для кнопок карточек – перебиваем глобальные */
+.flashcard-actions .btn {
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1.2 !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  min-width: 80px !important;
+  box-shadow: none !important;
+}
+
+.btn-success {
+  background: #10b981;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #059669;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+/* === ЧАТ === */
 .chat-sidebar {
   background: white;
   border-radius: 20px;
@@ -191,14 +234,15 @@
 }
 
 .chat-header {
+  background: #2a2a3c;   /* тёмный фон для контраста с белым текстом */
   padding: 16px 20px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #3f3f55;
 }
 
 .chat-header h3 {
   margin: 0;
   font-size: 1.1rem;
-  color: #1e293b;
+  color: white;           /* белый текст "Чат" */
 }
 
 .chat-messages {

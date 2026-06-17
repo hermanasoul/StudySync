@@ -56,7 +56,6 @@ const StudySessionRoom: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Ref для отслеживания, подключён ли WebSocket
   const wsConnected = useRef(webSocketService.checkConnection());
   const joinSent = useRef(false);
 
@@ -74,7 +73,6 @@ const StudySessionRoom: React.FC = () => {
 
   useEffect(() => { loadSession(); }, [loadSession]);
 
-  // Ожидание подключения WebSocket и вход в комнату
   useEffect(() => {
     if (!sessionId) return;
 
@@ -85,7 +83,6 @@ const StudySessionRoom: React.FC = () => {
       joinSent.current = true;
     };
 
-    // Если уже подключены — сразу заходим
     if (webSocketService.checkConnection()) {
       wsConnected.current = true;
       joinRoom();
@@ -94,26 +91,23 @@ const StudySessionRoom: React.FC = () => {
     const onConnected = () => {
       console.log('🔌 WebSocket подключился, входим в сессию');
       wsConnected.current = true;
-      // Небольшая задержка на всякий случай
       setTimeout(joinRoom, 100);
     };
 
     const onReconnected = () => {
       console.log('🔄 WebSocket переподключился, повторно входим в сессию');
-      joinSent.current = false; // разрешаем повторный join
+      joinSent.current = false;
       setTimeout(joinRoom, 100);
     };
 
     webSocketService.on('connected', onConnected);
     webSocketService.on('reconnected', onReconnected);
 
-    // Обработчики сообщений
     const handleStateUpdate = (data: any) => {
       if (data.session) setSession(data.session);
     };
 
     const handleInitialMessages = (msgs: any[]) => {
-      console.log('📨 Получены начальные сообщения:', msgs);
       const chatMsgs: ChatMessage[] = msgs.map((msg: any) => ({
         _id: msg._id,
         userId: msg.userId,
@@ -125,7 +119,6 @@ const StudySessionRoom: React.FC = () => {
     };
 
     const handleNewMessage = (msg: any) => {
-      console.log('💬 Новое сообщение:', msg);
       const chatMsg: ChatMessage = {
         _id: msg._id || Date.now().toString(),
         userId: msg.userId,
@@ -295,8 +288,8 @@ const StudySessionRoom: React.FC = () => {
                   <div className="flashcard-actions" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <button className="btn btn-outline" onClick={() => handleFlashcardAction('previous')}>← Назад</button>
                     <button className="btn btn-outline" onClick={() => handleFlashcardAction('next')}>Далее →</button>
-                    <button className="btn btn-success" onClick={() => handleFlashcardAction('answer', 'correct')}>Знаю ✓</button>
-                    <button className="btn btn-danger" onClick={() => handleFlashcardAction('answer', 'incorrect')}>Не знаю ✕</button>
+                    <button className="btn btn-success" onClick={() => handleFlashcardAction('answer', 'correct')}>Знаю</button>
+                    <button className="btn btn-danger" onClick={() => handleFlashcardAction('answer', 'incorrect')}>Не знаю</button>
                   </div>
                 </div>
               </div>
@@ -305,7 +298,7 @@ const StudySessionRoom: React.FC = () => {
 
           <div className="chat-sidebar">
             <div className="chat-header">
-              <h3>Чат сессии</h3>
+              <h3>Чат</h3>
             </div>
             <div className="chat-messages">
               {messages.map((msg, idx) => (

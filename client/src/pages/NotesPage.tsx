@@ -72,7 +72,6 @@ const NotesPage: React.FC = () => {
           ...n,
           _id: n._id || n.id,
         }));
-        // Фильтруем дубликаты по _id
         const uniqueNotes = freshNotes.filter(
           (note: Note, index: number, self: Note[]) =>
             index === self.findIndex((t: Note) => t._id === note._id)
@@ -98,16 +97,14 @@ const NotesPage: React.FC = () => {
     if (!validSubjectId) return;
     try {
       setError(null);
-      console.log('Отправка POST /notes...');  // отладка
       const response = await fetchWithAuth('/notes', {
         method: 'POST',
         body: JSON.stringify({ ...noteData, subjectId: validSubjectId }),
       });
       const data = await response.json();
-      console.log('Ответ на создание заметки:', data); // отладка
       if (data.success) {
         setShowCreateModal(false);
-        await loadNotes();   // перезагружаем список с сервера
+        await loadNotes();
       } else {
         setError(extractError(data));
       }
@@ -244,7 +241,7 @@ const NotesPage: React.FC = () => {
           )}
         </div>
         <div className="page-actions">
-          <Link to="/dashboard" className="btn-outline">← Назад к предметам</Link>
+          <Link to="/subjects" className="btn-outline">← Назад к предметам</Link>
         </div>
       </div>
 

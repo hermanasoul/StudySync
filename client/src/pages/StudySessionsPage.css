@@ -1,9 +1,9 @@
-/* StudySessionsPage.css */
+/* client/src/pages/StudySessionsPage.css */
 
 .study-sessions-page {
   min-height: 100vh;
   background: #f1f5f9;
-  padding-top: 140px; /* отступ под фиксированную шапку */
+  padding-top: 140px;
 }
 
 .page-content {
@@ -12,7 +12,6 @@
   padding: 24px 20px;
 }
 
-/* Верхняя строка */
 .page-top-row {
   display: flex;
   justify-content: space-between;
@@ -33,44 +32,84 @@
   font-size: 0.9rem;
 }
 
-.page-actions {
+/* ===== Кнопки страницы – ПЕРЕОПРЕДЕЛЕНИЕ ГЛОБАЛЬНЫХ СТИЛЕЙ ===== */
+.page-actions,
+.filter-checkboxes {
   display: flex;
   gap: 10px;
   align-items: center;
   flex-shrink: 0;
 }
 
-/* Кнопки */
-.btn {
-  padding: 8px 18px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-  border: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.9rem;
+/* Общие сбросы для кнопок на странице (с добавлением body для повышения веса) */
+body .page-actions .btn,
+body .page-actions .btn-primary,
+body .page-actions .btn-outline,
+body .filter-checkboxes .btn,
+body .filter-checkboxes .btn-outline,
+body .filter-checkboxes .btn-sm {
+  padding: 8px 18px !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  white-space: nowrap !important;
+  height: 42px !important;
+  line-height: 1.2 !important;
+  min-width: auto !important;
+  width: auto !important;
+  box-shadow: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
 }
 
-.btn-primary {
-  background: #4f46e5;
-  color: white;
+/* Кнопка "Создать сессию" */
+body .page-actions .create-btn {
+  background: #4f46e5 !important;
+  color: white !important;
 }
 
-.btn-primary:hover {
-  background: #4338ca;
+body .page-actions .create-btn:hover {
+  background: #4338ca !important;
 }
 
-.btn-outline {
-  background: white;
-  border: 2px solid #4f46e5;
-  color: #4f46e5;
+/* Кнопка "Обновить" – синяя с белым текстом */
+body .page-actions .refresh-btn {
+  background: #4f46e5 !important;
+  color: white !important;
+  border: none !important;
 }
 
-.btn-outline:hover {
-  background: #f8fafc;
+body .page-actions .refresh-btn:hover {
+  background: #4338ca !important;
+}
+
+/* Кнопка «Сбросить» – компактная, синяя, без растягивания */
+body .filter-checkboxes .reset-btn {
+  height: 32px !important;
+  padding: 0 14px !important;
+  font-size: 0.85rem !important;
+  background: #4f46e5 !important;
+  color: white !important;
+  border: none !important;
+  line-height: 32px !important;
+  min-width: auto !important;
+  width: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+
+body .filter-checkboxes .reset-btn:hover {
+  background: #4338ca !important;
 }
 
 /* Статистика */
@@ -137,11 +176,15 @@
   outline: none;
 }
 
+/* Контейнер для чекбоксов и кнопки сброса */
 .filter-checkboxes {
   display: flex;
-  gap: 14px;
+  flex-wrap: wrap;
   align-items: center;
-  margin-left: auto;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  margin-top: 8px;
 }
 
 .checkbox-label {
@@ -153,18 +196,18 @@
   cursor: pointer;
 }
 
-/* Сетка сессий */
+/* Сетка сессий – две колонки */
 .sessions-content {
   margin-top: 8px;
 }
 
 .sessions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
-/* Загрузка */
+/* Загрузка и пустое состояние */
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -198,6 +241,7 @@
   margin-bottom: 10px;
 }
 
+/* Адаптация */
 @media (max-width: 768px) {
   .page-content {
     padding: 16px;
@@ -214,7 +258,11 @@
     align-items: stretch;
   }
   .filter-checkboxes {
-    margin-left: 0;
     justify-content: flex-start;
+    width: auto;
+    margin-top: 0;
+  }
+  .sessions-grid {
+    grid-template-columns: 1fr;
   }
 }

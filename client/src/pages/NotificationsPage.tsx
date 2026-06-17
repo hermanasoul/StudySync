@@ -227,7 +227,6 @@ const NotificationsPage: React.FC = () => {
     try {
       await studySessionsAPI.join(sessionId);
       navigate(`/study-sessions/${sessionId}`);
-      // Пометим уведомление как прочитанное
       await handleMarkAsRead(notificationId);
     } catch (error) {
       console.error('Error joining study session:', error);

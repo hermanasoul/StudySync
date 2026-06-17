@@ -50,6 +50,14 @@ interface StudySession {
   createdAt: string;
 }
 
+const initialFilters = {
+  accessType: 'all',
+  subjectId: '',
+  groupId: '',
+  friendsOnly: false,
+  showActiveOnly: true
+};
+
 const StudySessionsPage: React.FC = () => {
   const navigate = useNavigate();
 
@@ -59,13 +67,7 @@ const StudySessionsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const [filters, setFilters] = useState({
-    accessType: 'all',
-    subjectId: '',
-    groupId: '',
-    friendsOnly: false,
-    showActiveOnly: true
-  });
+  const [filters, setFilters] = useState(initialFilters);
 
   const fetchData = useCallback(async () => {
     try {
@@ -128,6 +130,10 @@ const StudySessionsPage: React.FC = () => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
+  const resetFilters = () => {
+    setFilters(initialFilters);
+  };
+
   const getActiveSessionsCount = () => sessions.filter(s => s.status === 'active').length;
   const getWaitingSessionsCount = () => sessions.filter(s => s.status === 'waiting').length;
 
@@ -142,10 +148,10 @@ const StudySessionsPage: React.FC = () => {
             <p className="page-subtitle">Изучайте материал вместе с друзьями и коллегами</p>
           </div>
           <div className="page-actions">
-            <button className="btn btn-primary" onClick={handleCreateSession}>
+            <button className="btn btn-primary create-btn" onClick={handleCreateSession}>
               + Создать сессию
             </button>
-            <button className="btn btn-outline" onClick={handleRefresh} title="Обновить">
+            <button className="btn btn-outline refresh-btn" onClick={handleRefresh} title="Обновить">
               ⟳
             </button>
           </div>
@@ -173,7 +179,7 @@ const StudySessionsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Фильтры горизонтально */}
+        {/* Фильтры */}
         <div className="filters-row">
           <div className="filter-group">
             <label>Тип доступа</label>
@@ -214,6 +220,34 @@ const StudySessionsPage: React.FC = () => {
               <input type="checkbox" checked={filters.showActiveOnly} onChange={e => handleFilterChange('showActiveOnly', e.target.checked)} />
               Только активные
             </label>
+            {/* Кнопка сброса с инлайн-стилями – гарантированно компактная */}
+            <button
+  onClick={resetFilters}
+  style={{
+    height: '32px',
+    padding: '0 14px',
+    fontSize: '0.85rem',
+    background: '#4f46e5',
+    color: 'white',
+    border: 'none',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    fontWeight: 600,
+    lineHeight: '32px',
+    minWidth: 'auto',
+    width: 'auto',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: 'none',
+    margin: 0,
+    whiteSpace: 'nowrap',
+    boxSizing: 'border-box',
+    flexShrink: 0,
+  }}
+>
+  Сбросить
+</button>
           </div>
         </div>
 

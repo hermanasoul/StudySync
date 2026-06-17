@@ -5,12 +5,12 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #121212; /* глубокий тёмный фон */
+  background: #121212;
   color: #eee;
 }
 
-/* Шапка страницы уже учтена через компонент Header, поэтому отступ для содержимого */
-.page-with-header {
+/* ИЗОЛИРОВАННЫЙ класс – только для страницы чатов */
+.chats-page .page-with-header {
   flex: 1;
   display: flex;
   overflow: hidden;
@@ -36,7 +36,7 @@
 /* Заголовок боковой панели */
 .chats-sidebar-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   padding: 16px;
   background: #2a2a3c;
@@ -49,6 +49,13 @@
   font-size: 1.2rem;
   color: #ddd;
   font-weight: 600;
+}
+
+/* Контейнер для кнопки создания чата */
+.create-chat-button-container {
+  padding: 0 16px 12px;
+  background: #2a2a3c;
+  border-bottom: 1px solid #3f3f55;
 }
 
 /* Кнопки (общие стили для тёмной темы) */

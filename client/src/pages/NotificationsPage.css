@@ -1,3 +1,11 @@
+/* client/src/pages/NotificationsPage.css */
+
+/* Гарантированное исправление конфликта с компонентом шапки */
+.notifications-page .notifications-container {
+  display: block !important;      /* убираем flex, навязанный шапкой */
+  align-items: stretch !important; /* сбрасываем align-items */
+}
+
 .notifications-page {
   min-height: 100vh;
   background-color: #f9fafb;

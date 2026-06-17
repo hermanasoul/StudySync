@@ -1,164 +1,145 @@
-/* StudySessionCard.css */
-
 .study-session-card {
   background: white;
-  border-radius: 14px;
-  padding: 14px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  max-width: 100%;
 }
 
-.study-session-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-}
-
+/* Шапка – бейджи горизонтально с переносом */
 .session-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.session-status-badge {
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: white;
-  white-space: nowrap;
-}
-
-.session-access-badge {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 0.75rem;
-  color: #475569;
-}
-
-.access-text {
-  white-space: nowrap;
-}
-
-.host-badge {
-  font-size: 0.75rem;
-  color: #b45309;
-  background: #fef3c7;
-  padding: 2px 8px;
-  border-radius: 12px;
-}
-
-.session-title-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+  padding: 10px 14px;
+  min-height: 60px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.session-title {
-  margin: 0;
-  font-size: 1rem;
-  color: #1e293b;
-  word-break: break-word;
+/* Компактные бейджи */
+.session-status-badge,
+.session-access-badge,
+.host-badge,
+.group-badge {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.session-status-badge {
+  background: var(--status-color, #ffa726);
+}
+
+.session-access-badge {
+  background: #f0f0ff;
+  color: #4f46e5;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.host-badge {
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .group-badge {
-  font-size: 0.75rem;
-  background: #e0e7ff;
-  color: #4338ca;
-  padding: 2px 8px;
-  border-radius: 12px;
-  display: flex;
+  background: #f0f0ff;
+  color: #4f46e5;
+  display: inline-flex;
   align-items: center;
-  gap: 3px;
-  white-space: nowrap;
+  gap: 4px;
+}
+
+/* Содержимое карточки */
+.session-content {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.session-title {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
 }
 
 .session-description {
-  margin: 0;
+  margin: 0 0 12px;
+  color: #475569;
   font-size: 0.85rem;
-  color: #64748b;
-  line-height: 1.4;
 }
 
 .session-info-grid {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
+  margin-bottom: 12px;
 }
 
 .info-item {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.8rem;
-  color: #475569;
-  white-space: normal;
-  word-break: break-word;
+  font-size: 0.85rem;
+  color: #1e293b;
 }
 
-.info-icon {
-  font-size: 0.95rem;
-  flex-shrink: 0;
-}
-
-.info-label {
-  /* без ограничений */
-}
-
+/* Блок создателя и участников – колонкой */
 .session-host-section {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 2px;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .host-info {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
 }
 
 .host-avatar {
   position: relative;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
 }
 
-.avatar-img {
-  width: 100%;
-  height: 100%;
+.avatar-img,
+.avatar-fallback {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
 }
 
 .avatar-fallback {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: #e2e8f0;
-  color: #475569;
+  background: #4f46e5;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 0.8rem;
 }
 
 .level-badge {
   position: absolute;
-  bottom: -3px;
-  right: -3px;
-  background: #4f46e5;
+  bottom: -4px;
+  right: -6px;
+  background: #1e293b;
   color: white;
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   padding: 1px 4px;
   border-radius: 8px;
-  line-height: 1;
+  white-space: nowrap;
 }
 
 .host-details {
@@ -167,145 +148,124 @@
 }
 
 .host-name {
-  font-size: 0.85rem;
   font-weight: 600;
   color: #1e293b;
+  font-size: 0.95rem;
 }
 
 .host-role {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   color: #64748b;
 }
 
+/* Участники – иконки */
 .participants-preview {
   display: flex;
   align-items: center;
 }
 
 .participant-avatar {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
+  margin-left: -6px;
+  border: 2px solid white;
+  border-radius: 50%;
+  overflow: hidden;
   position: relative;
 }
 
-.participant-level {
-  position: absolute;
-  bottom: -3px;
-  right: -3px;
-  background: #4f46e5;
-  color: white;
-  font-size: 0.5rem;
-  padding: 1px 3px;
-  border-radius: 6px;
+.participant-avatar .avatar-img,
+.participant-avatar .avatar-fallback {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.more-participants {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #e2e8f0;
+.participant-avatar .avatar-fallback {
+  background: #10b981;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.65rem;
-  color: #475569;
+  font-weight: 600;
+}
+
+.more-participants {
+  width: 28px;
+  height: 28px;
   margin-left: -6px;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: #e5e7eb;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
 }
 
-.error-message {
-  background: #fee2e2;
-  color: #b91c1c;
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-}
-
-/* Футер теперь точно не будет налезать */
+/* Нижняя часть – кнопки */
 .session-footer {
+  margin-top: auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: auto;           /* прижимает футер к низу, если карточка выше */
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
 }
 
 .session-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.created-at {
-  font-size: 0.75rem;
-  color: #94a3b8;
+  font-size: 0.8rem;
+  color: #64748b;
 }
 
 .live-indicator {
+  color: #ef4444;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 3px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #ef4444;
+  gap: 4px;
 }
 
 .live-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+  width: 8px;
+  height: 8px;
   background: #ef4444;
+  border-radius: 50%;
+  display: inline-block;
   animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
   0% { opacity: 1; }
-  50% { opacity: 0.4; }
+  50% { opacity: 0.5; }
   100% { opacity: 1; }
 }
 
-.session-actions {
-  display: flex;
-  gap: 6px;
+/* ===== КНОПКА В КАРТОЧКЕ – ПЕРЕОПРЕДЕЛЕНИЕ ГЛОБАЛЬНЫХ СТИЛЕЙ ===== */
+.session-actions .btn {
+  padding: 6px 16px !important;
+  height: 36px !important;
+  font-size: 0.85rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  border: none !important;
+  cursor: pointer !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  color: white !important;
+  background: #4f46e5 !important;
+  width: auto !important;
+  min-width: auto !important;
+  flex-shrink: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
 }
 
-.btn {
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.85rem;
-}
-
-.btn-primary {
-  background: #4f46e5;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #4338ca;
-}
-
-.btn-disabled {
-  background: #cbd5e1;
-  color: #64748b;
-  cursor: not-allowed;
-}
-
-.spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  display: inline-block;
-  margin-right: 4px;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.session-actions .btn:hover {
+  background: #4338ca !important;
 }
