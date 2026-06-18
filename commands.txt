@@ -1,0 +1,19 @@
+Здесь будут указаны комманды (обновить ридми: добавить развертывание на докере и комманды отдельного локального старта)
+
+1. 
+sudo systemctl start mongod
+
+2.
+node scripts/seedDemoData.js
+node scripts/seedFriendsOnly.js
+node scripts/seedAchievements.js
+node scripts/seedExtraSubjects.js
+
+3. Если нужно почистить кэш
+sudo rm -rf node_modules/.cache
+sudo chown -R $USER:$USER node_modules
+npm start
+
+4. Если нужны демо-данные одного из пользователей
+anna@studysync.demo
+Demo123!
