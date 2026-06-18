@@ -5,7 +5,6 @@
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
-  /* граница убрана */
 }
 
 .session-header {

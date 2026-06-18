@@ -1,5 +1,3 @@
-// server/routes/rewards.js
-
 const express = require('express');
 const User = require('../models/User');
 const UserLevel = require('../models/UserLevel');

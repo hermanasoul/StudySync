@@ -1,11 +1,9 @@
-// client/src/components/PomodoroTimer.tsx
-
 import React, { useState, useEffect, useRef } from 'react';
 import './PomodoroTimer.css';
 
 interface PomodoroTimerProps {
-  workDuration: number; // minutes
-  breakDuration: number; // minutes
+  workDuration: number;
+  breakDuration: number;
   autoSwitch: boolean;
   isActive: boolean;
   timerType: 'work' | 'break';

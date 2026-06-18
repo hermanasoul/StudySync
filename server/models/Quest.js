@@ -1,5 +1,3 @@
-// server/models/Quest.js
-
 const mongoose = require('mongoose');
 
 const questSchema = new mongoose.Schema({

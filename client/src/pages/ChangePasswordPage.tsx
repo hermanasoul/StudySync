@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
-import api from '../services/api'; // Используем импорт по умолчанию
+import api from '../services/api';
 import './ChangePasswordPage.css';
 
 const ChangePasswordPage: React.FC = () => {

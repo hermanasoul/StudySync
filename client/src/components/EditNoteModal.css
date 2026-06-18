@@ -54,7 +54,6 @@
   color: var(--text-primary);
 }
 
-/* ===== ФОРМА С ОТСТУПАМИ ===== */
 .note-form {
   padding: 25px !important;
 }
@@ -103,7 +102,6 @@
   font-weight: 600;
 }
 
-/* ===== ДЕЙСТВИЯ С КНОПКАМИ ===== */
 .form-actions {
   display: flex;
   gap: 12px;
@@ -111,7 +109,6 @@
   margin-top: 24px;
 }
 
-/* Уникальные классы для кнопок — перебивают глобальные стили */
 .editnote-save-btn,
 .editnote-delete-btn {
   height: 34px !important;

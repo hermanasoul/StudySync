@@ -6,7 +6,7 @@
 .profile-edit-container {
   max-width: 600px;
   margin: 0 auto;
-  padding: 50px 20px 40px; /* уменьшено до 50px */
+  padding: 50px 20px 40px;
 }
 
 .profile-edit-container h1 {

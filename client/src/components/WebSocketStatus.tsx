@@ -1,5 +1,3 @@
-// client/src/components/WebSocketStatus.tsx
-
 import React, { useState, useEffect } from 'react';
 import webSocketService from '../services/websocket';
 import './WebSocketStatus.css';
@@ -83,9 +81,9 @@ const WebSocketStatus: React.FC = () => {
   };
 
   const getStatusColor = () => {
-    if (status.isConnected) return '#10b981'; // green
-    if (status.reconnectAttempts > 0) return '#f59e0b'; // yellow
-    return '#ef4444'; // red
+    if (status.isConnected) return '#10b981';
+    if (status.reconnectAttempts > 0) return '#f59e0b';
+    return '#ef4444';
   };
 
   const getStatusText = () => {

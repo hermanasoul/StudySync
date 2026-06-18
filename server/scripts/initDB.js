@@ -1,5 +1,3 @@
-// server/scripts/initDB.js
-
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
@@ -18,7 +16,6 @@ async function initDB() {
     
     console.log('✅ Connected to MongoDB');
 
-    // Очищаем коллекции (опционально, только для разработки)
     if (process.env.NODE_ENV === 'development') {
       await User.deleteMany({});
       await Subject.deleteMany({});

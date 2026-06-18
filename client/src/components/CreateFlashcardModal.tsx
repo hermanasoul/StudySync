@@ -1,5 +1,3 @@
-// client/src/components/CreateFlashcardModal.tsx
-
 import React, { useState, useRef } from 'react';
 import { flashcardsAPI, achievementsAPI } from '../services/api';
 import webSocketService from '../services/websocket';

@@ -1,4 +1,3 @@
-// client/src/components/SpecialAbilities.tsx
 import React from 'react';
 import './SpecialAbilities.css';
 

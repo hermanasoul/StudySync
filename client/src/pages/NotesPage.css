@@ -24,7 +24,6 @@
   color: var(--text-secondary);
 }
 
-/* ===== КОНТЕЙНЕРЫ КНОПОК ===== */
 .notes-actions {
   display: flex;
   justify-content: center;
@@ -37,8 +36,6 @@
   margin-top: 30px;
 }
 
-/* ===== УНИКАЛЬНЫЕ КНОПКИ ===== */
-/* Кнопка "Создать заметку" в основном блоке */
 .notes-create-btn {
   height: 34px !important;
   padding: 0 14px !important;
@@ -62,7 +59,6 @@
   background: var(--accent-primary-hover) !important;
 }
 
-/* Кнопка "Создать заметку" в пустом состоянии */
 .notes-create-btn-empty {
   height: 34px !important;
   padding: 0 14px !important;
@@ -87,7 +83,6 @@
   background: var(--accent-primary-hover) !important;
 }
 
-/* Кнопка "Назад к предметам" — жёлтая (глобальный стиль) */
 .notes-back-btn {
   height: 34px !important;
   padding: 0 14px !important;
@@ -105,7 +100,6 @@
   line-height: 1.2 !important;
   box-shadow: none !important;
   text-decoration: none !important;
-  /* Жёлтый стиль из buttons.css */
   background: #fbbf24 !important;
   color: #92400e !important;
   box-shadow: 0 4px 14px rgba(252, 211, 77, 0.3) !important;
@@ -115,7 +109,6 @@
   color: white !important;
 }
 
-/* ===== ОСТАЛЬНЫЕ СТИЛИ (без изменений) ===== */
 .notes-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

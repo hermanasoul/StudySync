@@ -1,5 +1,3 @@
-// client/src/services/api.ts
-
 import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -34,7 +32,7 @@ api.interceptors.response.use(
   }
 );
 
-// Интерфейсы для учебных сессий (из исходного файла)
+// Интерфейсы для учебных сессий
 export interface StudySession {
   _id: string;
   name: string;
@@ -524,7 +522,6 @@ export const chatsAPI = {
   getScheduledMessages: () => api.get('/chats/messages/scheduled'),
 };
 
-// Вспомогательные функции
 export const validateInviteCode = (
   code: string
 ): { isValid: boolean; message?: string } => {

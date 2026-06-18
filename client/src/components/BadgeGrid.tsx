@@ -1,4 +1,3 @@
-// client/src/components/BadgeGrid.tsx
 import React, { useState } from 'react';
 import BadgeIcon from './BadgeIcon';
 import './BadgeGrid.css';

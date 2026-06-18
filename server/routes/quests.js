@@ -1,5 +1,3 @@
-// server/routes/quests.js
-
 const express = require('express');
 const mongoose = require('mongoose');
 const Quest = require('../models/Quest');

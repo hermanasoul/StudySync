@@ -1,5 +1,3 @@
-// server/scripts/seedAchievements.js
-
 const mongoose = require('mongoose');
 require('dotenv').config();
 const Achievement = require('../models/Achievement');
@@ -105,13 +103,13 @@ const achievements = [
     category: 'social',
     difficulty: 'bronze',
     points: 50,
-    requirements: { type: 'friends_count', count: 1 },  // <-- было target: 1, теперь count
+    requirements: { type: 'friends_count', count: 1 },
     secret: false,
     isActive: true,
     sortOrder: 28
   },
 
-  // === DAILY LOGIN (добавлено) ===
+  // === DAILY LOGIN ===
   {
     code: 'DAILY_LOGIN_3',
     name: 'Три дня подряд',

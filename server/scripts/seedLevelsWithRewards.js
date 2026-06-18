@@ -1,5 +1,3 @@
-// server/scripts/seedLevelsWithRewards.js
-
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const UserLevel = require('../models/UserLevel');

@@ -6,7 +6,7 @@
 .chats-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 80px 20px 40px; /* уменьшен отступ сверху */
+  padding: 80px 20px 40px;
   display: flex;
   gap: 20px;
   height: calc(100vh - 100px);
@@ -109,7 +109,6 @@
   align-items: center;
 }
 
-/* ===== ЕДИНЫЙ СТИЛЬ ДЛЯ КНОПОК В ФОРМЕ ===== */
 .create-chat-form .form-actions .btn {
   flex: 1;
   height: 38px !important;
@@ -140,7 +139,6 @@
   background: var(--accent-success-hover) !important;
 }
 
-/* ===== КНОПКА "ОТМЕНА" — КРАСНАЯ ===== */
 .create-chat-form .form-actions .btn-danger,
 .create-chat-form .form-actions .btn-outline {
   background: var(--accent-danger) !important;

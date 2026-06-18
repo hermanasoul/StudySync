@@ -1,4 +1,3 @@
-// server/routes/achievements.js
 const { query, param } = require('express-validator');
 const express = require('express');
 const mongoose = require('mongoose');

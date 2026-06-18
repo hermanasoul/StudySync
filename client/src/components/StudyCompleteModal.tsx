@@ -1,5 +1,3 @@
-// client/src/components/StudyCompleteModal.tsx
-
 import React from 'react';
 import './StudyCompleteModal.css';
 

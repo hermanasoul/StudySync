@@ -21,7 +21,7 @@ const notificationSchema = new mongoose.Schema({
         'system',
         'friend_request',
         'friend_accept',
-        'friend_request_accepted', // <-- добавлено
+        'friend_request_accepted',
         'study_session_invite',
         'study_session_started'
       ],

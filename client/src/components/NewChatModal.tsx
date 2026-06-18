@@ -1,5 +1,3 @@
-// client/src/components/NewChatModal.tsx
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { chatsAPI, friendsAPI } from '../services/api';

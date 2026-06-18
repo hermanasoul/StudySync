@@ -1,4 +1,3 @@
-// server/scripts/seedQuests.js
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const Quest = require('../models/Quest');

@@ -1,4 +1,3 @@
-/* ===== КОМПАКТНЫЙ РЕЖИМ (дашборд, профиль) ===== */
 .level-progress-compact {
   background: var(--bg-hover) !important;
   border-radius: 8px !important;
@@ -51,7 +50,6 @@
   flex-shrink: 0 !important;
 }
 
-/* ФОН ПРОГРЕСС-БАРА — var(--progress-bg) */
 .level-progress-compact .progress-bar {
   position: static !important;
   height: 16px !important;
@@ -87,7 +85,6 @@
   color: var(--accent-primary) !important;
 }
 
-/* --- ИКОНКА ПРИЗА СЛЕДУЮЩЕГО УРОВНЯ --- */
 .level-progress-compact .next-reward {
   display: flex !important;
   align-items: center !important;
@@ -120,7 +117,6 @@
   color: #92400e !important;
 }
 
-/* ===== ПОЛНАЯ ВЕРСИЯ (страница уровней) ===== */
 .level-progress {
   background: var(--bg-card) !important;
   padding: 30px !important;
@@ -217,7 +213,6 @@
   font-weight: 500 !important;
 }
 
-/* ФОН БОЛЬШОГО ПРОГРЕСС-БАРА — var(--progress-bg) */
 .level-progress .progress-bar-large {
   height: 24px !important;
   background: var(--progress-bg) !important;
@@ -390,7 +385,6 @@
   gap: 15px !important;
 }
 
-/* ФОН МАЛЕНЬКОГО ПРОГРЕСС-БАРА — var(--progress-bg) */
 .level-progress .progress-bar-small {
   flex: 1 !important;
   height: 6px !important;

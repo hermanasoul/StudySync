@@ -1,4 +1,3 @@
-// server/scripts/fixFriendsFinal.js
 const mongoose = require('mongoose');
 const Friendship = require('../models/Friendship');
 const User = require('../models/User');

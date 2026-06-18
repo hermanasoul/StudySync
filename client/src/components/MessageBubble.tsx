@@ -71,7 +71,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   const handleSaveEdit = async () => {
     if (editContent.trim() && editContent !== message.content) {
       try {
-        // TODO: Вызов API для редактирования сообщения
         console.log('Editing message:', message._id, editContent);
       } catch (error) {
         console.error('Error editing message:', error);
@@ -83,7 +82,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   const handleDelete = async () => {
     if (window.confirm('Вы уверены, что хотите удалить это сообщение?')) {
       try {
-        // TODO: Вызов API для удаления сообщения
         console.log('Deleting message:', message._id);
       } catch (error) {
         console.error('Error deleting message:', error);

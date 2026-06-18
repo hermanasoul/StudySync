@@ -1,5 +1,3 @@
-// server/scripts/seedDemoData.js
-
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 require('dotenv').config({ path: '../.env' });

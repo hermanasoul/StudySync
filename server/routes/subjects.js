@@ -1,7 +1,5 @@
-// server/routes/subjects.js
-
 const express = require('express');
-const { body, query, param } = require('express-validator');   // <-- ДОБАВИТЬ СЮДА
+const { body, query, param } = require('express-validator');
 const Subject = require('../models/Subject');
 const { auth, restrictTo } = require('../middleware/auth');
 const { 
@@ -35,7 +33,7 @@ router.get('/',
       icon: subject.icon,
       createdBy: subject.createdBy,
       isPublic: subject.isPublic,
-      progress: 0, // TODO: Реализовать расчет прогресса
+      progress: 0,
       createdAt: subject.createdAt,
       updatedAt: subject.updatedAt
     }));
@@ -243,7 +241,6 @@ router.delete('/:subjectId',
       throw new AppError('Предмет не найден или доступ запрещен', 404);
     }
 
-    // TODO: Удалить связанные заметки и карточки (каскадное удаление)
 
     res.json({
       success: true,

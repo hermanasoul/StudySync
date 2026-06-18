@@ -1,5 +1,3 @@
-// server/websocket.js
-
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User');
@@ -185,7 +183,7 @@ class WebSocketServer {
           });
 
           // Загружаем последние 50 сообщений чата
-          const mongoose = require('mongoose'); // если ещё не объявлен вверху файла
+          const mongoose = require('mongoose');
 const objectId = new mongoose.Types.ObjectId(sessionId);
 const lastMessages = await StudySessionMessage.find({ sessionId: objectId })
   .sort({ createdAt: -1 })
@@ -232,7 +230,7 @@ const lastMessages = await StudySessionMessage.find({ sessionId: objectId })
         }).catch(console.error);
       });
 
-      // Отправка сообщения в учебной сессии (ИСПРАВЛЕНО)
+      // Отправка сообщения в учебной сессии
       socket.on('study_session_message', async (data) => {
         const { sessionId, content } = data;
         const roomId = `study_session:${sessionId}`;

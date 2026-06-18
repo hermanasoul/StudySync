@@ -1,5 +1,3 @@
-// client/src/components/ChatList.tsx
-
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import './ChatList.css';

@@ -1,4 +1,3 @@
-// server/routes/notifications.js
 const { body, param, query } = require('express-validator');
 const express = require('express');
 const mongoose = require('mongoose');

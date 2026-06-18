@@ -51,7 +51,6 @@
   border-top: 1px solid var(--border-color);
 }
 
-/* ===== УНИКАЛЬНЫЕ КЛАССЫ ДЛЯ КНОПОК ===== */
 .confirm-cancel-btn,
 .confirm-confirm-btn {
   height: 34px !important;

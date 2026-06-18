@@ -1,5 +1,3 @@
-/* client/src/pages/NotificationsPage.css */
-
 .notifications-page .notifications-container {
   display: block !important;
   align-items: stretch !important;
@@ -147,12 +145,10 @@
   color: var(--input-text);
 }
 
-/* ===== КНОПКА "ОТМЕТИТЬ ВСЕ КАК ПРОЧИТАННЫЕ" ===== */
 .mark-all-read-btn {
-  color: var(--text-primary) !important; /* в светлой теме тёмный, в тёмной светлый */
+  color: var(--text-primary) !important;
 }
 
-/* В тёмной теме делаем текст белым */
 body.dark-theme .mark-all-read-btn {
   color: #ffffff !important;
 }

@@ -1,5 +1,3 @@
-// server/scripts/seedLevels.js
-
 const mongoose = require('mongoose');
 const UserLevel = require('../models/UserLevel');
 

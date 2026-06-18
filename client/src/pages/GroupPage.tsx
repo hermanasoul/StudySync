@@ -45,7 +45,6 @@ interface Flashcard {
   groupId?: string;
 }
 
-// ===== Компонент для отдельной карточки =====
 interface FlashcardItemProps {
   flashcard: Flashcard;
   onEdit: (flashcard: Flashcard) => void;
@@ -68,7 +67,7 @@ const GroupFlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onEdit, o
           </div>
         )}
         <button
-          className="btn btn-primary toggle-answer-btn"  // <-- изменено с btn-outline на btn-primary
+          className="btn btn-primary toggle-answer-btn"
           onClick={() => setShowAnswer(!showAnswer)}
         >
           {showAnswer ? 'Скрыть ответ' : 'Показать ответ'}
@@ -92,7 +91,6 @@ const GroupFlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onEdit, o
   );
 };
 
-// ===== Основной компонент страницы =====
 const GroupPage: React.FC = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
@@ -115,7 +113,6 @@ const GroupPage: React.FC = () => {
   const [showDeleteNoteConfirm, setShowDeleteNoteConfirm] = useState(false);
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
 
-  // ===== Режим изучения карточек =====
   const [studyMode, setStudyMode] = useState(false);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [showAnswerInStudy, setShowAnswerInStudy] = useState(false);

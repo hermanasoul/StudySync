@@ -1,5 +1,3 @@
-// client/src/components/CollaborativeFlashcardViewer.tsx
-
 import React, { useState, useEffect } from 'react';
 import './CollaborativeFlashcardViewer.css';
 

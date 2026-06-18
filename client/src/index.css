@@ -4,7 +4,6 @@
   box-sizing: border-box;
 }
 
-/* ===== СВЕТЛАЯ ТЕМА (по умолчанию) ===== */
 :root {
   /* Фоны */
   --bg-primary: #ffffff;
@@ -81,7 +80,6 @@
   --progress-bg: #f8fafc;
 }
 
-/* ===== ТЁМНАЯ ТЕМА ===== */
 body.dark-theme {
   --bg-primary: #0f172a;
   --bg-secondary: #1e293b;
@@ -182,7 +180,6 @@ a:hover {
   color: var(--text-primary);
 }
 
-/* ===== АНИМАЦИИ ===== */
 .fade-in {
   animation: fadeIn 0.5s ease-in-out;
 }
@@ -217,7 +214,6 @@ a:hover {
   animation: fadeIn 0.4s ease-out;
 }
 
-/* Дополнительные анимации */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -261,7 +257,6 @@ a:hover {
   animation: scaleIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-/* ===== ИСПРАВЛЕНИЕ ДЛЯ МОДАЛЬНЫХ ОКОН (скругление заголовка) ===== */
 .modal-content .modal-header {
   border-radius: 12px 12px 0 0 !important;
   overflow: hidden !important;
@@ -270,7 +265,6 @@ a:hover {
   overflow: hidden !important;
 }
 
-/* ===== ПЕРЕОПРЕДЕЛЕНИЕ КНОПОК В ШАПКЕ С МАКСИМАЛЬНОЙ СПЕЦИФИЧНОСТЬЮ ===== */
 #root .header .header-buttons .btn,
 #root .header .header-buttons .btn-primary,
 #root .header .header-buttons .btn-outline,
@@ -300,7 +294,6 @@ a:hover {
   vertical-align: middle !important;
 }
 
-/* Цвета для кнопок в шапке */
 #root .header .header-buttons .btn-primary {
   background: var(--accent-primary) !important;
   color: var(--text-inverse) !important;

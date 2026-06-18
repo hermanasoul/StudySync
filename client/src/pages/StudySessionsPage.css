@@ -71,7 +71,6 @@ body .page-actions .refresh-btn:hover {
   background: var(--accent-primary-hover) !important;
 }
 
-/* ===== Кнопки-фильтры ===== */
 .filter-toggle-btn {
   height: 32px !important;
   padding: 0 14px !important;
@@ -140,14 +139,12 @@ body .page-actions .refresh-btn:hover {
   background: var(--accent-primary-hover) !important;
 }
 
-/* ===== Карточки статистики — исправление конфликта стилей ===== */
 .stats-row {
   display: flex;
   gap: 12px;
   margin-bottom: 20px;
 }
 
-/* Усиленный селектор для переопределения глобальных стилей */
 .study-sessions-page .stats-row .stat-card {
   flex: 1 1 0;
   background: var(--bg-card);
@@ -155,8 +152,8 @@ body .page-actions .refresh-btn:hover {
   border-radius: 12px;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
-  display: block !important;          /* отменяем flex из глобального стиля */
-  text-align: center !important;      /* центрируем текст */
+  display: block !important;
+  text-align: center !important;
   min-width: 0;
   box-sizing: border-box;
 }
@@ -173,7 +170,7 @@ body .page-actions .refresh-btn:hover {
   font-size: 0.8rem;
   color: var(--text-secondary);
   display: block;
-  margin-top: 8px !important;         /* гарантированный отступ */
+  margin-top: 8px !important;
   line-height: 1.4;
 }
 

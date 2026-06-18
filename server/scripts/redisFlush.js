@@ -1,5 +1,3 @@
-// server/scripts/redisFlush.js
-
 const redis = require('../config/redis');
 
 async function flushRedis() {

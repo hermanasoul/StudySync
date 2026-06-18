@@ -1,5 +1,3 @@
-// client/src/components/CreateNoteModal.tsx
-
 import React, { useState, useRef, useEffect } from 'react';
 import { notesAPI, achievementsAPI } from '../services/api';
 import './CreateNoteModal.css';

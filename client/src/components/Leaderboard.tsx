@@ -1,5 +1,3 @@
-// client\src\components\Leaderboard.tsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { leaderboardsAPI } from '../services/api';

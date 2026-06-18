@@ -1,5 +1,3 @@
-// server/models/ExperienceHistory.js
-
 const mongoose = require('mongoose');
 
 const experienceHistorySchema = new mongoose.Schema({
@@ -35,7 +33,7 @@ const experienceHistorySchema = new mongoose.Schema({
   },
   sourceId: {
     type: mongoose.Schema.Types.ObjectId,
-    required: false // Может быть null для некоторых причин
+    required: false
   },
   details: {
     type: mongoose.Schema.Types.Mixed,

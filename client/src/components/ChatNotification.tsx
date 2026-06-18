@@ -1,5 +1,3 @@
-// client/src/components/ChatNotification.tsx
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { chatsAPI } from '../services/api';

@@ -28,7 +28,6 @@
   transition: opacity 300ms;
 }
 
-/* базовые стили кнопок (если нет в buttons.css) */
 .btn {
   padding: 8px 16px;
   border-radius: 8px;
@@ -64,7 +63,6 @@
   font-size: 0.85rem;
 }
 
-/* Модальное окно подтверждения удаления */
 .delete-confirm-overlay {
   position: fixed;
   top: 0;
@@ -99,7 +97,6 @@
   justify-content: center;
 }
 
-/* Адаптивность для модалок (если нужно) */
 @media (max-width: 768px) {
   .delete-confirm-dialog {
     width: 90%;
@@ -107,13 +104,11 @@
   }
 }
 
-/* Глобальное исправление для всех модальных окон: скругление нижних углов */
 .modal-content {
   overflow: hidden !important;
   border-radius: 12px !important;
 }
 
-/* ===== ГЛОБАЛЬНОЕ СКРУГЛЕНИЕ ДЛЯ ВСЕХ МОДАЛОК ===== */
 .modal-content,
 .note-modal,
 .create-session-modal,
@@ -123,7 +118,6 @@
   border-radius: 12px !important;
 }
 
-/* Белый заголовок для всех модалок */
 .modal-header h2,
 .modal-header h3 {
   color: white !important;

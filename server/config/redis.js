@@ -1,5 +1,3 @@
-// server/config/redis.js
-
 const redis = require('redis');
 const { AppError } = require('../middleware/errorHandler');
 

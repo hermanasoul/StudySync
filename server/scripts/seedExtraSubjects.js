@@ -9,7 +9,7 @@ async function seedExtraSubjects() {
     await mongoose.connect(MONGODB_URI);
     console.log('📦 Подключено к MongoDB');
 
-    // Находим демо-пользователя (Анну)
+    // Находим демо-пользователя
     const anna = await User.findOne({ email: 'anna@studysync.demo' });
     if (!anna) {
       console.error('❌ Демо-пользователь не найден. Сначала запустите seedDemoData.js');

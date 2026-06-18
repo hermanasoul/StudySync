@@ -1,5 +1,3 @@
-// client/src/components/ProtectedRoute.tsx
-
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -22,7 +20,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Если токен есть, но user ещё не восстановлен (редкий случай)
+  // Если токен есть, но user ещё не восстановлен
   if (!user) {
     return <div className="loading">Восстановление сессии...</div>;
   }

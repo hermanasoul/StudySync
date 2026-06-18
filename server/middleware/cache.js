@@ -1,5 +1,3 @@
-// server/middleware/cache.js
-
 const redis = require('../config/redis');
 
 // Генерация ключа кэша на основе запроса

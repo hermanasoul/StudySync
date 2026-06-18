@@ -1,4 +1,3 @@
-// client/src/components/AchievementProgress.tsx
 import React from 'react';
 import './AchievementProgress.css';
 

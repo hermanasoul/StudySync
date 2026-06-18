@@ -1,5 +1,3 @@
-// client/src/pages/StudyHistoryPage.tsx
-
 import React from 'react';
 import Header from '../components/Header';
 import './StudyHistoryPage.css';

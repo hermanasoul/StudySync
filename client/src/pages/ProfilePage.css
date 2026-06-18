@@ -6,7 +6,7 @@
 .profile-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 180px 20px 40px; /* увеличено до 120px */
+  padding: 180px 20px 40px;
 }
 
 .profile-header {
@@ -166,7 +166,6 @@
   }
 }
 
-/* Остальные стили (секции, бейджи, награды, настройки) — без изменений */
 .profile-section {
   background: var(--bg-card);
   border-radius: 12px;

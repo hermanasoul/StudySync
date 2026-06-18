@@ -1,5 +1,3 @@
-// client/src/components/LevelUpNotification.tsx
-
 import React, { useState, useEffect } from 'react';
 import './LevelUpNotification.css';
 

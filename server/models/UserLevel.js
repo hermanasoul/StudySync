@@ -1,5 +1,3 @@
-// server/models/UserLevel.js
-
 const mongoose = require('mongoose');
 
 const levelSchema = new mongoose.Schema({

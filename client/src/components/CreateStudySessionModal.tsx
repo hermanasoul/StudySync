@@ -1,5 +1,3 @@
-// client/src/components/CreateStudySessionModal.tsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { studySessionsAPI, flashcardsAPI, friendsAPI } from '../services/api';
 import './CreateStudySessionModal.css';

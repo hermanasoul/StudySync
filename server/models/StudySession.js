@@ -1,5 +1,3 @@
-// server/models/StudySession.js
-
 const mongoose = require('mongoose');
 
 const studySessionSchema = new mongoose.Schema({
@@ -120,8 +118,7 @@ const studySessionSchema = new mongoose.Schema({
     enum: ['collaborative', 'individual', 'host-controlled'],
     default: 'collaborative'
   },
-  
-  // Настройки Pomodoro (интегрируем с вашей системой достижений)
+
   pomodoroSettings: {
     workDuration: {
       type: Number,
@@ -181,8 +178,7 @@ const studySessionSchema = new mongoose.Schema({
       default: 0
     }
   },
-  
-  // Чат сессии (интеграция с вашей системой чатов)
+
   chatEnabled: {
     type: Boolean,
     default: true

@@ -1,5 +1,3 @@
-// server/middleware/validation.js
-
 const { body, param, query, validationResult } = require('express-validator');
 
 const validate = (req, res, next) => {

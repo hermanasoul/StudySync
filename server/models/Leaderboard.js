@@ -10,7 +10,7 @@ const leaderboardSchema = new mongoose.Schema({
   scopeId: {
     type: mongoose.Schema.Types.ObjectId,
     index: true,
-    sparse: true // Может быть null для глобальных лидербордов
+    sparse: true
   },
   scopeName: {
     type: String,
@@ -214,8 +214,6 @@ leaderboardSchema.statics.getGlobalUsers = async function(metric) {
 
 // Метод для получения пользователей по предмету
 leaderboardSchema.statics.getSubjectUsers = async function(metric, subjectId) {
-  // Здесь нужна логика для конкретного предмета
-  // Пока вернем пустой массив
   return [];
 };
 
@@ -243,15 +241,11 @@ leaderboardSchema.statics.getGroupUsers = async function(metric, groupId) {
 
 // Метод для получения еженедельных пользователей
 leaderboardSchema.statics.getWeeklyUsers = async function(metric) {
-  // Здесь нужна логика для еженедельного прогресса
-  // Пока вернем пустой массив
   return [];
 };
 
 // Метод для получения ежемесячных пользователей
 leaderboardSchema.statics.getMonthlyUsers = async function(metric) {
-  // Здесь нужна логика для ежемесячного прогресса
-  // Пока вернем пустой массив
   return [];
 };
 

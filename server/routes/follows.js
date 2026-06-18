@@ -1,5 +1,3 @@
-// server/routes/follows.js
-
 const express = require('express');
 const Follow = require('../models/Follow');
 const User = require('../models/User');

@@ -1,4 +1,3 @@
-// client/src/components/BadgeIcon.tsx
 import React from 'react';
 import './BadgeIcon.css';
 

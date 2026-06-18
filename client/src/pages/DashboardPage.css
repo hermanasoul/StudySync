@@ -69,7 +69,6 @@
   color: var(--link-hover);
 }
 
-/* ===== БЫСТРАЯ СТАТИСТИКА ===== */
 body .dashboard-section.quick-stats .stats-grid {
   display: grid !important;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
@@ -131,7 +130,6 @@ body .dashboard-section.quick-stats .stat-label {
   line-height: 1.2 !important;
 }
 
-/* ===== ДОСТИЖЕНИЯ ===== */
 .achievements-preview {
   display: flex;
   flex-direction: column;
@@ -185,7 +183,6 @@ body .dashboard-section.quick-stats .stat-label {
   font-weight: 600;
 }
 
-/* ===== ПРЕДМЕТЫ ===== */
 .subjects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -234,7 +231,6 @@ body .dashboard-section.quick-stats .stat-label {
   line-height: 1.4;
 }
 
-/* ===== ПРОГРЕСС-БАР — фон использует --progress-bg ===== */
 .subject-card .progress-container {
   position: relative !important;
   margin-bottom: 16px !important;

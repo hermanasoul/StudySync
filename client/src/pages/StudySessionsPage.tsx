@@ -132,7 +132,6 @@ const StudySessionsPage: React.FC = () => {
     setFilters(initialFilters);
   };
 
-  // Переключатели для кнопок-фильтров
   const toggleFriendsOnly = () => {
     setFilters(prev => ({ ...prev, friendsOnly: !prev.friendsOnly }));
   };

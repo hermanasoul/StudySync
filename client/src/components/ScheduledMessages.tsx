@@ -1,5 +1,3 @@
-// client/src/components/ScheduledMessages.tsx
-
 import React, { useState, useEffect } from 'react';
 import { chatsAPI } from '../services/api';
 import webSocketService from '../services/websocket';

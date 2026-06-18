@@ -1,4 +1,3 @@
-// client/src/components/VisualEffectsPreview.tsx
 import React, { useState, useEffect } from 'react';
 import './VisualEffectsPreview.css';
 

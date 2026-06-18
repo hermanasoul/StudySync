@@ -84,7 +84,6 @@
   text-overflow: ellipsis;
 }
 
-/* ===== ЕДИНЫЙ СТИЛЬ ДЛЯ ВСЕХ КНОПОК В ШАПКЕ ===== */
 .header-buttons .btn {
   height: 40px !important;
   padding: 0 16px !important;
@@ -137,7 +136,6 @@
   background: var(--accent-primary-hover) !important;
 }
 
-/* ===== КНОПКИ "Войти" и "Регистрация" — гарантированное выравнивание ===== */
 .header-buttons .btn-outline,
 .header-buttons .btn-primary {
   height: 40px !important;
@@ -149,7 +147,6 @@
   line-height: 1 !important;
 }
 
-/* ===== КОМПАКТНЫЕ ИКОНКИ УВЕДОМЛЕНИЙ ===== */
 .header-buttons .notifications-button,
 .header-buttons .ChatNotification button,
 .header-buttons .theme-toggle {

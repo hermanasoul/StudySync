@@ -1,5 +1,3 @@
-// server/scripts/seedNotifications.js
-
 const mongoose = require('mongoose');
 require('dotenv').config();
 const Notification = require('../models/Notification');

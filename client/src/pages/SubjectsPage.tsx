@@ -1,5 +1,3 @@
-// client/src/pages/SubjectsPage.tsx
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
@@ -9,7 +7,7 @@ import './SubjectsPage.css';
 import '../App.css';
 
 interface Subject {
-  id: string;  // теперь используем id (как отдаёт сервер)
+  id: string;
   name: string;
   description: string;
   color: string;

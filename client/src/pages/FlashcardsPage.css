@@ -34,7 +34,6 @@
   margin-top: 30px;
 }
 
-/* ===== УНИКАЛЬНЫЕ КНОПКИ ===== */
 .flashcard-create-btn {
   height: 34px !important;
   padding: 0 14px !important;
@@ -155,7 +154,6 @@
   color: white !important;
 }
 
-/* ===== ПОДСКАЗКА КАРТОЧКИ — ФОН ВСЕГДА ЖЁЛТЫЙ, ТЕКСТ ТЁМНЫЙ ===== */
 .flashcard-hint {
   background: #fef3c7 !important;
   padding: 6px 10px;
@@ -165,13 +163,11 @@
   color: #92400e !important;
 }
 
-/* В тёмной теме фон не меняем, текст остаётся тёмным */
 body.dark-theme .flashcard-hint {
   background: #fef3c7 !important;
   color: #92400e !important;
 }
 
-/* ===== ОСТАЛЬНЫЕ СТИЛИ (без изменений) ===== */
 .flashcards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

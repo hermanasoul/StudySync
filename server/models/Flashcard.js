@@ -1,5 +1,3 @@
-// server/models/Flashcard.js
-
 const mongoose = require('mongoose');
 
 const flashcardSchema = new mongoose.Schema({

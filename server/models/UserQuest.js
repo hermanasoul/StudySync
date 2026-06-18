@@ -1,5 +1,3 @@
-// server/models/UserQuest.js
-
 const mongoose = require('mongoose');
 
 const userQuestSchema = new mongoose.Schema({

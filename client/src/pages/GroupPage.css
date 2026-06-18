@@ -1,7 +1,6 @@
 .group-page {
   min-height: 100vh;
   background: var(--bg-primary);
-  /* padding-top убран — отступ задаётся глобальным .page-with-header */
 }
 
 .group-container {
@@ -301,7 +300,6 @@
   background: #d97706 !important;
 }
 
-/* ===== ВКЛАДКА КАРТОЧЕК ===== */
 .flashcards-header {
   display: flex;
   justify-content: space-between;
@@ -401,7 +399,6 @@
   color: var(--text-primary);
 }
 
-/* ===== КНОПКА "ПОКАЗАТЬ ОТВЕТ" — СИНЯЯ ===== */
 .toggle-answer-btn {
   margin-top: 8px;
   height: 32px !important;
@@ -438,7 +435,6 @@
   box-shadow: none !important;
 }
 
-/* ===== РЕЖИМ ИЗУЧЕНИЯ ===== */
 .study-mode {
   margin-top: 20px;
 }
@@ -514,7 +510,6 @@
   box-shadow: none !important;
 }
 
-/* ===== ВКЛАДКА ЗАМЕТОК ===== */
 .notes-header {
   display: flex;
   justify-content: space-between;
@@ -527,7 +522,6 @@
   font-size: 20px;
 }
 
-/* ===== КНОПКА "СОЗДАТЬ ЗАМЕТКУ" — ГАРАНТИРОВАННО КОМПАКТНАЯ ===== */
 html body .group-page .notes-header .create-note-btn {
   height: 34px !important;
   padding: 0 14px !important;

@@ -1,5 +1,3 @@
-// client/src/components/InviteMembersModal.tsx
-
 import React, { useState } from 'react';
 import { groupsAPI, achievementsAPI } from '../services/api';
 import './InviteMembersModal.css';
@@ -45,7 +43,6 @@ const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
         await achievementsAPI.check('FIRST_INVITE');
         
         // Достижение за несколько приглашений
-        // В реальном приложении нужно отслеживать количество принятых приглашений
         await achievementsAPI.check('MENTOR_5', 20); // 20% прогресса (1 из 5)
       } catch (achievementError) {
         console.error('Error checking achievements:', achievementError);

@@ -98,7 +98,6 @@ class WebSocketService {
 
     // Учебные сессии
     this.socket.on('study_session_state', (data) => { this.emit('study_session_state', data); });
-    // 🔧 Добавлена поддержка получения истории сообщений
     this.socket.on('study_session_messages', (data) => { this.emit('study_session_messages', data); });
     this.socket.on('study_session_participant_joined', (data) => { this.emit('study_session_participant_joined', data); });
     this.socket.on('study_session_participant_left', (data) => { this.emit('study_session_participant_left', data); });
@@ -115,7 +114,6 @@ class WebSocketService {
     this.socket.on('message_deleted', (data) => { this.emit('message_deleted', data); });
     this.socket.on('chat_updated', (data) => { this.emit('chat_updated', data); });
 
-    // Ping-pong
     setInterval(() => {
       if (this.socket && this.isConnected) {
         this.socket.emit('ping');

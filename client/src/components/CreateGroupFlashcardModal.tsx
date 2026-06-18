@@ -1,5 +1,3 @@
-// client/src/components/CreateGroupFlashcardModal.tsx
-
 import React, { useState } from 'react';
 import { flashcardsAPI } from '../services/api';
 import webSocketService from '../services/websocket';

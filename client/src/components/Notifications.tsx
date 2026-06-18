@@ -1,5 +1,3 @@
-// client/src/components/Notifications.tsx
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { notificationsAPI } from '../services/api';

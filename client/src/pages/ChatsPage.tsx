@@ -1,5 +1,3 @@
-// client/src/pages/ChatsPage.tsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from '../components/Header';
 import ChatList from '../components/ChatList';

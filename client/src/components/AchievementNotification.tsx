@@ -1,5 +1,3 @@
-// client/src/components/AchievementNotification.tsx
-
 import React, { useState, useEffect } from 'react';
 import './AchievementNotification.css';
 

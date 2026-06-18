@@ -1,5 +1,3 @@
-// server/swagger.js
-
 const swaggerJsdoc = require('swagger-jsdoc');
 
 const options = {
@@ -100,7 +98,7 @@ const options = {
   },
   apis: [
     './server/routes/*.js',   // все файлы маршрутов
-    './server/models/*.js'    // модели для схем (если аннотированы)
+    './server/models/*.js'    // модели для схем
   ]
 };
 

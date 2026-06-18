@@ -1,5 +1,3 @@
-// server/models/StudySessionParticipant.js
-
 const mongoose = require('mongoose');
 
 const studySessionParticipantSchema = new mongoose.Schema({

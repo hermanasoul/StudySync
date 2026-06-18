@@ -1,5 +1,3 @@
-// client/src/pages/GroupsPage.tsx
-
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import CreateGroupModal from '../components/CreateGroupModal';

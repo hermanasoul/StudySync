@@ -25,10 +25,8 @@ import ChatsPage from './pages/ChatsPage';
 import StudySessionsPage from './pages/StudySessionsPage';
 import StudySessionRoom from './pages/StudySessionRoom';
 import StudyHistoryPage from './pages/StudyHistoryPage';
-// ========== ДОБАВЛЕНЫ ИМПОРТЫ НОВЫХ СТРАНИЦ ==========
 import ProfileEditPage from './pages/ProfileEditPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
-// ======================================================
 import './App.css';
 import './styles/buttons.css';
 import webSocketService from './services/websocket';

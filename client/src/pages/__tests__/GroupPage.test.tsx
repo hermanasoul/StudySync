@@ -28,7 +28,7 @@ const mockGroup = {
   inviteCode: 'ABC123'
 };
 
-// Вспомогательная функция для полного AxiosResponse (исправлена для TS)
+// Вспомогательная функция для полного AxiosResponse
 const mockAxiosResponse = (data: any, status = 200) => ({
   data,
   status,

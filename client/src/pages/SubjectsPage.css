@@ -1,5 +1,3 @@
-/* client/src/pages/SubjectsPage.css */
-
 .subjects-page,
 .subjects-page .page-with-header,
 .subjects-page .subjects-container {
@@ -95,7 +93,6 @@
   flex: 1;
 }
 
-/* ===== ПРОГРЕСС-БАР — фон использует --progress-bg ===== */
 .progress-container {
   position: relative;
   margin-bottom: 16px;

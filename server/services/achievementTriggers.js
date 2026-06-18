@@ -1,5 +1,3 @@
-// server/services/achievementTriggers.js
-
 const mongoose = require('mongoose');
 const Achievement = require('../models/Achievement');
 const UserAchievement = require('../models/UserAchievement');
@@ -168,7 +166,6 @@ class AchievementTriggers {
 
   async onDailyLogin(userId) {
     try {
-      // Здесь будет логика отслеживания серий
     } catch (error) {
       console.error('Error in onDailyLogin trigger:', error);
     }

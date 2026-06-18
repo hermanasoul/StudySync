@@ -13,7 +13,7 @@
 
 .modal-content {
   background: var(--modal-bg);
-  padding: 32px 32px 28px; /* увеличенные отступы */
+  padding: 32px 32px 28px;
   border-radius: 12px;
   box-shadow: var(--shadow-lg);
   max-width: 420px;

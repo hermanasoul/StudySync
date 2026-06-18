@@ -1,5 +1,3 @@
-// server/routes/leaderboards.js
-
 const express = require('express');
 const Leaderboard = require('../models/Leaderboard');
 const User = require('../models/User');

@@ -15,7 +15,7 @@ interface EditFlashcardModalProps {
   onClose: () => void;
   flashcard: Flashcard | null;
   onFlashcardUpdated: (updated?: Flashcard) => void;
-  onFlashcardDeleted: () => void; // больше не используется, но оставляем для совместимости
+  onFlashcardDeleted: () => void;
 }
 
 const EditFlashcardModal: React.FC<EditFlashcardModalProps> = ({

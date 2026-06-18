@@ -1,5 +1,3 @@
-// client/src/components/StudySessionStats.tsx
-
 import React from 'react';
 import './StudySessionStats.css';
 

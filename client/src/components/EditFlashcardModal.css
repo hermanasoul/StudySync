@@ -58,7 +58,6 @@
   color: var(--text-primary);
 }
 
-/* ===== ФОРМА С ОТСТУПАМИ ===== */
 .flashcard-form {
   padding: 25px !important;
 }
@@ -128,7 +127,6 @@
   font-size: 14px;
 }
 
-/* ===== ДЕЙСТВИЯ С КНОПКАМИ ===== */
 .form-actions {
   display: flex;
   justify-content: space-between;
@@ -143,7 +141,6 @@
   align-items: center;
 }
 
-/* УНИКАЛЬНЫЕ КЛАССЫ ДЛЯ КНОПОК */
 .editflashcard-delete-btn,
 .editflashcard-cancel-btn,
 .editflashcard-save-btn {
@@ -180,7 +177,6 @@
   background: var(--accent-danger-hover) !important;
 }
 
-/* Отмена — жёлтая (как глобальный .btn-outline) */
 .editflashcard-cancel-btn {
   background: #fbbf24 !important;
   color: #92400e !important;

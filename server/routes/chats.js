@@ -1,5 +1,3 @@
-// server/routes/chats.js
-
 const express = require('express');
 const Chat = require('../models/Chat');
 const Message = require('../models/Message');
@@ -10,7 +8,6 @@ const { clearCacheOnMutation } = require('../middleware/cache');
 const upload = require('../middleware/upload');
 const router = express.Router();
 
-// ---------- Планировщик отложенных сообщений ----------
 const schedulePendingMessages = async (ws) => {
   try {
     const pending = await Message.find({
@@ -46,7 +43,6 @@ const sendScheduledMessage = async (messageId, ws) => {
     chat.lastMessage = msg._id;
     await chat.save();
 
-    // Отправляем новое сообщение в чат (с ПРАВИЛЬНЫМ временем)
     if (ws) {
       ws.emitToChat(msg.chat.toString(), 'new_message', msg);
 
