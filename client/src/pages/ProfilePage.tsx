@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Импортируем useNavigate
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { levelsAPI, achievementsAPI, badgesAPI, questsAPI, rewardsAPI } from '../services/api';
 import Header from '../components/Header';
 import LevelProgress from '../components/LevelProgress';
 import BadgeGrid from '../components/BadgeGrid';
+import ThemeToggle from '../components/ThemeToggle';
 import './ProfilePage.css';
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
-  const navigate = useNavigate(); // Добавляем навигацию
+  const navigate = useNavigate();
   const [progress, setProgress] = useState<any>(null);
   const [recentAchievements, setRecentAchievements] = useState<any[]>([]);
   const [badges, setBadges] = useState<any>(null);
@@ -18,6 +19,15 @@ const ProfilePage: React.FC = () => {
   const [rewards, setRewards] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'badges' | 'quests' | 'rewards' | 'settings'>('overview');
+
+  // Состояния для настроек
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [emailNotifications, setEmailNotifications] = useState(true);
+
+  // Hover состояния
+  const [hoverEditProfile, setHoverEditProfile] = useState(false);
+  const [hoverChangePassword, setHoverChangePassword] = useState(false);
+  const [hoverNewQuests, setHoverNewQuests] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -367,9 +377,31 @@ const ProfilePage: React.FC = () => {
       <div className="section-header">
         <h3>🎯 Задания и квесты</h3>
         <button
-          className="btn-primary btn-sm"
-          style={{ padding: '6px 14px', fontSize: '0.85rem', width: 'auto', minWidth: 'auto' }}
+          className="new-quests-btn"
           onClick={handleGenerateDailyQuests}
+          style={{
+            height: '32px',
+            padding: '0 14px',
+            fontSize: '0.85rem',
+            minWidth: '0',
+            width: 'auto',
+            borderRadius: '6px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: hoverNewQuests ? '#4338ca' : '#4f46e5',
+            color: '#ffffff',
+            border: 'none',
+            cursor: 'pointer',
+            fontWeight: '500',
+            lineHeight: '1.2',
+            boxShadow: 'none',
+            margin: '0',
+            flexShrink: '0',
+            transition: 'background 0.2s ease',
+          }}
+          onMouseEnter={() => setHoverNewQuests(true)}
+          onMouseLeave={() => setHoverNewQuests(false)}
         >
           Новые задания
         </button>
@@ -607,6 +639,82 @@ const ProfilePage: React.FC = () => {
     </div>
   );
 
+  const renderSettingsTab = () => (
+    <div className="profile-section settings-tab">
+      <h3>⚙️ Настройки профиля</h3>
+      
+      <div className="settings-grid">
+        <div className="settings-card">
+          <div className="settings-card-icon">👤</div>
+          <div className="settings-card-content">
+            <h4>Редактировать профиль</h4>
+            <p>Изменить имя, email и аватар</p>
+            <button 
+              className="btn btn-primary settings-btn"
+              onClick={() => navigate('/profile/edit')}
+            >
+              Перейти
+            </button>
+          </div>
+        </div>
+        
+        <div className="settings-card">
+          <div className="settings-card-icon">🔑</div>
+          <div className="settings-card-content">
+            <h4>Сменить пароль</h4>
+            <p>Обновить пароль для безопасности</p>
+            <button 
+              className="btn btn-primary settings-btn"
+              onClick={() => navigate('/profile/change-password')}
+            >
+              Перейти
+            </button>
+          </div>
+        </div>
+        
+        <div className="settings-card">
+          <div className="settings-card-icon">🎨</div>
+          <div className="settings-card-content">
+            <h4>Тема оформления</h4>
+            <p>Переключить светлую/тёмную тему</p>
+            <div className="settings-theme-toggle">
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+        
+        <div className="settings-card">
+          <div className="settings-card-icon">🔔</div>
+          <div className="settings-card-content">
+            <h4>Уведомления</h4>
+            <p>Настройки получения уведомлений</p>
+            <div className="settings-toggle-group">
+              <label className="settings-toggle">
+                <input 
+                  type="checkbox" 
+                  checked={notificationsEnabled} 
+                  onChange={() => setNotificationsEnabled(!notificationsEnabled)} 
+                />
+                <span className="settings-toggle-slider"></span>
+                <span className="settings-toggle-label">Включены</span>
+              </label>
+              <label className="settings-toggle">
+                <input 
+                  type="checkbox" 
+                  checked={emailNotifications} 
+                  onChange={() => setEmailNotifications(!emailNotifications)} 
+                  disabled={!notificationsEnabled}
+                />
+                <span className="settings-toggle-slider"></span>
+                <span className="settings-toggle-label">Email уведомления</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const handleGenerateDailyQuests = async () => {
     try {
       await questsAPI.generateDaily();
@@ -715,11 +823,66 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
             
-            <div className="profile-actions">
-              <button className="btn-primary" onClick={() => navigate('/profile/edit')}>
+            <div className="profile-actions" style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+              {/* Кнопка "Редактировать профиль" — синяя */}
+              <button
+                onClick={() => navigate('/profile/edit')}
+                style={{
+                  height: '34px',
+                  padding: '0 16px',
+                  fontSize: '13px',
+                  minWidth: '0',
+                  width: 'auto',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  lineHeight: '1.2',
+                  boxShadow: 'none',
+                  margin: '0',
+                  flexShrink: '0',
+                  gap: '4px',
+                  background: hoverEditProfile ? '#4338ca' : '#4f46e5',
+                  color: '#ffffff',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s ease',
+                }}
+                onMouseEnter={() => setHoverEditProfile(true)}
+                onMouseLeave={() => setHoverEditProfile(false)}
+              >
                 Редактировать профиль
               </button>
-              <button className="btn-outline" onClick={() => navigate('/profile/change-password')}>
+              
+              {/* Кнопка "Сменить пароль" — жёлтая (btn-outline) */}
+              <button
+                onClick={() => navigate('/profile/change-password')}
+                style={{
+                  height: '34px',
+                  padding: '0 16px',
+                  fontSize: '13px',
+                  minWidth: '0',
+                  width: 'auto',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  lineHeight: '1.2',
+                  boxShadow: '0 4px 14px rgba(252, 211, 77, 0.3)',
+                  margin: '0',
+                  flexShrink: '0',
+                  gap: '4px',
+                  background: hoverChangePassword ? '#d97706' : '#fbbf24',
+                  color: '#92400e',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s ease',
+                }}
+                onMouseEnter={() => setHoverChangePassword(true)}
+                onMouseLeave={() => setHoverChangePassword(false)}
+              >
                 Сменить пароль
               </button>
             </div>
@@ -729,12 +892,7 @@ const ProfilePage: React.FC = () => {
           {activeTab === 'badges' && renderBadgesTab()}
           {activeTab === 'quests' && renderQuestsTab()}
           {activeTab === 'rewards' && renderRewardsTab()}
-          {activeTab === 'settings' && (
-            <div className="profile-section">
-              <h3>Настройки профиля</h3>
-              <p>Скоро появится!</p>
-            </div>
-          )}
+          {activeTab === 'settings' && renderSettingsTab()}
         </div>
       </div>
     </div>

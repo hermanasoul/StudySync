@@ -1,12 +1,10 @@
-/* client\src\components\StudyCompleteModal.css */
-
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--modal-overlay);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,13 +12,14 @@
 }
 
 .complete-modal {
-  background: white;
+  background: var(--modal-bg);
   border-radius: 16px;
   padding: 0;
   width: 90%;
   max-width: 480px;
   text-align: center;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--modal-border);
 }
 
 .complete-header {
@@ -36,7 +35,7 @@
   margin: 0;
   font-size: 28px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   line-height: 1.2;
 }
 
@@ -45,7 +44,7 @@
 }
 
 .complete-body p {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 16px;
   line-height: 1.5;
   margin-bottom: 24px;
@@ -59,30 +58,30 @@
 }
 
 .stat-item {
-  background: #f8fafc;
+  background: var(--bg-secondary);
   padding: 16px;
   border-radius: 8px;
-  border-left: 4px solid #4f46e5;
+  border-left: 4px solid var(--accent-primary);
 }
 
 .stat-number {
   font-size: 24px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .stat-label {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-secondary);
   text-transform: uppercase;
   font-weight: 500;
 }
 
 .progress-tip {
-  background: #f0f9ff;
-  border: 1px solid #e0f2fe;
-  color: #0369a1;
+  background: var(--bg-active);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
   padding: 12px;
   border-radius: 8px;
   font-size: 14px;
@@ -95,7 +94,8 @@
   padding: 0 32px 32px;
 }
 
-.btn-primary, .btn-outline {
+.btn-primary,
+.btn-outline {
   padding: 12px 24px !important;
   border-radius: 8px !important;
   font-weight: 500 !important;
@@ -108,22 +108,22 @@
 }
 
 .btn-primary {
-  background: #4f46e5 !important;
-  color: white !important;
+  background: var(--accent-primary) !important;
+  color: var(--text-inverse) !important;
 }
 
 .btn-primary:hover {
-  background: #4338ca !important;
+  background: var(--accent-primary-hover) !important;
   transform: translateY(-1px) !important;
 }
 
 .btn-outline {
-  background: #6b7280 !important;
-  color: white !important;
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
 }
 
 .btn-outline:hover {
-  background: #4b5563 !important;
+  background: var(--bg-hover) !important;
   transform: translateY(-1px) !important;
 }
 
@@ -132,23 +132,18 @@
     width: 95%;
     margin: 20px;
   }
-  
   .complete-actions {
     flex-direction: column;
   }
-  
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  
   .complete-header {
     padding: 24px 24px 0;
   }
-  
   .complete-body {
     padding: 20px 24px;
   }
-  
   .complete-actions {
     padding: 0 24px 24px;
   }

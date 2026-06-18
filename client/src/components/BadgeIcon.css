@@ -1,4 +1,3 @@
-/* client/src/components/BadgeIcon.css */
 .badge-icon {
   position: relative;
   display: inline-flex;
@@ -18,7 +17,7 @@
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .badge-icon-small .badge-icon-container {
@@ -63,7 +62,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 2px solid white;
+  border: 2px solid var(--bg-card);
   z-index: 2;
 }
 
@@ -74,11 +73,10 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  border: 2px solid white;
+  border: 2px solid var(--bg-card);
   z-index: 2;
 }
 
-/* Информация о бейдже для большого размера */
 .badge-info {
   margin-top: 10px;
   text-align: center;
@@ -88,7 +86,7 @@
 .badge-name {
   font-size: 14px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 4px;
   line-height: 1.2;
 }
@@ -96,27 +94,25 @@
 .badge-difficulty {
   font-size: 12px;
   font-weight: 500;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 2px;
 }
 
 .badge-points {
   font-size: 11px;
   font-weight: 600;
-  color: #8b5cf6;
-  background: #f3f4f6;
+  color: var(--accent-primary);
+  background: var(--bg-secondary);
   padding: 2px 6px;
   border-radius: 10px;
   display: inline-block;
 }
 
-/* Эффекты при наведении */
 .badge-icon:hover .badge-icon-container {
   transform: scale(1.05);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md);
 }
 
-/* Анимация для новых бейджей */
 @keyframes badgeUnlock {
   0% {
     transform: scale(0.8);
@@ -135,7 +131,6 @@
   animation: badgeUnlock 0.5s ease-out;
 }
 
-/* Тулаtip */
 .badge-icon[data-tooltip] {
   position: relative;
 }
@@ -146,14 +141,16 @@
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
+  background: var(--bg-card);
+  color: var(--text-primary);
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 12px;
   white-space: nowrap;
   z-index: 1000;
   margin-bottom: 8px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .badge-icon[data-tooltip]:hover::before {
@@ -163,7 +160,7 @@
   left: 50%;
   transform: translateX(-50%);
   border: 4px solid transparent;
-  border-top-color: rgba(0, 0, 0, 0.8);
+  border-top-color: var(--border-color);
   margin-bottom: -4px;
   z-index: 1000;
 }

@@ -1,5 +1,3 @@
-// client/src/components/EditNoteModal.tsx
-
 import React, { useState } from 'react';
 import './EditNoteModal.css';
 
@@ -87,7 +85,7 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({ isOpen, onClose, onSubmit
           <h2>Редактировать заметку</h2>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
-        <form onSubmit={handleUpdate}>
+        <form onSubmit={handleUpdate} className="note-form" style={{ padding: '25px' }}>
           {error && <div className="error-message"><strong>Ошибка:</strong> {error}</div>}
           <div className="form-group">
             <label>Заголовок</label>
@@ -103,9 +101,24 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({ isOpen, onClose, onSubmit
           </div>
           <div className="form-actions">
             {onDelete && (
-              <button type="button" onClick={handleDelete} className="btn-danger" disabled={loading}>Удалить</button>
+              <button 
+                type="button" 
+                className="editnote-delete-btn"
+                onClick={handleDelete} 
+                disabled={loading}
+                style={{ height: '34px', padding: '0 14px', fontSize: '13px', minWidth: 'auto', width: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '6px' }}
+              >
+                Удалить
+              </button>
             )}
-            <button type="submit" className="btn-primary" disabled={loading}>Сохранить</button>
+            <button 
+              type="submit" 
+              className="editnote-save-btn"
+              disabled={loading}
+              style={{ height: '34px', padding: '0 14px', fontSize: '13px', minWidth: 'auto', width: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '6px' }}
+            >
+              {loading ? 'Сохранение...' : 'Сохранить'}
+            </button>
           </div>
         </form>
       </div>

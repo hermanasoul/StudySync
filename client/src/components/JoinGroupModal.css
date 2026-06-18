@@ -1,12 +1,10 @@
-/* client\src\components\JoinGroupModal.css */
-
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--modal-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,20 +12,28 @@
 }
 
 .modal-content {
-  background: white;
-  padding: 40px;
+  background: var(--modal-bg);
+  padding: 32px 32px 28px; /* увеличенные отступы */
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  max-width: 400px;
+  box-shadow: var(--shadow-lg);
+  max-width: 420px;
   width: 90%;
   text-align: center;
+  border: 1px solid var(--modal-border);
+  animation: scaleIn 0.25s ease-out;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 22px;
+  color: var(--text-primary);
 }
 
 .close-button {
@@ -35,58 +41,127 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
+  color: var(--text-secondary);
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s, color 0.2s;
+}
+
+.close-button:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.modal-body {
+  margin-top: 8px;
 }
 
 .modal-body p {
-  margin-bottom: 25px;
-  color: #6b7280;
+  margin: 0 0 24px 0;
+  color: var(--text-secondary);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.join-form .form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.join-form .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 14px;
 }
 
 .code-input {
   width: 100%;
-  padding: 15px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
   font-size: 16px;
-  margin-bottom: 25px;
+  background: var(--input-bg);
+  color: var(--input-text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  text-align: center;
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+
+.code-input:focus {
+  outline: none;
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.code-input::placeholder {
+  font-weight: 400;
+  letter-spacing: normal;
+  color: var(--text-muted);
+}
+
+.join-form .input-hint {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  text-align: center;
 }
 
 .btn-primary {
   width: 100%;
-  background: #4f46e5;
-  color: white;
-  padding: 15px;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  padding: 14px;
   border: none;
-  border-radius: 6px;
-  font-weight: 500;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
   cursor: pointer;
-  margin-top: 20px;
+  margin-top: 8px;
   justify-content: center;
   text-align: center;
+  transition: background 0.2s, transform 0.1s;
 }
 
-.btn-primary:hover {
-  background: #4338ca;
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .error-message {
-  color: #ef4444;
+  color: var(--accent-danger);
   font-size: 14px;
-  margin-top: 15px;
+  margin-top: 16px;
+  text-align: center;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
-.join-form .form-group {
-  margin-bottom: 25px;
-}
-
-.join-form .input-hint {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 10px;
-}
-
-.join-form .form-actions {
-  margin-top: 30px;
-  gap: 15px;
+@media (max-width: 480px) {
+  .modal-content {
+    padding: 24px 20px 20px;
+  }
+  .modal-header h2 {
+    font-size: 20px;
+  }
+  .code-input {
+    font-size: 14px;
+    padding: 12px 14px;
+  }
 }

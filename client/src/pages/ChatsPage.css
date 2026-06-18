@@ -1,302 +1,196 @@
-/* client/src/pages/ChatsPage.css */
-
-/* Основной контейнер страницы */
 .chats-page {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: #121212;
-  color: #eee;
-}
-
-/* ИЗОЛИРОВАННЫЙ класс – только для страницы чатов */
-.chats-page .page-with-header {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
+  min-height: 100vh;
+  background: var(--bg-primary);
 }
 
 .chats-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 20px 40px; /* уменьшен отступ сверху */
   display: flex;
-  flex: 1;
-  height: 100%;
-  background: #1e1e2e;
+  gap: 20px;
+  height: calc(100vh - 100px);
+  min-height: 500px;
 }
 
-/* Левая панель со списком чатов */
 .chats-sidebar {
-  width: 300px;
-  border-right: 1px solid #3f3f55;
-  background: #1e1e2e;
+  width: 320px;
+  min-width: 280px;
+  background: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
-/* Заголовок боковой панели */
 .chats-sidebar-header {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 16px;
-  background: #2a2a3c;
-  border-bottom: 1px solid #3f3f55;
-  flex-shrink: 0;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .chats-sidebar-header h3 {
+  font-size: 18px;
+  color: var(--text-primary);
   margin: 0;
-  font-size: 1.2rem;
-  color: #ddd;
-  font-weight: 600;
 }
 
-/* Контейнер для кнопки создания чата */
 .create-chat-button-container {
-  padding: 0 16px 12px;
-  background: #2a2a3c;
-  border-bottom: 1px solid #3f3f55;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
 }
 
-/* Кнопки (общие стили для тёмной темы) */
-.btn {
+.create-chat-button-container .btn {
+  width: 100%;
   padding: 8px 16px;
   border-radius: 8px;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
   border: none;
   cursor: pointer;
   font-weight: 500;
-  font-size: 0.9rem;
-  transition: background 0.2s, opacity 0.2s;
-  color: #fff;
+  transition: background 0.2s;
+  height: 44px;
+  font-size: 14px;
 }
 
-.btn-primary {
-  background: #5b4d8c;
+.create-chat-button-container .btn:hover {
+  background: var(--accent-primary-hover);
 }
 
-.btn-primary:hover {
-  background: #6a5fa0;
-}
-
-.btn-success {
-  background: #2d8c4a;
-}
-
-.btn-success:hover {
-  background: #37a359;
-}
-
-.btn-outline {
-  background: transparent;
-  border: 1px solid #3f3f55;
-  color: #ccc;
-}
-
-.btn-outline:hover {
-  border-color: #5b4d8c;
-  color: #fff;
-}
-
-.btn-danger {
-  background: #852c3a;
-}
-
-.btn-danger:hover {
-  background: #a33648;
-}
-
-.btn-sm {
-  padding: 4px 10px;
-  font-size: 0.85rem;
-}
-
-/* Форма создания чата */
 .create-chat-form {
   padding: 16px;
-  background: #2a2a3c;
-  border-bottom: 1px solid #3f3f55;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.create-chat-form .form-group {
+  margin-bottom: 12px;
 }
 
-.form-label {
-  font-size: 0.85rem;
-  color: #aaa;
+.create-chat-form .form-label {
+  display: block;
+  font-size: 13px;
   font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
 }
 
-select,
-input[type="text"],
-input[type="datetime-local"] {
+.create-chat-form select {
   width: 100%;
   padding: 8px 12px;
-  background: #1e1e2e;
-  border: 1px solid #3f3f55;
-  border-radius: 8px;
-  color: #eee;
-  font-size: 0.9rem;
-  outline: none;
-  transition: border-color 0.2s;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: 14px;
+  height: 40px;
 }
 
-select:focus,
-input[type="text"]:focus,
-input[type="datetime-local"]:focus {
-  border-color: #5b4d8c;
-}
-
-select option {
-  background: #1e1e2e;
-  color: #eee;
-}
-
-.form-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-/* Сообщения об ошибках и подсказках */
-.error-message {
-  color: #ff6b6b;
-  font-size: 0.85rem;
+.create-chat-form .selected-friend {
+  font-size: 13px;
+  color: var(--text-secondary);
   margin-top: 4px;
 }
 
-.info-message {
-  color: #aaa;
-  font-size: 0.8rem;
+.create-chat-form .info-message {
+  font-size: 13px;
+  color: var(--text-secondary);
 }
 
-.info-message a {
-  color: #b4a3ff;
-  text-decoration: none;
+.create-chat-form .info-message a {
+  color: var(--link-color);
 }
 
-.info-message a:hover {
-  text-decoration: underline;
+.create-chat-form .form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  align-items: center;
 }
 
-/* Правая часть – окно чата или приветственный экран */
+/* ===== ЕДИНЫЙ СТИЛЬ ДЛЯ КНОПОК В ФОРМЕ ===== */
+.create-chat-form .form-actions .btn {
+  flex: 1;
+  height: 38px !important;
+  padding: 0 12px !important;
+  font-size: 13px !important;
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  border: none !important;
+  cursor: pointer !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+  line-height: 1.2 !important;
+  min-width: 0 !important;
+  width: auto !important;
+  flex: 0 1 auto !important;
+  white-space: nowrap;
+  transition: background 0.2s ease !important;
+}
+
+.create-chat-form .form-actions .btn-success {
+  background: var(--accent-success) !important;
+  color: var(--text-inverse) !important;
+}
+.create-chat-form .form-actions .btn-success:hover:not(:disabled) {
+  background: var(--accent-success-hover) !important;
+}
+
+/* ===== КНОПКА "ОТМЕНА" — КРАСНАЯ ===== */
+.create-chat-form .form-actions .btn-danger,
+.create-chat-form .form-actions .btn-outline {
+  background: var(--accent-danger) !important;
+  color: var(--text-inverse) !important;
+  border: none !important;
+}
+.create-chat-form .form-actions .btn-danger:hover:not(:disabled),
+.create-chat-form .form-actions .btn-outline:hover:not(:disabled) {
+  background: var(--accent-danger-hover) !important;
+}
+
 .chats-main {
   flex: 1;
+  background: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: #1a1a2e;
 }
 
-/* Приветственный экран, если чат не выбран */
 .no-chat-selected {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100%;
-  padding: 40px;
-  text-align: center;
-  color: #ccc;
-  background: #1a1a2e;
-}
-
-.no-chat-selected h2 {
-  margin: 0 0 16px 0;
-  font-size: 28px;
-  background: linear-gradient(135deg, #8b5cf6, #c084fc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.no-chat-selected p {
-  margin: 0 0 40px 0;
-  color: #9ca3af;
+  color: var(--text-secondary);
   font-size: 16px;
-  max-width: 400px;
-}
-
-/* Блок с возможностями чатов (если используются) */
-.chat-features {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-  max-width: 700px;
-  width: 100%;
-}
-
-.feature {
-  display: flex;
-  gap: 12px;
-  padding: 16px;
-  background: #2a2a3c;
-  border-radius: 12px;
-  transition: transform 0.3s;
-}
-
-.feature:hover {
-  transform: translateY(-3px);
-}
-
-.feature-icon {
-  font-size: 28px;
-}
-
-.feature-text h4 {
-  margin: 0 0 6px 0;
-  font-size: 15px;
-  color: #eee;
-}
-
-.feature-text p {
-  margin: 0;
-  font-size: 13px;
-  color: #9ca3af;
-}
-
-/* Адаптивность */
-@media (max-width: 1024px) {
-  .chats-sidebar {
-    width: 280px;
-  }
 }
 
 @media (max-width: 768px) {
   .chats-container {
     flex-direction: column;
+    height: auto;
+    padding-top: 100px;
   }
-
   .chats-sidebar {
     width: 100%;
-    height: 300px;
-    border-right: none;
-    border-bottom: 1px solid #3f3f55;
+    min-width: 0;
   }
-
   .chats-main {
-    height: calc(100% - 300px);
+    min-height: 400px;
   }
-
-  .chat-features {
-    grid-template-columns: 1fr;
+  .create-chat-form .form-actions {
+    flex-direction: column;
+    gap: 8px;
   }
-}
-
-/* Скроллбар для боковой панели */
-.chats-sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.chats-sidebar::-webkit-scrollbar-thumb {
-  background: #3f3f55;
-  border-radius: 3px;
-}
-
-.chats-sidebar::-webkit-scrollbar-track {
-  background: transparent;
+  .create-chat-form .form-actions .btn {
+    width: 100% !important;
+    flex: 1 1 100% !important;
+  }
 }

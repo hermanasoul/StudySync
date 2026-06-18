@@ -1,145 +1,177 @@
-/* client/src/pages/FlashcardsPage.css */
-
 .flashcards-page {
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--bg-primary);
 }
 
 .flashcards-container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 140px 20px 40px;   /* достаточно для шапки */
+  padding: 140px 20px 60px;
 }
 
-/* Заголовок и кнопки действий */
 .flashcards-header {
   display: flex;
-  flex-direction: column;      /* заголовок и кнопки — друг под другом */
-  align-items: flex-start;
-  gap: 20px;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
   margin-bottom: 30px;
 }
-
 .flashcards-header h1 {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0;
 }
-
 .flashcards-actions {
   display: flex;
-  gap: 12px;
+  justify-content: center;
+  gap: 10px;
   flex-wrap: wrap;
 }
+.page-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
 
-/* Единый вид для ВСЕХ кнопок внутри flashcards-actions */
-.flashcards-actions .btn,
-.flashcards-actions .btn-primary,
-.flashcards-actions .btn-success,
-.flashcards-actions .btn-outline {
-  height: 44px !important;
-  min-width: 180px;
-  padding: 0 20px !important;
+/* ===== УНИКАЛЬНЫЕ КНОПКИ ===== */
+.flashcard-create-btn {
+  height: 34px !important;
+  padding: 0 14px !important;
+  font-size: 13px !important;
+  min-width: auto !important;
+  width: auto !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  text-align: center !important;
-  white-space: nowrap;
-  font-size: 14px !important;
-  font-weight: 500;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  background: var(--accent-primary) !important;
+  color: var(--text-inverse) !important;
+  border: none !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
   line-height: 1.2 !important;
-  box-sizing: border-box;
-  vertical-align: middle;
-  margin: 0;
+  box-shadow: none !important;
+}
+.flashcard-create-btn:hover:not(:disabled) {
+  background: var(--accent-primary-hover) !important;
 }
 
-/* Цвета */
-.flashcards-actions .btn-primary {
-  background: #4f46e5;
-  color: white;
+.flashcard-create-btn-empty {
+  height: 34px !important;
+  padding: 0 14px !important;
+  font-size: 13px !important;
+  min-width: auto !important;
+  width: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--accent-primary) !important;
+  color: var(--text-inverse) !important;
+  border: none !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  box-shadow: none !important;
+  margin-top: 20px !important;
 }
-.flashcards-actions .btn-primary:hover {
-  background: #4338ca;
-}
-.flashcards-actions .btn-success {
-  background: #10b981;
-  color: white;
-}
-.flashcards-actions .btn-success:hover {
-  background: #059669;
-}
-.flashcards-actions .btn-outline {
-  background: transparent;
-  color: #4f46e5;
-  border: 1px solid #4f46e5;
-}
-.flashcards-actions .btn-outline:hover {
-  background: #4f46e5;
-  color: white;
-}
-
-/* Общие кнопки (переопределение для всей страницы) */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 1.4;
-  text-decoration: none;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+.flashcard-create-btn-empty:hover:not(:disabled) {
+  background: var(--accent-primary-hover) !important;
 }
 
-.btn-primary {
-  background: #4f46e5;
-  color: white;
+.flashcard-study-btn {
+  height: 34px !important;
+  padding: 0 14px !important;
+  font-size: 13px !important;
+  min-width: auto !important;
+  width: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--accent-success) !important;
+  color: var(--text-inverse) !important;
+  border: none !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  box-shadow: none !important;
 }
-.btn-primary:hover {
-  background: #4338ca;
-}
-
-.btn-success {
-  background: #10b981;
-  color: white;
-}
-.btn-success:hover {
-  background: #059669;
-}
-
-.btn-outline {
-  background: transparent;
-  color: #4f46e5;
-  border: 1px solid #4f46e5;
-}
-.btn-outline:hover {
-  background: #4f46e5;
-  color: white;
+.flashcard-study-btn:hover:not(:disabled) {
+  background: var(--accent-success-hover) !important;
 }
 
-.btn-danger {
-  background: #ef4444;
-  color: white;
+.flashcard-back-btn {
+  height: 34px !important;
+  padding: 0 14px !important;
+  font-size: 13px !important;
+  min-width: auto !important;
+  width: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  color: var(--accent-primary) !important;
+  border: 1px solid var(--accent-primary) !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  box-shadow: none !important;
 }
-.btn-danger:hover {
-  background: #dc2626;
+.flashcard-back-btn:hover:not(:disabled) {
+  background: var(--accent-primary) !important;
+  color: var(--text-inverse) !important;
 }
 
-/* Компактные кнопки (Редактировать / Удалить) */
-.btn-sm {
-  padding: 6px 12px;
+.flashcard-back-link {
+  height: 34px !important;
+  padding: 0 14px !important;
+  font-size: 13px !important;
+  min-width: auto !important;
+  width: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+  background: #fbbf24 !important;
+  color: #92400e !important;
+  box-shadow: 0 4px 14px rgba(252, 211, 77, 0.3) !important;
+}
+.flashcard-back-link:hover:not(:disabled) {
+  background: #d97706 !important;
+  color: white !important;
+}
+
+/* ===== ПОДСКАЗКА КАРТОЧКИ — ФОН ВСЕГДА ЖЁЛТЫЙ, ТЕКСТ ТЁМНЫЙ ===== */
+.flashcard-hint {
+  background: #fef3c7 !important;
+  padding: 6px 10px;
+  border-radius: 6px;
   font-size: 13px;
+  margin-top: 8px;
+  color: #92400e !important;
 }
 
-/* Сетка карточек */
+/* В тёмной теме фон не меняем, текст остаётся тёмным */
+body.dark-theme .flashcard-hint {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+/* ===== ОСТАЛЬНЫЕ СТИЛИ (без изменений) ===== */
 .flashcards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -148,104 +180,104 @@
 }
 
 .flashcard-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e5e7eb;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
 }
-
 .flashcard-content {
   flex: 1;
   margin-bottom: 15px;
 }
-
 .flashcard-question h3 {
   margin: 0 0 8px;
   font-size: 18px;
   font-weight: 600;
+  color: var(--text-primary);
 }
-
 .flashcard-answer p {
   margin: 0;
-  color: #374151;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
-
-.flashcard-hint {
-  background: #fef3c7;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  margin-top: 8px;
-}
-
-/* Действия с карточкой (редактировать/удалить) */
 .flashcard-actions {
   display: flex;
   gap: 8px;
   margin-top: auto;
 }
+.flashcard-actions .btn-sm {
+  height: 28px !important;
+  min-width: auto !important;
+  width: auto !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+  border-radius: 4px !important;
+}
 
-/* Режим изучения */
 .study-mode {
   margin-bottom: 30px;
 }
-
 .study-progress {
   font-size: 16px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   margin-bottom: 20px;
   text-align: center;
 }
-
 .study-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 30px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
   max-width: 600px;
   margin: 0 auto;
   text-align: center;
+  border: 1px solid var(--border-color);
 }
-
 .card-question h2 {
   margin: 0 0 10px;
   font-size: 24px;
+  color: var(--text-primary);
 }
-
 .card-answer {
   margin-top: 20px;
 }
-
 .knowledge-actions {
   display: flex;
   gap: 12px;
   justify-content: center;
   margin-top: 20px;
 }
-
-/* Кнопка "Назад к предметам" внизу */
-.page-actions {
-  text-align: center;
-  margin-top: 30px;
+.knowledge-actions .btn {
+  height: 34px !important;
+  min-width: auto !important;
+  width: auto !important;
+  padding: 0 16px !important;
+  font-size: 13px !important;
 }
 
-/* Пустое состояние */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
 }
-
 .empty-icon {
   font-size: 64px;
   margin-bottom: 20px;
 }
+.empty-state h3 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+.empty-state p {
+  color: var(--text-secondary);
+  margin-bottom: 25px;
+}
 
-/* Сообщения об ошибках */
 .error-message {
   background: #fee2e2;
   border: 1px solid #fecaca;
@@ -257,7 +289,6 @@
   justify-content: space-between;
   align-items: center;
 }
-
 .error-close {
   background: none;
   border: none;
@@ -266,21 +297,12 @@
   cursor: pointer;
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .flashcards-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
+    align-items: center;
   }
-  
   .flashcards-actions {
     width: 100%;
-    justify-content: flex-start;
-  }
-  
-  .flashcards-actions .btn {
-    min-width: auto;
-    flex: 1;
+    justify-content: center;
   }
 }

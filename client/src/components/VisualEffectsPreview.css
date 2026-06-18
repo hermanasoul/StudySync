@@ -1,16 +1,15 @@
-/* client/src/components/VisualEffectsPreview.css */
 .visual-effects-preview {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 25px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e5e7eb;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
 .preview-container h3 {
   font-size: 20px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0 0 20px 0;
   text-align: center;
 }
@@ -29,7 +28,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--accent-primary), #764ba2);
   overflow: hidden;
   transition: all 0.3s ease;
 }
@@ -56,7 +55,7 @@
 
 .avatar-icon {
   font-size: 48px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
 .preview-medium .avatar-icon {
@@ -73,12 +72,11 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255,255,255,0.1);
   backdrop-filter: blur(4px);
   z-index: 1;
 }
 
-/* Эффекты аватара */
 .avatar-sparkle::before {
   content: '';
   position: absolute;
@@ -86,7 +84,7 @@
   left: -10px;
   right: -10px;
   bottom: -10px;
-  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.4), transparent);
   animation: sparkle-rotate 3s linear infinite;
   z-index: 1;
 }
@@ -124,27 +122,22 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-
 @keyframes glow-pulse {
   0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.6); }
   50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.9); }
 }
-
 @keyframes fire-flicker {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.8; }
 }
-
 @keyframes halo-float {
   0%, 100% { transform: translateX(-50%) translateY(0); }
   50% { transform: translateX(-50%) translateY(-15px); }
 }
-
 @keyframes rainbow-cycle {
   0% { filter: hue-rotate(0deg); }
   100% { filter: hue-rotate(360deg); }
 }
-
 @keyframes pulse-animation {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
@@ -157,20 +150,20 @@
 .effect-name {
   font-size: 24px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .effect-description {
   font-size: 16px;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 12px;
 }
 
 .effect-status {
   display: inline-block;
-  background: #10b981;
-  color: white;
+  background: var(--accent-success);
+  color: var(--text-inverse);
   padding: 6px 16px;
   border-radius: 20px;
   font-size: 14px;
@@ -180,7 +173,7 @@
 .effect-options h4 {
   font-size: 18px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0 0 15px 0;
   text-align: center;
 }
@@ -197,22 +190,22 @@
   align-items: center;
   gap: 8px;
   padding: 15px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 10px;
-  background: white;
+  background: var(--bg-card);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .effect-option:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: #8b5cf6;
+  box-shadow: var(--shadow-sm);
+  border-color: var(--accent-primary);
 }
 
 .effect-option.selected {
-  border-color: #8b5cf6;
-  background: #f5f3ff;
+  border-color: var(--accent-primary);
+  background: var(--bg-active);
 }
 
 .effect-option.locked {
@@ -230,23 +223,23 @@
   top: -8px;
   right: -8px;
   font-size: 16px;
-  background: white;
+  background: var(--bg-card);
   border-radius: 50%;
   padding: 2px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .effect-option-name {
   font-size: 14px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   text-align: center;
 }
 
 .effect-requires {
   font-size: 12px;
-  color: #6b7280;
-  background: #f3f4f6;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
   padding: 2px 8px;
   border-radius: 10px;
 }
@@ -255,7 +248,6 @@
   .effects-grid {
     grid-template-columns: repeat(3, 1fr);
   }
-  
   .preview-content {
     flex-direction: column;
   }

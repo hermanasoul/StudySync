@@ -1,12 +1,10 @@
-/* client\src\components\NewChatModal.css */
-
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--modal-overlay);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -19,6 +17,10 @@
   max-height: 80vh;
   display: flex;
   flex-direction: column;
+  background: var(--modal-bg);
+  border-radius: 12px;
+  border: 1px solid var(--modal-border);
+  box-shadow: var(--shadow-lg);
 }
 
 .modal-header {
@@ -26,20 +28,20 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h2 {
   margin: 0;
   font-size: 20px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .close-button {
   background: none;
   border: none;
   font-size: 24px;
-  color: #6b7280;
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 0;
   width: 32px;
@@ -52,8 +54,8 @@
 }
 
 .close-button:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .modal-body {
@@ -71,9 +73,9 @@
 .type-btn {
   flex: 1;
   padding: 16px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 12px;
-  background: white;
+  background: var(--bg-card);
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -83,12 +85,12 @@
 }
 
 .type-btn:hover {
-  border-color: #9ca3af;
+  border-color: var(--border-dark);
 }
 
 .type-btn.active {
-  border-color: #3b82f6;
-  background: #eff6ff;
+  border-color: var(--accent-primary);
+  background: var(--bg-active);
 }
 
 .type-icon {
@@ -98,7 +100,7 @@
 .type-label {
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .group-info {
@@ -114,43 +116,45 @@
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 14px;
   transition: border-color 0.3s;
+  background: var(--input-bg);
+  color: var(--input-text);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
 .participants-section h4 {
   margin: 0 0 16px 0;
   font-size: 16px;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .friends-list {
   max-height: 300px;
   overflow-y: auto;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
 }
 
 .no-friends {
   padding: 40px 20px;
   text-align: center;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .no-friends-icon {
@@ -165,24 +169,24 @@
 
 .hint {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .friend-item {
   display: flex;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-light);
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
 .friend-item:hover {
-  background-color: #f9fafb;
+  background-color: var(--bg-hover);
 }
 
 .friend-item.selected {
-  background-color: #eff6ff;
+  background-color: var(--bg-active);
 }
 
 .friend-avatar {
@@ -201,8 +205,8 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  color: white;
+  background: linear-gradient(135deg, var(--accent-primary), #764ba2);
+  color: var(--text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -217,25 +221,25 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #10b981;
-  color: white;
+  background: var(--accent-success);
+  color: var(--text-inverse);
   font-size: 10px;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid white;
+  border: 2px solid var(--bg-card);
 }
 
 .friend-name {
   flex: 1;
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .selected-check {
-  color: #10b981;
+  color: var(--accent-success);
   font-size: 20px;
   font-weight: bold;
 }
@@ -252,10 +256,10 @@
 .selected-count {
   margin-top: 16px;
   padding: 12px;
-  background: #f3f4f6;
+  background: var(--bg-secondary);
   border-radius: 6px;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-secondary);
   text-align: center;
 }
 
@@ -264,8 +268,8 @@
   justify-content: flex-end;
   gap: 12px;
   padding: 20px;
-  border-top: 1px solid #e5e7eb;
-  background: #f9fafb;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-secondary);
 }
 
 .btn-outline,
@@ -280,26 +284,26 @@
 }
 
 .btn-outline {
-  background: white;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .btn-outline:hover {
-  background: #f3f4f6;
-  border-color: #9ca3af;
+  background: var(--bg-hover);
+  border-color: var(--border-dark);
 }
 
 .btn-primary {
-  background: #3b82f6;
-  color: white;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--accent-primary-hover);
 }
 
 .btn-primary:disabled {
-  background: #9ca3af;
+  background: var(--text-muted);
   cursor: not-allowed;
 }

@@ -1,4 +1,3 @@
-/* client/src/components/AchievementNotification.css */
 .achievement-notification {
   position: fixed;
   top: 80px;
@@ -12,13 +11,14 @@
 }
 
 .achievement-notification-content {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 20px;
   width: 350px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lg);
   position: relative;
   overflow: hidden;
+  border: 1px solid var(--border-color);
 }
 
 .close-notification-btn {
@@ -28,7 +28,7 @@
   background: none;
   border: none;
   font-size: 20px;
-  color: #9ca3af;
+  color: var(--text-muted);
   cursor: pointer;
   width: 30px;
   height: 30px;
@@ -40,8 +40,8 @@
 }
 
 .close-notification-btn:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .achievement-header {
@@ -72,20 +72,20 @@
 .achievement-title h3 {
   font-size: 16px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-secondary);
   margin: 0 0 4px 0;
 }
 
 .achievement-title h4 {
   font-size: 18px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .achievement-description {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-secondary);
   line-height: 1.5;
   margin: 0 0 15px 0;
 }
@@ -95,14 +95,14 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 15px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
 }
 
 .achievement-points {
   font-size: 14px;
   font-weight: 600;
-  color: #8b5cf6;
-  background: #f3f4f6;
+  color: var(--accent-primary);
+  background: var(--bg-secondary);
   padding: 6px 12px;
   border-radius: 20px;
 }
@@ -171,7 +171,6 @@
     right: 10px;
     left: 10px;
   }
-  
   .achievement-notification-content {
     width: auto;
     max-width: 100%;

@@ -1,7 +1,7 @@
 .header {
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid #e1e5e9;
+  background: var(--bg-header);
+  box-shadow: var(--shadow-sm);
+  border-bottom: 1px solid var(--border-color);
   position: fixed;
   top: 0;
   left: 0;
@@ -24,7 +24,7 @@
   justify-content: center;
   align-items: center;
   padding: 10px 0;
-  border-bottom: 1px solid #e1e5e9;
+  border-bottom: 1px solid var(--border-color);
   height: 60px;
 }
 
@@ -39,7 +39,7 @@
 .logo {
   font-size: 28px;
   font-weight: bold;
-  color: #4f46e5;
+  color: var(--accent-primary);
   text-decoration: none;
   line-height: 1.2;
 }
@@ -53,7 +53,7 @@
 }
 
 .nav-link {
-  color: #6b7280;
+  color: var(--text-secondary);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s;
@@ -63,7 +63,7 @@
 }
 
 .nav-link:hover {
-  color: #4f46e5;
+  color: var(--accent-primary);
 }
 
 .header-buttons {
@@ -75,7 +75,7 @@
 
 .user-greeting {
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
   white-space: nowrap;
   font-size: 0.9rem;
   flex: 0 1 auto;
@@ -84,75 +84,10 @@
   text-overflow: ellipsis;
 }
 
-/* Сброс лишних отступов у контейнеров уведомлений и чата */
-.header-buttons .notifications-container,
-.header-buttons .ChatNotification {
-  padding: 0 !important;
-  margin: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-}
-
-/* Мини-иконки уведомлений и сообщений – совсем компактные */
-.header-buttons .notifications-button,
-.header-buttons .ChatNotification button {
-  width: 14px !important;
-  height: 14px !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 0.55rem !important;
-  border-radius: 3px !important;
-  background: #f3f4f6 !important;
-  border: none !important;
-  cursor: pointer !important;
-  color: #374151 !important;
-  min-width: auto !important;
-  box-shadow: none !important;
-  line-height: 1 !important;
-}
-
-.header-buttons .notifications-button:hover,
-.header-buttons .ChatNotification button:hover {
-  background: #e5e7eb !important;
-}
-
-/* Переключатель темы – компактный, прижат вправо */
-.theme-toggle {
-  width: 18px !important;
-  height: 18px !important;
-  padding: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 0.65rem !important;
-  border-radius: 3px !important;
-  background: #f3f4f6 !important;
-  border: none !important;
-  cursor: pointer !important;
-  color: #374151 !important;
-  min-width: auto !important;
-  box-shadow: none !important;
-  margin-left: auto;
-  margin-right: 10px;
-}
-
-.theme-toggle:hover {
-  background: #e5e7eb !important;
-}
-
-/* Увеличенные отступы между элементами правой группы */
-.header-buttons {
-  gap: 22px;
-}
-
-/* Единый стиль для кнопок Профиль и Выйти */
+/* ===== ЕДИНЫЙ СТИЛЬ ДЛЯ ВСЕХ КНОПОК В ШАПКЕ ===== */
 .header-buttons .btn {
-  padding: 0 16px !important;
   height: 40px !important;
-  border-radius: 8px !important;
+  padding: 0 16px !important;
   font-size: 0.875rem !important;
   font-weight: 500 !important;
   display: inline-flex !important;
@@ -166,39 +101,80 @@
   min-width: auto !important;
   box-shadow: none !important;
   line-height: 1 !important;
+  border-radius: 8px !important;
 }
 
 .header-buttons .btn-success {
-  background: #10b981 !important;
-  color: white !important;
+  background: var(--accent-success) !important;
+  color: var(--text-inverse) !important;
 }
 .header-buttons .btn-success:hover {
-  background: #059669 !important;
+  background: var(--accent-success-hover) !important;
 }
 
 .header-buttons .btn-danger {
-  background: #ef4444 !important;
-  color: white !important;
+  background: var(--accent-danger) !important;
+  color: var(--text-inverse) !important;
 }
 .header-buttons .btn-danger:hover {
-  background: #dc2626 !important;
+  background: var(--accent-danger-hover) !important;
 }
 
 .header-buttons .btn-outline {
   background: transparent !important;
-  border: 1px solid #d1d5db !important;
-  color: #374151 !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-secondary) !important;
 }
 .header-buttons .btn-outline:hover {
-  background: #f3f4f6 !important;
+  background: var(--bg-hover) !important;
 }
 
 .header-buttons .btn-primary {
-  background: #4f46e5 !important;
-  color: white !important;
+  background: var(--accent-primary) !important;
+  color: var(--text-inverse) !important;
 }
 .header-buttons .btn-primary:hover {
-  background: #4338ca !important;
+  background: var(--accent-primary-hover) !important;
+}
+
+/* ===== КНОПКИ "Войти" и "Регистрация" — гарантированное выравнивание ===== */
+.header-buttons .btn-outline,
+.header-buttons .btn-primary {
+  height: 40px !important;
+  padding: 0 16px !important;
+  font-size: 0.875rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+
+/* ===== КОМПАКТНЫЕ ИКОНКИ УВЕДОМЛЕНИЙ ===== */
+.header-buttons .notifications-button,
+.header-buttons .ChatNotification button,
+.header-buttons .theme-toggle {
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1rem !important;
+  border-radius: 50% !important;
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  min-width: 0 !important;
+  box-shadow: none !important;
+}
+
+.header-buttons .notifications-button:hover,
+.header-buttons .ChatNotification button:hover,
+.header-buttons .theme-toggle:hover {
+  background: var(--bg-hover) !important;
 }
 
 /* Адаптивность */

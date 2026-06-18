@@ -1,5 +1,3 @@
-// client/src/pages/GroupPage.tsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -8,8 +6,10 @@ import CreateGroupNoteModal from '../components/CreateGroupNoteModal';
 import EditGroupNoteModal from '../components/EditGroupNoteModal';
 import EditFlashcardModal from '../components/EditFlashcardModal';
 import InviteMembersModal from '../components/InviteMembersModal';
+import ConfirmModal from '../components/ConfirmModal';
+import StudyCompleteModal from '../components/StudyCompleteModal';
 import Button from '../components/Button';
-import { groupsAPI } from '../services/api';
+import { groupsAPI, notesAPI, flashcardsAPI } from '../services/api';
 import webSocketService from '../services/websocket';
 import './GroupPage.css';
 import '../App.css';
@@ -45,6 +45,54 @@ interface Flashcard {
   groupId?: string;
 }
 
+// ===== Компонент для отдельной карточки =====
+interface FlashcardItemProps {
+  flashcard: Flashcard;
+  onEdit: (flashcard: Flashcard) => void;
+  onDelete: (id: string) => void;
+}
+
+const GroupFlashcardItem: React.FC<FlashcardItemProps> = ({ flashcard, onEdit, onDelete }) => {
+  const [showAnswer, setShowAnswer] = useState(false);
+
+  return (
+    <div className="flashcard-card">
+      <div className="flashcard-content">
+        <div className="flashcard-question">
+          <h4>{flashcard.question}</h4>
+          {flashcard.hint && <div className="flashcard-hint">💡 {flashcard.hint}</div>}
+        </div>
+        {showAnswer && (
+          <div className="flashcard-answer">
+            <p>{flashcard.answer}</p>
+          </div>
+        )}
+        <button
+          className="btn btn-primary toggle-answer-btn"  // <-- изменено с btn-outline на btn-primary
+          onClick={() => setShowAnswer(!showAnswer)}
+        >
+          {showAnswer ? 'Скрыть ответ' : 'Показать ответ'}
+        </button>
+      </div>
+      <div className="flashcard-actions">
+        <button
+          className="btn btn-sm btn-outline"
+          onClick={() => onEdit(flashcard)}
+        >
+          Редактировать
+        </button>
+        <button
+          className="btn btn-sm btn-danger"
+          onClick={() => onDelete(flashcard._id)}
+        >
+          Удалить
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ===== Основной компонент страницы =====
 const GroupPage: React.FC = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
@@ -53,7 +101,7 @@ const GroupPage: React.FC = () => {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'flashcards' | 'notes'>('overview');
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteGroupConfirm, setShowDeleteGroupConfirm] = useState(false);
   const [showCreateFlashcardModal, setShowCreateFlashcardModal] = useState(false);
   const [showCreateNoteModal, setShowCreateNoteModal] = useState(false);
   const [showEditNoteModal, setShowEditNoteModal] = useState(false);
@@ -62,6 +110,17 @@ const GroupPage: React.FC = () => {
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [editingFlashcard, setEditingFlashcard] = useState<Flashcard | null>(null);
   const [members, setMembers] = useState<Group['members']>([]);
+  const [showDeleteFlashcardConfirm, setShowDeleteFlashcardConfirm] = useState(false);
+  const [deletingFlashcardId, setDeletingFlashcardId] = useState<string | null>(null);
+  const [showDeleteNoteConfirm, setShowDeleteNoteConfirm] = useState(false);
+  const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
+
+  // ===== Режим изучения карточек =====
+  const [studyMode, setStudyMode] = useState(false);
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [showAnswerInStudy, setShowAnswerInStudy] = useState(false);
+  const [studiedCards, setStudiedCards] = useState<string[]>([]);
+  const [showStudyComplete, setShowStudyComplete] = useState(false);
 
   const isValidGroupId = !!groupId && groupId !== 'undefined';
 
@@ -153,6 +212,13 @@ const GroupPage: React.FC = () => {
     };
   }, [group?._id, loadAllData]);
 
+  // Сброс режима изучения при смене вкладки
+  useEffect(() => {
+    if (activeTab !== 'flashcards') {
+      setStudyMode(false);
+    }
+  }, [activeTab]);
+
   const getRoleBadge = (role: string) => {
     const cfg = { owner: { label: 'Владелец', color: '#ef4444' }, admin: { label: 'Админ', color: '#f59e0b' }, member: { label: 'Участник', color: '#3b82f6' } };
     const c = cfg[role as keyof typeof cfg] || cfg.member;
@@ -170,6 +236,7 @@ const GroupPage: React.FC = () => {
     return group?.createdBy._id === u.id;
   };
 
+  // ===== Обработчики =====
   const handleNoteCreated = (newNoteData?: any) => {
     if (newNoteData?._id) {
       setNotes(prev => [{
@@ -226,6 +293,91 @@ const GroupPage: React.FC = () => {
     loadAllData();
   };
 
+  const handleDeleteFlashcard = async () => {
+    if (!deletingFlashcardId) return;
+    try {
+      await groupsAPI.deleteFlashcard(group!._id, deletingFlashcardId);
+      setFlashcards(prev => prev.filter(f => f._id !== deletingFlashcardId));
+      setShowDeleteFlashcardConfirm(false);
+      setDeletingFlashcardId(null);
+    } catch (err) {
+      console.error('Delete flashcard error:', err);
+      alert('Ошибка удаления карточки');
+    }
+  };
+
+  const handleDeleteNote = async () => {
+    if (!deletingNoteId) return;
+    try {
+      await notesAPI.delete(deletingNoteId);
+      setNotes(prev => prev.filter(n => n._id !== deletingNoteId));
+      setShowDeleteNoteConfirm(false);
+      setDeletingNoteId(null);
+    } catch (err) {
+      console.error('Delete note error:', err);
+      alert('Ошибка удаления заметки');
+    }
+  };
+
+  // ===== Режим изучения =====
+  const startStudy = () => {
+    if (flashcards.length === 0) return;
+    setStudyMode(true);
+    setCurrentCardIndex(0);
+    setShowAnswerInStudy(false);
+    setStudiedCards([]);
+    setShowStudyComplete(false);
+  };
+
+  const exitStudy = () => {
+    setStudyMode(false);
+    setShowStudyComplete(false);
+  };
+
+  const handleKnow = async () => {
+    const card = flashcards[currentCardIndex];
+    try {
+      await flashcardsAPI.markAsKnown(card._id);
+      if (!studiedCards.includes(card._id)) {
+        setStudiedCards(prev => [...prev, card._id]);
+      }
+      nextCard();
+    } catch (e) {
+      console.error('Error marking as known:', e);
+      nextCard();
+    }
+  };
+
+  const handleDontKnow = async () => {
+    const card = flashcards[currentCardIndex];
+    try {
+      await flashcardsAPI.markAsUnknown(card._id);
+      if (!studiedCards.includes(card._id)) {
+        setStudiedCards(prev => [...prev, card._id]);
+      }
+      nextCard();
+    } catch (e) {
+      console.error('Error marking as unknown:', e);
+      nextCard();
+    }
+  };
+
+  const nextCard = () => {
+    if (currentCardIndex < flashcards.length - 1) {
+      setCurrentCardIndex(prev => prev + 1);
+      setShowAnswerInStudy(false);
+    } else {
+      setShowStudyComplete(true);
+    }
+  };
+
+  const restartStudy = () => {
+    setCurrentCardIndex(0);
+    setShowAnswerInStudy(false);
+    setStudiedCards([]);
+    setShowStudyComplete(false);
+  };
+
   if (loading) return <div className="group-page"><Header /><div className="page-with-header"><div className="loading">Загрузка группы...</div></div></div>;
   if (!group) return <div className="group-page"><Header /><div className="page-with-header"><div className="error-page"><h2>Группа не найдена</h2><p>Группа не существует или у вас нет доступа.</p><Button variant="primary" href="/groups">Вернуться к группам</Button></div></div></div>;
 
@@ -246,14 +398,13 @@ const GroupPage: React.FC = () => {
                   {group.isPublic && <span className="public-badge">Публичная</span>}
                   <span className="member-count">{members.length} участников</span>
                 </div>
-                {/* Код приглашения теперь под названием */}
                 <div className="invite-section">
                   <div className="invite-label">Код приглашения:</div>
                   <div className="invite-code-display">{group.inviteCode}</div>
                 </div>
               </div>
               <div className="group-actions-header">
-                {isUserOwner() && <Button variant="danger" onClick={() => setShowDeleteConfirm(true)}>Удалить группу</Button>}
+                {isUserOwner() && <Button variant="danger" onClick={() => setShowDeleteGroupConfirm(true)}>Удалить группу</Button>}
               </div>
             </div>
             {group.description && <div className="group-description-section"><p className="group-description">{group.description}</p></div>}
@@ -278,7 +429,11 @@ const GroupPage: React.FC = () => {
                     <div className="action-buttons">
                       <Button variant="primary" onClick={()=>setShowCreateFlashcardModal(true)}>Создать карточку</Button>
                       <Button variant="success" onClick={()=>setShowInviteModal(true)}>Пригласить участников</Button>
-                      {subjectIdUnified && <Button variant="outline" href={`/subjects/${subjectIdUnified}/flashcards`}>Изучать карточки</Button>}
+                      {subjectIdUnified && (
+                        <Button variant="outline" onClick={startStudy}>
+                          Изучать все карточки
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -297,7 +452,7 @@ const GroupPage: React.FC = () => {
                     <h3>Карточки группы ({flashcards.length})</h3>
                     <div className="flashcards-header-actions">
                       {subjectIdUnified && (
-                        <Button variant="outline" href={`/subjects/${subjectIdUnified}/flashcards`}>
+                        <Button variant="outline" onClick={startStudy}>
                           Изучать все карточки
                         </Button>
                       )}
@@ -306,39 +461,98 @@ const GroupPage: React.FC = () => {
                   </div>
                   {flashcards.length===0 ? (
                     <div className="empty-state"><div className="empty-icon">📚</div><h4>Пока нет карточек</h4><p>Создайте первую карточку для совместного изучения</p><Button variant="primary" onClick={()=>setShowCreateFlashcardModal(true)}>Создать карточку</Button></div>
-                  ) : (
-                    <div className="flashcards-list">
-                      {flashcards.map(f=>
-                        <div key={f._id} className="flashcard-card">
-                          <div className="flashcard-content">
-                            <div className="flashcard-question"><h4>{f.question}</h4>{f.hint&&<div className="flashcard-hint">💡 {f.hint}</div>}</div>
-                            <div className="flashcard-answer"><p>{f.answer}</p></div>
+                  ) : studyMode ? (
+                    <div className="study-mode">
+                      <div className="study-progress">Прогресс: {currentCardIndex + 1} / {flashcards.length}</div>
+                      <div className="flashcard-study">
+                        <div className="study-card">
+                          <div className="card-question">
+                            <h2>{flashcards[currentCardIndex].question}</h2>
+                            {flashcards[currentCardIndex].hint && <div className="card-hint">💡 {flashcards[currentCardIndex].hint}</div>}
                           </div>
-                          <div className="flashcard-actions">
-                            <button
-                              className="edit-btn"
-                              onClick={() => {
-                                setEditingFlashcard(f);
-                                setShowEditFlashcardModal(true);
-                              }}
-                            >
-                              ✏️
-                            </button>
+                          {showAnswerInStudy && (
+                            <div className="card-answer"><h3>Ответ:</h3><p>{flashcards[currentCardIndex].answer}</p></div>
+                          )}
+                          <div className="study-actions">
+                            {!showAnswerInStudy ? (
+                              <button className="btn btn-primary" onClick={() => setShowAnswerInStudy(true)}>Показать ответ</button>
+                            ) : (
+                              <div className="knowledge-actions">
+                                <button className="btn btn-success" onClick={handleKnow}>Знаю ✅</button>
+                                <button className="btn btn-danger" onClick={handleDontKnow}>Не знаю ❌</button>
+                              </div>
+                            )}
                           </div>
                         </div>
-                      )}
+                      </div>
+                      <div className="study-exit">
+                        <button className="btn btn-outline" onClick={exitStudy}>Выйти из изучения</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flashcards-list">
+                      {flashcards.map(f => (
+                        <GroupFlashcardItem
+                          key={f._id}
+                          flashcard={f}
+                          onEdit={(card) => {
+                            setEditingFlashcard(card);
+                            setShowEditFlashcardModal(true);
+                          }}
+                          onDelete={(id) => {
+                            setDeletingFlashcardId(id);
+                            setShowDeleteFlashcardConfirm(true);
+                          }}
+                        />
+                      ))}
                     </div>
                   )}
                 </div>
               )}
               {activeTab==='notes' && (
                 <div className="notes-tab">
-                  <div className="notes-header"><h3>Заметки группы ({notes.length})</h3><Button variant="primary" onClick={()=>setShowCreateNoteModal(true)}>+ Создать заметку</Button></div>
+                  <div className="notes-header">
+                    <h3>Заметки группы ({notes.length})</h3>
+                    <button
+                      className="btn btn-sm btn-primary create-note-btn"
+                      onClick={()=>setShowCreateNoteModal(true)}
+                    >
+                      + Создать заметку
+                    </button>
+                  </div>
                   {notes.length===0 ? (
-                    <div className="empty-state"><div className="empty-icon">📝</div><h4>Пока нет заметок</h4><p>Создайте первую заметку для совместной работы</p><Button variant="primary" onClick={()=>setShowCreateNoteModal(true)}>Создать заметку</Button></div>
+                    <div className="empty-state"><div className="empty-icon">📝</div><h4>Пока нет заметок</h4><p>Создайте первую заметку для совместной работы</p><button className="btn btn-sm btn-primary" onClick={()=>setShowCreateNoteModal(true)}>Создать заметку</button></div>
                   ) : (
                     <div className="notes-list">
-                      {notes.map(n=><div key={n._id} className="note-card"><div className="note-header"><div className="note-title">{n.title}</div><div className="note-actions"><button className="edit-btn" onClick={()=>{ setEditingNote(n); setShowEditNoteModal(true); }}>✏️</button></div></div><div className="note-meta"><span className="note-author">Автор: {n.authorId.name}</span><span className="note-date">{new Date(n.createdAt).toLocaleDateString('ru-RU')}</span></div><div className="note-content">{n.content}</div></div>)}
+                      {notes.map(n=>(
+                        <div key={n._id} className="note-card">
+                          <div className="note-header">
+                            <div className="note-title">{n.title}</div>
+                            <div className="note-actions">
+                              <button
+                                className="btn btn-sm btn-outline"
+                                onClick={()=>{ setEditingNote(n); setShowEditNoteModal(true); }}
+                              >
+                                Редактировать
+                              </button>
+                              <button
+                                className="btn btn-sm btn-danger"
+                                onClick={() => {
+                                  setDeletingNoteId(n._id);
+                                  setShowDeleteNoteConfirm(true);
+                                }}
+                              >
+                                Удалить
+                              </button>
+                            </div>
+                          </div>
+                          <div className="note-meta">
+                            <span className="note-author">Автор: {n.authorId.name}</span>
+                            <span className="note-date">{new Date(n.createdAt).toLocaleDateString('ru-RU')}</span>
+                          </div>
+                          <div className="note-content">{n.content}</div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -347,9 +561,41 @@ const GroupPage: React.FC = () => {
           </div>
         </div>
       </div>
-      {showDeleteConfirm && (
-        <div className="modal-overlay"><div className="modal-content delete-modal"><div className="modal-header"><h2>Удалить группу</h2><button className="close-button" onClick={()=>setShowDeleteConfirm(false)}>×</button></div><div className="modal-body"><p>Вы уверены, что хотите удалить группу <strong>"{group.name}"</strong>?</p><p>Это действие нельзя отменить.</p></div><div className="modal-actions"><Button variant="outline" onClick={()=>setShowDeleteConfirm(false)}>Отмена</Button><Button variant="danger" onClick={handleDeleteGroup}>Удалить группу</Button></div></div></div>
+
+      {/* Модалки */}
+      {showDeleteGroupConfirm && (
+        <div className="modal-overlay"><div className="modal-content delete-modal"><div className="modal-header"><h2>Удалить группу</h2><button className="close-button" onClick={()=>setShowDeleteGroupConfirm(false)}>×</button></div><div className="modal-body"><p>Вы уверены, что хотите удалить группу <strong>"{group.name}"</strong>?</p><p>Это действие нельзя отменить.</p></div><div className="modal-actions"><Button variant="outline" onClick={()=>setShowDeleteGroupConfirm(false)}>Отмена</Button><Button variant="danger" onClick={handleDeleteGroup}>Удалить группу</Button></div></div></div>
       )}
+
+      <ConfirmModal
+        isOpen={showDeleteFlashcardConfirm}
+        onClose={() => { setShowDeleteFlashcardConfirm(false); setDeletingFlashcardId(null); }}
+        onConfirm={handleDeleteFlashcard}
+        title="Удаление карточки"
+        message="Вы уверены, что хотите удалить эту карточку? Это действие нельзя отменить."
+        confirmText="Удалить"
+        cancelText="Отмена"
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteNoteConfirm}
+        onClose={() => { setShowDeleteNoteConfirm(false); setDeletingNoteId(null); }}
+        onConfirm={handleDeleteNote}
+        title="Удаление заметки"
+        message="Вы уверены, что хотите удалить эту заметку? Это действие нельзя отменить."
+        confirmText="Удалить"
+        cancelText="Отмена"
+      />
+
+      <StudyCompleteModal
+        isOpen={showStudyComplete}
+        onClose={exitStudy}
+        studiedCount={studiedCards.length}
+        totalCount={flashcards.length}
+        onRestart={restartStudy}
+        mode="flashcards"
+      />
+
       {group && (
         <>
           <CreateGroupFlashcardModal

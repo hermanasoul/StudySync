@@ -117,10 +117,9 @@ const FriendsPage: React.FC = () => {
       if (activeTab === 'search') {
         handleSearch();
       }
-    }, 300); // 300ms задержка
-
+    }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchQuery]); // eslint-disable-line
 
   const handleSearch = async () => {
     if (searchLoading) return;
@@ -148,7 +147,6 @@ const FriendsPage: React.FC = () => {
     setLoadingState(userId, true);
     try {
       await friendsAPI.sendRequest(userId);
-      // Обновляем список после отправки
       setSearchResults(prev => prev.filter(u => u._id !== userId));
       loadData();
     } catch (err: any) {
@@ -270,7 +268,7 @@ const FriendsPage: React.FC = () => {
                           </div>
                         </div>
                         <button
-                          className="btn btn-danger btn-sm"  // Добавлен btn-sm
+                          className="btn btn-danger btn-sm"
                           disabled={!!requestLoading[friend.friendshipId || friend._id]}
                           onClick={() => handleRemoveFriend(friend.friendshipId || friend._id)}
                         >

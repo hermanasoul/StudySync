@@ -1,7 +1,7 @@
 .home-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
-  color: white;
+  background: linear-gradient(135deg, var(--accent-primary), #764ba2);
+  color: var(--text-inverse);
 }
 
 .home-main {
@@ -50,13 +50,12 @@
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  background: white;
-  color: #4f46e5;
+  background: var(--text-inverse);
+  color: var(--accent-primary);
   border: none;
   box-shadow: 0 4px 14px rgba(251, 191, 36, 0.3);
   cursor: pointer;
 }
-
 .hero-btn-primary:hover {
   background: #e0e7ff;
   transform: translateY(-2px);
@@ -77,14 +76,13 @@
   justify-content: center;
   box-sizing: border-box;
   background: transparent;
-  color: white;
-  border: 2px solid white;
+  color: var(--text-inverse);
+  border: 2px solid var(--text-inverse);
   box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
   cursor: pointer;
 }
-
 .hero-btn-outline:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255,255,255,0.1);
   transform: translateY(-2px);
   box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
 }
@@ -93,11 +91,9 @@
   .hero-section h1 {
     font-size: 36px;
   }
-
   .hero-section p {
     font-size: 18px;
   }
-
   .hero-buttons {
     flex-direction: column;
     width: 100%;

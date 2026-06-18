@@ -16,11 +16,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* размеры будут задаваться из Header.css */
 }
 
 .notification-button:hover {
-  background-color: #f3f4f6;
+  background-color: var(--bg-hover);
 }
 
 .notification-icon {
@@ -37,18 +36,17 @@
   min-width: 18px;
   height: 18px;
   padding: 0 4px;
-  background: #ef4444;
-  color: white;
+  background: var(--accent-danger);
+  color: var(--text-inverse);
   border-radius: 9px;
   font-size: 11px;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid white;
+  border: 2px solid var(--bg-card);
 }
 
-/* Остальные стили дропдауна без изменений */
 .dropdown-overlay {
   position: fixed;
   top: 0;
@@ -63,12 +61,13 @@
   top: 100%;
   right: 0;
   width: 320px;
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lg);
   z-index: 1000;
   margin-top: 8px;
   overflow: hidden;
+  border: 1px solid var(--border-color);
 }
 
 .dropdown-header {
@@ -76,19 +75,19 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .dropdown-header h4 {
   margin: 0;
   font-size: 16px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .mark-read-btn {
   padding: 4px 12px;
-  background: #3b82f6;
-  color: white;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
   border: none;
   border-radius: 6px;
   font-size: 12px;
@@ -97,7 +96,7 @@
 }
 
 .mark-read-btn:hover {
-  background: #2563eb;
+  background: var(--accent-primary-hover);
 }
 
 .chats-list {
@@ -121,7 +120,7 @@
 
 .empty-chats p {
   margin: 0;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
@@ -129,21 +128,21 @@
   display: flex;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-light);
   text-decoration: none;
   color: inherit;
   transition: background-color 0.3s;
 }
 
 .chat-item:hover {
-  background-color: #f9fafb;
+  background-color: var(--bg-hover);
 }
 
 .chat-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(135deg, var(--accent-primary), #764ba2);
   margin-right: 12px;
   position: relative;
   flex-shrink: 0;
@@ -155,9 +154,9 @@
   right: 0;
   width: 10px;
   height: 10px;
-  background: #ef4444;
+  background: var(--accent-danger);
   border-radius: 50%;
-  border: 2px solid white;
+  border: 2px solid var(--bg-card);
 }
 
 .chat-info {
@@ -168,13 +167,13 @@
 .chat-name {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 2px;
 }
 
 .chat-preview {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -184,8 +183,8 @@
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
-  background: #3b82f6;
-  color: white;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
   border-radius: 10px;
   font-size: 12px;
   font-weight: bold;
@@ -197,12 +196,12 @@
 
 .dropdown-footer {
   padding: 12px 16px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
   text-align: center;
 }
 
 .view-all-btn {
-  color: #3b82f6;
+  color: var(--link-color);
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -210,6 +209,6 @@
 }
 
 .view-all-btn:hover {
-  color: #2563eb;
+  color: var(--link-hover);
   text-decoration: underline;
 }

@@ -1,5 +1,3 @@
-// client/src/pages/StudySessionsPage.tsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { studySessionsAPI, subjectsAPI, groupsAPI } from '../services/api';
@@ -134,6 +132,15 @@ const StudySessionsPage: React.FC = () => {
     setFilters(initialFilters);
   };
 
+  // Переключатели для кнопок-фильтров
+  const toggleFriendsOnly = () => {
+    setFilters(prev => ({ ...prev, friendsOnly: !prev.friendsOnly }));
+  };
+
+  const toggleShowActiveOnly = () => {
+    setFilters(prev => ({ ...prev, showActiveOnly: !prev.showActiveOnly }));
+  };
+
   const getActiveSessionsCount = () => sessions.filter(s => s.status === 'active').length;
   const getWaitingSessionsCount = () => sessions.filter(s => s.status === 'waiting').length;
 
@@ -212,42 +219,31 @@ const StudySessionsPage: React.FC = () => {
           </div>
 
           <div className="filter-checkboxes">
-            <label className="checkbox-label">
-              <input type="checkbox" checked={filters.friendsOnly} onChange={e => handleFilterChange('friendsOnly', e.target.checked)} />
-              Только с друзьями
-            </label>
-            <label className="checkbox-label">
-              <input type="checkbox" checked={filters.showActiveOnly} onChange={e => handleFilterChange('showActiveOnly', e.target.checked)} />
-              Только активные
-            </label>
-            {/* Кнопка сброса с инлайн-стилями – гарантированно компактная */}
+            {/* Кнопка-переключатель "Только с друзьями" */}
             <button
-  onClick={resetFilters}
-  style={{
-    height: '32px',
-    padding: '0 14px',
-    fontSize: '0.85rem',
-    background: '#4f46e5',
-    color: 'white',
-    border: 'none',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    fontWeight: 600,
-    lineHeight: '32px',
-    minWidth: 'auto',
-    width: 'auto',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: 'none',
-    margin: 0,
-    whiteSpace: 'nowrap',
-    boxSizing: 'border-box',
-    flexShrink: 0,
-  }}
->
-  Сбросить
-</button>
+              className={`filter-toggle-btn ${filters.friendsOnly ? 'active' : ''}`}
+              onClick={toggleFriendsOnly}
+              type="button"
+            >
+              Только с друзьями
+            </button>
+
+            {/* Кнопка-переключатель "Только активные" */}
+            <button
+              className={`filter-toggle-btn ${filters.showActiveOnly ? 'active' : ''}`}
+              onClick={toggleShowActiveOnly}
+              type="button"
+            >
+              Только активные
+            </button>
+
+            {/* Кнопка сброса */}
+            <button
+              onClick={resetFilters}
+              className="reset-btn"
+            >
+              Сбросить
+            </button>
           </div>
         </div>
 

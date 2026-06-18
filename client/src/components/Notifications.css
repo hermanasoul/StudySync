@@ -16,11 +16,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* размеры будут задаваться из Header.css */
 }
 
 .notifications-button:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--bg-hover);
 }
 
 .notification-icon {
@@ -35,8 +34,8 @@
   position: absolute;
   top: -5px;
   right: -5px;
-  background-color: #ef4444;
-  color: white;
+  background-color: var(--accent-danger);
+  color: var(--text-inverse);
   font-size: 0.65rem;
   font-weight: bold;
   border-radius: 50%;
@@ -46,35 +45,34 @@
   align-items: center;
   justify-content: center;
   animation: pulse 2s infinite;
-  border: 2px solid white;
+  border: 2px solid var(--bg-card);
 }
 
 @keyframes pulse {
   0% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    box-shadow: 0 0 0 0 rgba(239,68,68,0.7);
   }
   50% {
     transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    box-shadow: 0 0 0 10px rgba(239,68,68,0);
   }
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    box-shadow: 0 0 0 0 rgba(239,68,68,0);
   }
 }
 
-/* Дропдаун и остальные стили остаются без изменений */
 .notifications-dropdown {
   position: absolute;
   top: 100%;
   right: 0;
   width: 400px;
   max-height: 500px;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
   z-index: 1000;
   overflow: hidden;
   animation: slideDown 0.3s ease;
@@ -93,9 +91,9 @@
 
 .notifications-header {
   padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(135deg, var(--accent-primary), #764ba2);
+  color: var(--text-inverse);
 }
 
 .notifications-header h3 {
@@ -111,9 +109,9 @@
 }
 
 .mark-all-read-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255,255,255,0.2);
+  color: var(--text-inverse);
+  border: 1px solid rgba(255,255,255,0.3);
   padding: 4px 8px;
   border-radius: 4px;
   cursor: pointer;
@@ -122,11 +120,11 @@
 }
 
 .mark-all-read-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255,255,255,0.3);
 }
 
 .notifications-actions a {
-  color: white;
+  color: var(--text-inverse);
   text-decoration: none;
   padding: 4px 8px;
   border-radius: 4px;
@@ -134,7 +132,7 @@
 }
 
 .notifications-actions a:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255,255,255,0.2);
 }
 
 .notifications-list {
@@ -146,14 +144,14 @@
 .loading-notifications {
   padding: 40px 20px;
   text-align: center;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .loading-notifications .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #e5e7eb;
-  border-top: 4px solid #667eea;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--accent-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 16px;
@@ -167,7 +165,7 @@
 .no-notifications {
   padding: 40px 20px;
   text-align: center;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .no-notifications .empty-icon {
@@ -179,22 +177,22 @@
 .notification-item {
   display: flex;
   padding: 12px 16px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-light);
   cursor: pointer;
   transition: background-color 0.2s;
   position: relative;
 }
 
 .notification-item:hover {
-  background-color: #f9fafb;
+  background-color: var(--bg-hover);
 }
 
 .notification-item.unread {
-  background-color: #f0f9ff;
+  background-color: var(--bg-active);
 }
 
 .notification-item.unread:hover {
-  background-color: #e0f2fe;
+  background-color: var(--bg-hover);
 }
 
 .notification-item .notification-icon {
@@ -219,7 +217,7 @@
   margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -229,7 +227,7 @@
 .unread-dot {
   width: 8px;
   height: 8px;
-  background-color: #ef4444;
+  background-color: var(--accent-danger);
   border-radius: 50%;
   flex-shrink: 0;
   margin-left: 8px;
@@ -237,18 +235,14 @@
 }
 
 @keyframes blink {
-  0%, 50% {
-    opacity: 1;
-  }
-  25%, 75% {
-    opacity: 0.5;
-  }
+  0%, 50% { opacity: 1; }
+  25%, 75% { opacity: 0.5; }
 }
 
 .notification-message {
   margin: 0 0 8px 0;
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -265,13 +259,13 @@
 
 .notification-time {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .mark-read-btn {
   background: none;
-  border: 1px solid #d1d5db;
-  color: #6b7280;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -284,50 +278,43 @@
 }
 
 .mark-read-btn:hover {
-  background-color: #10b981;
-  color: white;
-  border-color: #10b981;
+  background-color: var(--accent-success);
+  color: var(--text-inverse);
+  border-color: var(--accent-success);
 }
 
-/* Стили для разных типов уведомлений */
 .notification-group-invitation {
-  border-left: 3px solid #3b82f6;
+  border-left: 3px solid var(--accent-primary);
 }
-
 .notification-group-join {
-  border-left: 3px solid #10b981;
+  border-left: 3px solid var(--accent-success);
 }
-
 .notification-flashcard-created {
   border-left: 3px solid #8b5cf6;
 }
-
 .notification-note-created {
   border-left: 3px solid #f59e0b;
 }
-
 .notification-study-reminder {
-  border-left: 3px solid #ef4444;
+  border-left: 3px solid var(--accent-danger);
 }
-
 .notification-achievement {
   border-left: 3px solid #f59e0b;
 }
-
 .notification-system {
-  border-left: 3px solid #6b7280;
+  border-left: 3px solid var(--text-muted);
 }
 
 .notifications-footer {
   padding: 12px 16px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
-  background-color: #f9fafb;
+  background-color: var(--bg-secondary);
 }
 
 .notifications-footer a {
-  color: #4f46e5;
+  color: var(--link-color);
   text-decoration: none;
   font-size: 0.85rem;
   padding: 4px 8px;
@@ -336,16 +323,14 @@
 }
 
 .notifications-footer a:hover {
-  background-color: #e0e7ff;
+  background-color: var(--bg-hover);
 }
 
-/* Адаптивность */
 @media (max-width: 640px) {
   .notifications-dropdown {
     width: 320px;
     right: -50px;
   }
-  
   .notification-title {
     max-width: 200px;
   }

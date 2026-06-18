@@ -1,14 +1,13 @@
-/* client\src\components\InviteMembersModal.css */
-
 .invite-modal {
-  background: white;
+  background: var(--modal-bg);
   border-radius: 12px;
   padding: 0;
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--modal-border);
 }
 
 .modal-header {
@@ -16,14 +15,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h2 {
   margin: 0;
   font-size: 24px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .close-button {
@@ -31,7 +30,7 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--text-secondary);
   padding: 0;
   width: 30px;
   height: 30px;
@@ -43,8 +42,8 @@
 }
 
 .close-button:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .invite-content {
@@ -59,7 +58,7 @@
   margin-bottom: 15px;
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .invite-form {
@@ -76,25 +75,27 @@
 
 .form-group label {
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
 .form-group input {
   padding: 12px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 6px;
   font-size: 16px;
   transition: border-color 0.2s;
+  background: var(--input-bg);
+  color: var(--input-text);
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #4f46e5;
+  border-color: var(--input-focus);
 }
 
 .error-message {
-  background: #fef2f2;
+  background: #fee2e2;
   border: 1px solid #fecaca;
   color: #dc2626;
   padding: 12px;
@@ -103,9 +104,9 @@
 }
 
 .success-message {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #16a34a;
+  background: #d1fae5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
   padding: 12px;
   border-radius: 6px;
   font-size: 14px;
@@ -115,7 +116,7 @@
   display: flex;
   align-items: center;
   margin: 25px 0;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
@@ -124,7 +125,7 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: #e5e7eb;
+  background: var(--border-color);
 }
 
 .invite-divider span {
@@ -134,22 +135,22 @@
 .invite-code-section {
   text-align: center;
   padding: 20px;
-  background: #f8fafc;
+  background: var(--bg-secondary);
   border-radius: 8px;
-  border: 2px dashed #e5e7eb;
+  border: 2px dashed var(--border-color);
 }
 
 .invite-code-display {
   font-family: 'Courier New', monospace;
   font-size: 24px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   letter-spacing: 3px;
   margin-bottom: 15px;
   padding: 10px;
-  background: white;
+  background: var(--bg-card);
   border-radius: 6px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
 }
 
 .copy-btn {
@@ -158,12 +159,13 @@
 
 .invite-hint {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0;
   line-height: 1.4;
 }
 
-.btn-primary, .btn-outline {
+.btn-primary,
+.btn-outline {
   padding: 12px 24px !important;
   border-radius: 6px !important;
   font-weight: 500 !important;
@@ -175,28 +177,28 @@
 }
 
 .btn-primary {
-  background: #4f46e5 !important;
-  color: white !important;
+  background: var(--accent-primary) !important;
+  color: var(--text-inverse) !important;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #4338ca !important;
+  background: var(--accent-primary-hover) !important;
   transform: translateY(-1px) !important;
 }
 
 .btn-primary:disabled {
-  background: #9ca3af !important;
+  background: var(--text-muted) !important;
   cursor: not-allowed !important;
   transform: none !important;
 }
 
 .btn-outline {
-  background: #3b82f6 !important;
-  color: white !important;
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
 }
 
 .btn-outline:hover:not(:disabled) {
-  background: #2563eb !important;
+  background: var(--bg-hover) !important;
   transform: translateY(-1px) !important;
 }
 

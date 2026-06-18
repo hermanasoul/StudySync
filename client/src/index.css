@@ -4,26 +4,149 @@
   box-sizing: border-box;
 }
 
+/* ===== СВЕТЛАЯ ТЕМА (по умолчанию) ===== */
 :root {
+  /* Фоны */
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-input: #ffffff;
+  --bg-hover: #f1f5f9;
+  --bg-active: #eef2ff;
+  --bg-header: #ffffff;
+
+  /* Текст */
   --text-primary: #1e293b;
   --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --text-inverse: #ffffff;
+
+  /* Границы */
   --border-color: #e2e8f0;
-  --accent-color: #3b82f6;
-  --card-bg: #ffffff;
-  --shadow: 0 1px 3px rgba(0,0,0,0.1);
+  --border-light: #f1f5f9;
+  --border-dark: #cbd5e1;
+
+  /* Тени */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+
+  /* Акцентные */
+  --accent-primary: #4f46e5;
+  --accent-primary-hover: #4338ca;
+  --accent-success: #10b981;
+  --accent-success-hover: #059669;
+  --accent-danger: #ef4444;
+  --accent-danger-hover: #dc2626;
+  --accent-warning: #f59e0b;
+  --accent-warning-hover: #d97706;
+
+  /* Кнопки */
+  --btn-primary-bg: #4f46e5;
+  --btn-primary-text: #ffffff;
+  --btn-primary-hover: #4338ca;
+
+  --btn-outline-bg: transparent;
+  --btn-outline-text: #4f46e5;
+  --btn-outline-border: #4f46e5;
+  --btn-outline-hover: #f8fafc;
+
+  --btn-danger-bg: #ef4444;
+  --btn-danger-text: #ffffff;
+  --btn-danger-hover: #dc2626;
+
+  --btn-success-bg: #10b981;
+  --btn-success-text: #ffffff;
+  --btn-success-hover: #059669;
+
+  /* Инпуты */
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --input-focus: #4f46e5;
+  --input-text: #1e293b;
+
+  /* Ссылки */
+  --link-color: #4f46e5;
+  --link-hover: #4338ca;
+
+  /* Уведомления и модалки */
+  --notification-bg: #ffffff;
+  --notification-border: #e5e7eb;
+  --notification-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  --modal-overlay: rgba(0,0,0,0.5);
+  --modal-bg: #ffffff;
+  --modal-border: #e5e7eb;
+
+  /* Прогресс-бары */
+  --progress-bg: #f8fafc;
 }
 
+/* ===== ТЁМНАЯ ТЕМА ===== */
 body.dark-theme {
   --bg-primary: #0f172a;
   --bg-secondary: #1e293b;
+  --bg-card: #1e293b;
+  --bg-input: #1e293b;
+  --bg-hover: #334155;
+  --bg-active: #1e293b;
+  --bg-header: #0f172a;
+
   --text-primary: #f1f5f9;
   --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-inverse: #0f172a;
+
   --border-color: #334155;
-  --accent-color: #60a5fa;
-  --card-bg: #1e293b;
-  --shadow: 0 4px 6px rgba(0,0,0,0.3);
+  --border-light: #1e293b;
+  --border-dark: #475569;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.4);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.5);
+
+  --accent-primary: #818cf8;
+  --accent-primary-hover: #6366f1;
+  --accent-success: #34d399;
+  --accent-success-hover: #10b981;
+  --accent-danger: #f87171;
+  --accent-danger-hover: #ef4444;
+  --accent-warning: #fbbf24;
+  --accent-warning-hover: #f59e0b;
+
+  --btn-primary-bg: #818cf8;
+  --btn-primary-text: #0f172a;
+  --btn-primary-hover: #6366f1;
+
+  --btn-outline-bg: transparent;
+  --btn-outline-text: #818cf8;
+  --btn-outline-border: #818cf8;
+  --btn-outline-hover: #1e293b;
+
+  --btn-danger-bg: #f87171;
+  --btn-danger-text: #0f172a;
+  --btn-danger-hover: #ef4444;
+
+  --btn-success-bg: #34d399;
+  --btn-success-text: #0f172a;
+  --btn-success-hover: #10b981;
+
+  --input-bg: #1e293b;
+  --input-border: #475569;
+  --input-focus: #818cf8;
+  --input-text: #f1f5f9;
+
+  --link-color: #818cf8;
+  --link-hover: #6366f1;
+
+  --notification-bg: #1e293b;
+  --notification-border: #334155;
+  --notification-shadow: 0 10px 25px rgba(0,0,0,0.5);
+
+  --modal-overlay: rgba(0,0,0,0.7);
+  --modal-bg: #1e293b;
+  --modal-border: #334155;
+
+  --progress-bg: #0f172a;
 }
 
 body {
@@ -36,7 +159,7 @@ body {
   line-height: 1.6;
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  transition: background-color 0.3s, color 0.3s;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 code {
@@ -46,131 +169,78 @@ code {
 
 a {
   text-decoration: none;
+  color: var(--link-color);
+}
+a:hover {
+  color: var(--link-hover);
 }
 
 .page-with-header {
   padding-top: 140px !important;
   min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 /* ===== АНИМАЦИИ ===== */
-
-/* Базовое плавное появление */
 .fade-in {
   animation: fadeIn 0.5s ease-in-out;
 }
-
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
-/* Задержки для последовательного появления */
 .fade-in-delay-1 { animation-delay: 0.1s; }
 .fade-in-delay-2 { animation-delay: 0.2s; }
 .fade-in-delay-3 { animation-delay: 0.3s; }
 
-/* Анимация для модальных окон */
 .modal-overlay {
   animation: fadeIn 0.2s ease-out;
 }
-
 .modal-content {
   animation: slideUp 0.3s ease-out;
 }
-
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Hover-эффект для карточек */
 .card-hover {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
 .card-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
-/* Плавное появление для страниц */
 .page-container {
   animation: fadeIn 0.4s ease-out;
 }
 
-/* ===== ГЛОБАЛЬНЫЕ АНИМАЦИИ ===== */
-
-/* Плавное появление */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+/* Дополнительные анимации */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
+.animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+.animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+.animate-fade-in-down { animation: fadeInDown 0.4s ease-out forwards; }
+.animate-scale-in { animation: scaleIn 0.3s ease-out forwards; }
 
-/* Классы применения */
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out forwards;
-}
-.animate-fade-in-up {
-  animation: fadeInUp 0.5s ease-out forwards;
-}
-.animate-fade-in-down {
-  animation: fadeInDown 0.4s ease-out forwards;
-}
-.animate-scale-in {
-  animation: scaleIn 0.3s ease-out forwards;
-}
-
-/* Задержки */
 .delay-100 { animation-delay: 0.1s; }
 .delay-200 { animation-delay: 0.2s; }
 .delay-300 { animation-delay: 0.3s; }
 .delay-400 { animation-delay: 0.4s; }
 .delay-500 { animation-delay: 0.5s; }
 
-/* Пульсация */
 @keyframes pulse-gentle {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
@@ -179,16 +249,88 @@ a {
   animation: pulse-gentle 2s ease-in-out infinite;
 }
 
-/* Универсальный hover-эффект для карточек */
 .hover-lift {
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 .hover-lift:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 24px -8px rgba(0,0,0,0.15);
 }
 
-/* Анимация для модальных окон (если не используется своя) */
 .modal-content-animated {
   animation: scaleIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* ===== ИСПРАВЛЕНИЕ ДЛЯ МОДАЛЬНЫХ ОКОН (скругление заголовка) ===== */
+.modal-content .modal-header {
+  border-radius: 12px 12px 0 0 !important;
+  overflow: hidden !important;
+}
+.modal-content {
+  overflow: hidden !important;
+}
+
+/* ===== ПЕРЕОПРЕДЕЛЕНИЕ КНОПОК В ШАПКЕ С МАКСИМАЛЬНОЙ СПЕЦИФИЧНОСТЬЮ ===== */
+#root .header .header-buttons .btn,
+#root .header .header-buttons .btn-primary,
+#root .header .header-buttons .btn-outline,
+#root .header .header-buttons .btn-success,
+#root .header .header-buttons .btn-danger {
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  padding: 0 16px !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  border: none !important;
+  white-space: nowrap !important;
+  min-width: auto !important;
+  width: auto !important;
+  box-shadow: none !important;
+  line-height: 1 !important;
+  border-radius: 8px !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  vertical-align: middle !important;
+}
+
+/* Цвета для кнопок в шапке */
+#root .header .header-buttons .btn-primary {
+  background: var(--accent-primary) !important;
+  color: var(--text-inverse) !important;
+}
+#root .header .header-buttons .btn-primary:hover {
+  background: var(--accent-primary-hover) !important;
+}
+
+#root .header .header-buttons .btn-outline {
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+#root .header .header-buttons .btn-outline:hover {
+  background: var(--bg-hover) !important;
+  border-color: var(--border-dark) !important;
+}
+
+#root .header .header-buttons .btn-success {
+  background: var(--accent-success) !important;
+  color: var(--text-inverse) !important;
+}
+#root .header .header-buttons .btn-success:hover {
+  background: var(--accent-success-hover) !important;
+}
+
+#root .header .header-buttons .btn-danger {
+  background: var(--accent-danger) !important;
+  color: var(--text-inverse) !important;
+}
+#root .header .header-buttons .btn-danger:hover {
+  background: var(--accent-danger-hover) !important;
 }

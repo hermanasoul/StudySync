@@ -1,6 +1,6 @@
 .public-groups-page {
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--bg-primary);
 }
 
 .public-groups-container {
@@ -13,44 +13,39 @@
   text-align: center;
   margin-bottom: 40px;
 }
-
 .page-header h1 {
   font-size: 36px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 10px;
 }
-
 .page-header p {
   font-size: 18px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .coming-soon {
-  background: white;
+  background: var(--bg-card);
   padding: 50px;
   border-radius: 16px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   text-align: center;
+  border: 1px solid var(--border-color);
 }
-
 .coming-soon-icon {
   font-size: 64px;
   margin-bottom: 20px;
 }
-
 .coming-soon h3 {
   font-size: 24px;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 15px;
 }
-
 .coming-soon p {
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 30px;
   line-height: 1.6;
 }
-
 .features-list {
   display: flex;
   flex-direction: column;
@@ -58,18 +53,16 @@
   max-width: 300px;
   margin: 0 auto;
 }
-
 .feature-item {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: #f8fafc;
+  background: var(--bg-secondary);
   border-radius: 8px;
-  color: #374151;
+  color: var(--text-primary);
   font-weight: 500;
 }
-
 .feature-icon {
   font-size: 20px;
 }
@@ -78,7 +71,6 @@
   .public-groups-container {
     padding: 120px 15px 30px;
   }
-  
   .coming-soon {
     padding: 30px 20px;
   }

@@ -1,14 +1,11 @@
-/* ChatWindow.css */
-
 .chat-window {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: #1e1e2e;
-  color: #eee;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   border-radius: 12px;
   overflow: hidden;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .chat-header {
@@ -16,20 +13,20 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  background: #2a2a3c;
-  border-bottom: 1px solid #3f3f55;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .chat-header h4 {
   margin: 0;
   font-size: 1.1rem;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .close-btn {
   background: none;
   border: none;
-  color: #aaa;
+  color: var(--text-secondary);
   font-size: 1.4rem;
   cursor: pointer;
   padding: 0 6px;
@@ -37,14 +34,13 @@
 }
 
 .close-btn:hover {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .chat-messages {
   flex: 1;
-  padding: 16px 16px 16px 16px;
+  padding: 16px;
   overflow-y: auto;
-  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -53,7 +49,7 @@
 .loading,
 .no-messages {
   text-align: center;
-  color: #aaa;
+  color: var(--text-secondary);
   margin-top: 40px;
 }
 
@@ -68,48 +64,47 @@
 .message.own {
   align-self: flex-end;
   align-items: flex-end;
-  margin-right: 40px; /* дополнительный отступ для кнопок */
+  margin-right: 40px;
 }
 
 .message-sender {
   font-size: 0.75rem;
-  color: #8a8a9a;
+  color: var(--text-secondary);
   margin-bottom: 2px;
   padding: 0 8px;
   display: block;
 }
 
 .message-bubble {
-  background: #2e2e40;
+  background: var(--bg-secondary);
   border-radius: 12px 12px 12px 4px;
   padding: 8px 12px;
-  color: #e0e0f0;
+  color: var(--text-primary);
   font-size: 0.95rem;
   line-height: 1.4;
-  /* ИСПРАВЛЕНИЕ: убираем разрыв слов по буквам */
-  overflow-wrap: break-word;  /* мягкий перенос */
-  word-break: normal;         /* не разрывать слова произвольно */
+  overflow-wrap: break-word;
+  word-break: normal;
   position: relative;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
   max-width: 100%;
   overflow: hidden;
 }
 
 .message.own .message-bubble {
-  background: #5b4d8c;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
   border-radius: 12px 12px 4px 12px;
-  color: #fff;
 }
 
 .message.deleted-message .message-bubble {
-  background: #3a3a4a;
-  color: #888;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
   font-style: italic;
 }
 
 .deleted-text {
   font-style: italic;
-  color: #999;
+  color: var(--text-secondary);
 }
 
 .edit-mode {
@@ -119,18 +114,18 @@
 }
 
 .edit-mode input {
-  background: #1e1e2e;
-  border: 1px solid #5b4d8c;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 6px 8px;
-  color: #eee;
+  color: var(--input-text);
   font-size: 0.95rem;
   width: 100%;
   outline: none;
 }
 
 .edit-mode input:focus {
-  border-color: #7b6db0;
+  border-color: var(--input-focus);
 }
 
 .edit-actions {
@@ -142,7 +137,7 @@
 .edit-actions button {
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--text-secondary);
   font-size: 1.1rem;
   cursor: pointer;
   padding: 4px;
@@ -151,7 +146,7 @@
 }
 
 .edit-actions button:hover {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .message-text {
@@ -174,7 +169,7 @@
 }
 
 .attachment-doc {
-  color: #b4a3ff;
+  color: var(--link-color);
   text-decoration: none;
   font-size: 0.85rem;
   display: flex;
@@ -185,7 +180,7 @@
 }
 
 .attachment-doc:hover {
-  color: #d4caff;
+  color: var(--link-hover);
 }
 
 .attachment-icon {
@@ -194,23 +189,22 @@
 
 .message-time {
   font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-muted);
   margin-top: 4px;
   display: inline-block;
 }
 
-/* Кнопки действий */
 .message-actions {
   display: none;
   position: absolute;
   right: -36px;
   top: 0;
   flex-direction: column;
-  background: #242436;
-  border: 1px solid #3f3f55;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 4px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-md);
   z-index: 10;
 }
 
@@ -221,7 +215,7 @@
 .message-actions button {
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--text-secondary);
   font-size: 1rem;
   cursor: pointer;
   padding: 4px;
@@ -230,15 +224,14 @@
 }
 
 .message-actions button:hover {
-  background: #3a3a50;
-  color: #fff;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
-/* Форма ввода */
 .chat-input {
-  background: #2a2a3c;
+  background: var(--bg-secondary);
   padding: 10px 16px;
-  border-top: 1px solid #3f3f55;
+  border-top: 1px solid var(--border-color);
 }
 
 .attachment-preview {
@@ -251,8 +244,8 @@
 .preview-item {
   display: flex;
   align-items: center;
-  background: #1e1e2e;
-  border: 1px solid #3f3f55;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 6px 10px;
   gap: 8px;
@@ -275,7 +268,7 @@
 .preview-filename {
   background: transparent;
   border: none;
-  color: #eee;
+  color: var(--text-primary);
   font-size: 0.85rem;
   outline: none;
   border-bottom: 1px dashed transparent;
@@ -285,18 +278,18 @@
 }
 
 .preview-filename:focus {
-  border-bottom-color: #5b4d8c;
+  border-bottom-color: var(--accent-primary);
 }
 
 .preview-size {
   font-size: 0.7rem;
-  color: #888;
+  color: var(--text-muted);
 }
 
 .preview-remove {
   background: none;
   border: none;
-  color: #ff6b6b;
+  color: var(--accent-danger);
   cursor: pointer;
   font-size: 1rem;
   padding: 2px 6px;
@@ -310,27 +303,27 @@
 
 .message-input {
   flex: 1;
-  background: #1e1e2e;
-  border: 1px solid #3f3f55;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 10px 14px;
-  color: #eee;
+  color: var(--input-text);
   font-size: 0.95rem;
   outline: none;
 }
 
 .message-input::placeholder {
-  color: #777;
+  color: var(--text-muted);
 }
 
 .message-input:focus {
-  border-color: #5b4d8c;
+  border-color: var(--input-focus);
 }
 
 .attachment-btn {
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--text-secondary);
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0 6px;
@@ -338,7 +331,7 @@
 }
 
 .attachment-btn:hover {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .input-extras {
@@ -354,28 +347,28 @@
 
 .scheduled-input {
   width: 100%;
-  background: #1e1e2e;
-  border: 1px solid #3f3f55;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 8px 10px;
-  color: #eee;
+  color: var(--input-text);
   font-size: 0.85rem;
   outline: none;
 }
 
 .scheduled-input::-webkit-calendar-picker-indicator {
-  filter: invert(1);
+  filter: var(--icon-filter);
   cursor: pointer;
 }
 
 .scheduled-input:focus {
-  border-color: #5b4d8c;
+  border-color: var(--input-focus);
 }
 
 .send-btn {
-  background: #5b4d8c;
+  background: var(--accent-primary);
   border: none;
-  color: white;
+  color: var(--text-inverse);
   font-size: 1.2rem;
   width: 40px;
   height: 40px;
@@ -388,14 +381,13 @@
 }
 
 .send-btn:hover {
-  background: #6a5fa0;
+  background: var(--accent-primary-hover);
 }
 
-/* Кнопка списка отложенных сообщений */
 .btn-scheduled {
-  background: #2e2e40;
+  background: var(--bg-secondary);
   border: none;
-  color: #eee;
+  color: var(--text-secondary);
   font-size: 1.2rem;
   width: 40px;
   height: 40px;
@@ -408,17 +400,16 @@
 }
 
 .btn-scheduled:hover {
-  background: #3a3a50;
+  background: var(--bg-hover);
 }
 
-/* Модальное окно подтверждения удаления */
 .delete-confirm-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: var(--modal-overlay);
   z-index: 100;
   display: flex;
   align-items: center;
@@ -426,12 +417,12 @@
 }
 
 .delete-confirm-dialog {
-  background: #2a2a3c;
-  border: 1px solid #3f3f55;
+  background: var(--modal-bg);
+  border: 1px solid var(--modal-border);
   border-radius: 12px;
   padding: 20px;
-  color: #eee;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
   text-align: center;
 }
 
@@ -446,17 +437,12 @@
   justify-content: center;
 }
 
-.delete-confirm-actions .btn {
-  min-width: 120px;
-}
-
-/* Полоса прокрутки */
 .chat-messages::-webkit-scrollbar {
   width: 6px;
 }
 
 .chat-messages::-webkit-scrollbar-thumb {
-  background: #3f3f55;
+  background: var(--border-color);
   border-radius: 3px;
 }
 

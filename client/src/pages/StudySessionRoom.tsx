@@ -1,5 +1,3 @@
-// client/src/pages/StudySessionRoom.tsx
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -277,15 +275,17 @@ const StudySessionRoom: React.FC = () => {
 
             {currentFlashcard && (
               <div className="flashcard-section">
-                <div className="flashcard-card" style={{ background: 'white', borderRadius: '12px', padding: '20px' }}>
-                  <h3 style={{ marginTop: 0 }}>Карточка {currentIndex + 1} из {flashcardList.length}</h3>
-                  <div className="flashcard-question" style={{ fontSize: '1.2rem', margin: '16px 0' }}>{currentFlashcard.question}</div>
-                  {currentFlashcard.hint && <div className="flashcard-hint" style={{ background: '#fef3c7', padding: '8px', borderRadius: '8px', marginBottom: '12px' }}>💡 {currentFlashcard.hint}</div>}
-                  <details style={{ marginBottom: '16px' }}>
-                    <summary>Показать ответ</summary>
-                    <div className="flashcard-answer" style={{ background: '#d1fae5', padding: '12px', borderRadius: '8px', marginTop: '8px' }}>{currentFlashcard.answer}</div>
+                <div className="flashcard-card">
+                  <h3 className="flashcard-counter">Карточка {currentIndex + 1} из {flashcardList.length}</h3>
+                  <div className="flashcard-question">{currentFlashcard.question}</div>
+                  {currentFlashcard.hint && (
+                    <div className="flashcard-hint">💡 {currentFlashcard.hint}</div>
+                  )}
+                  <details className="flashcard-details">
+                    <summary className="flashcard-summary">Показать ответ</summary>
+                    <div className="flashcard-answer">{currentFlashcard.answer}</div>
                   </details>
-                  <div className="flashcard-actions" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <div className="flashcard-actions">
                     <button className="btn btn-outline" onClick={() => handleFlashcardAction('previous')}>← Назад</button>
                     <button className="btn btn-outline" onClick={() => handleFlashcardAction('next')}>Далее →</button>
                     <button className="btn btn-success" onClick={() => handleFlashcardAction('answer', 'correct')}>Знаю</button>

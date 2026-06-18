@@ -48,7 +48,7 @@ a {
   vertical-align: middle;
 }
 .btn:focus-visible {
-  outline: 2px solid #4f46e5;
+  outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }
 .btn:disabled {
@@ -85,45 +85,45 @@ a {
 }
 
 .btn-primary {
-  background: #4f46e5;
-  color: white;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
   box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
 }
 .btn-primary:hover:not(:disabled) {
-  background: #4338ca;
+  background: var(--accent-primary-hover);
   transform: translateY(-1px);
   box-shadow: 0 8px 25px rgba(67, 56, 202, 0.4);
 }
 
 .btn-warning {
-  background: #f59e0b;
-  color: white;
+  background: var(--accent-warning);
+  color: var(--text-inverse);
   box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
 }
 .btn-warning:hover:not(:disabled) {
-  background: #d97706;
+  background: var(--accent-warning-hover);
   transform: translateY(-1px);
   box-shadow: 0 8px 25px rgba(217, 119, 6, 0.4);
 }
 
 .btn-success {
-  background: #10b981;
-  color: white;
+  background: var(--accent-success);
+  color: var(--text-inverse);
   box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
 }
 .btn-success:hover:not(:disabled) {
-  background: #059669;
+  background: var(--accent-success-hover);
   transform: translateY(-1px);
   box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4);
 }
 
 .btn-danger {
-  background: #ef4444;
-  color: white;
+  background: var(--accent-danger);
+  color: var(--text-inverse);
   box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
 }
 .btn-danger:hover:not(:disabled) {
-  background: #dc2626;
+  background: var(--accent-danger-hover);
   transform: translateY(-1px);
   box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
 }
@@ -137,21 +137,21 @@ a {
 }
 .btn-outline:hover:not(:disabled) {
   background: #d97706 !important;
-  color: white !important;
+  color: var(--text-inverse) !important;
   box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3) !important;
   transform: translateY(-1px);
 }
 
 .btn-secondary {
-  background: #6b7280;
-  color: white;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   box-shadow: 0 4px 14px rgba(107, 114, 128, 0.3);
   min-width: 120px;
 }
 .btn-secondary:hover:not(:disabled) {
-  background: #4b5563;
+  background: var(--bg-hover);
   transform: translateY(-1px);
-  box-shadow: 0 8px 25px rgba(75, 85, 99, 0.4);
+  box-shadow: var(--shadow-md);
 }
 
 .button-group {

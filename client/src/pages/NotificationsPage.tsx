@@ -1,5 +1,3 @@
-// client/src/pages/NotificationsPage.tsx
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -358,6 +356,7 @@ const NotificationsPage: React.FC = () => {
             <div className="actions">
               <Button
                 variant="outline"
+                className="mark-all-read-btn"
                 onClick={handleMarkAllAsRead}
                 disabled={stats?.unread === 0}
               >

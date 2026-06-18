@@ -1,14 +1,13 @@
 /* client/src/pages/NotificationsPage.css */
 
-/* Гарантированное исправление конфликта с компонентом шапки */
 .notifications-page .notifications-container {
-  display: block !important;      /* убираем flex, навязанный шапкой */
-  align-items: stretch !important; /* сбрасываем align-items */
+  display: block !important;
+  align-items: stretch !important;
 }
 
 .notifications-page {
   min-height: 100vh;
-  background-color: #f9fafb;
+  background-color: var(--bg-primary);
 }
 
 .notifications-container {
@@ -20,36 +19,31 @@
 .breadcrumb {
   margin-bottom: 20px;
   font-size: 0.9rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
-
 .breadcrumb a {
-  color: #4f46e5;
+  color: var(--link-color);
   text-decoration: none;
 }
-
 .breadcrumb a:hover {
   text-decoration: underline;
 }
-
 .breadcrumb span {
-  color: #111827;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .page-header {
   margin-bottom: 32px;
 }
-
 .page-header h1 {
   font-size: 2rem;
   margin: 0 0 8px 0;
-  color: #111827;
+  color: var(--text-primary);
 }
-
 .page-header p {
   margin: 0;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 1.1rem;
 }
 
@@ -59,83 +53,76 @@
   gap: 16px;
   margin-bottom: 32px;
 }
-
 .stat-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 20px;
   display: flex;
   align-items: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid var(--border-color);
 }
-
 .stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
-
 .stat-icon {
   font-size: 2rem;
   margin-right: 16px;
 }
-
 .stat-info {
   flex: 1;
 }
-
 .stat-number {
   font-size: 2rem;
   font-weight: bold;
-  color: #111827;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
-
 .stat-label {
   font-size: 0.9rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .notifications-controls {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
-
 .filters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
   margin-bottom: 20px;
 }
-
 .filter-group {
   display: flex;
   flex-direction: column;
 }
-
 .filter-group label {
   font-size: 0.9rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
-
 .filter-group select,
 .filter-group input {
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 0.95rem;
   transition: border-color 0.2s;
+  background: var(--input-bg);
+  color: var(--input-text);
 }
-
 .filter-group select:focus,
 .filter-group input:focus {
   outline: none;
-  border-color: #4f46e5;
+  border-color: var(--input-focus);
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
@@ -146,18 +133,28 @@
   flex-wrap: wrap;
   gap: 12px;
 }
-
 .bulk-actions {
   display: flex;
   gap: 12px;
   align-items: center;
 }
-
 .bulk-actions select {
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 0.95rem;
+  background: var(--input-bg);
+  color: var(--input-text);
+}
+
+/* ===== КНОПКА "ОТМЕТИТЬ ВСЕ КАК ПРОЧИТАННЫЕ" ===== */
+.mark-all-read-btn {
+  color: var(--text-primary) !important; /* в светлой теме тёмный, в тёмной светлый */
+}
+
+/* В тёмной теме делаем текст белым */
+body.dark-theme .mark-all-read-btn {
+  color: #ffffff !important;
 }
 
 .notifications-list {
@@ -170,19 +167,17 @@
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
-
 .loading .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #e5e7eb;
-  border-top: 4px solid #4f46e5;
+  border: 4px solid var(--bg-secondary);
+  border-top: 4px solid var(--accent-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
 }
-
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -191,70 +186,63 @@
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
-
 .empty-icon {
   font-size: 4rem;
   margin-bottom: 20px;
   opacity: 0.5;
 }
-
 .empty-state h3 {
   margin: 0 0 12px 0;
-  color: #111827;
+  color: var(--text-primary);
 }
-
 .empty-state p {
   margin: 0;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .notification-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   transition: transform 0.2s, box-shadow 0.2s;
-  border-left: 4px solid #4f46e5;
+  border-left: 4px solid var(--accent-primary);
   display: flex;
   gap: 16px;
+  border: 1px solid var(--border-color);
+  border-left-width: 4px;
 }
-
 .notification-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
-
 .notification-card.unread {
-  background: #f0f9ff;
-  border-left-color: #3b82f6;
+  background: var(--bg-active);
+  border-left-color: var(--accent-primary);
 }
-
 .notification-select {
   display: flex;
   align-items: flex-start;
 }
-
 .notification-select input[type="checkbox"] {
   width: 18px;
   height: 18px;
   cursor: pointer;
 }
-
 .notification-icon {
   font-size: 2rem;
   flex-shrink: 0;
 }
-
 .notification-content {
   flex: 1;
   min-width: 0;
 }
-
 .notification-header {
   display: flex;
   justify-content: space-between;
@@ -263,87 +251,74 @@
   flex-wrap: wrap;
   gap: 8px;
 }
-
 .notification-title {
   margin: 0;
   font-size: 1.1rem;
-  color: #111827;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
 }
-
 .notification-type {
   font-size: 0.8rem;
-  background: #e0e7ff;
-  color: #4f46e5;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
   padding: 4px 8px;
   border-radius: 20px;
   font-weight: 500;
 }
-
 .notification-meta {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-
 .notification-time {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
-
 .unread-badge {
   font-size: 0.75rem;
-  background: #ef4444;
-  color: white;
+  background: var(--accent-danger);
+  color: var(--text-inverse);
   padding: 3px 8px;
   border-radius: 12px;
   font-weight: 500;
   animation: pulse 2s infinite;
 }
-
 @keyframes pulse {
   0% { opacity: 1; }
   50% { opacity: 0.7; }
   100% { opacity: 1; }
 }
-
 .notification-message {
   margin: 0 0 16px 0;
-  color: #374151;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
-
 .notification-data {
-  background: #f9fafb;
+  background: var(--bg-secondary);
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 16px;
   font-size: 0.9rem;
 }
-
 .data-item {
   margin-bottom: 6px;
   display: flex;
   gap: 8px;
 }
-
 .data-item:last-child {
   margin-bottom: 0;
 }
-
 .data-item strong {
-  color: #111827;
+  color: var(--text-primary);
   min-width: 80px;
 }
-
 .notification-actions {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
-
 .action-btn {
   padding: 8px 12px;
   border: none;
@@ -355,52 +330,42 @@
   align-items: center;
   gap: 6px;
 }
-
 .read-btn {
-  background: #10b981;
-  color: white;
+  background: var(--accent-success);
+  color: var(--text-inverse);
 }
-
 .read-btn:hover {
-  background: #0da271;
+  background: var(--accent-success-hover);
 }
-
 .unread-btn {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
-
 .unread-btn:hover {
-  background: #e5e7eb;
+  background: var(--bg-hover);
 }
-
 .archive-btn {
-  background: #f59e0b;
-  color: white;
+  background: var(--accent-warning);
+  color: var(--text-inverse);
 }
-
 .archive-btn:hover {
-  background: #d97706;
+  background: var(--accent-warning-hover);
 }
-
 .delete-btn {
-  background: #ef4444;
-  color: white;
+  background: var(--accent-danger);
+  color: var(--text-inverse);
 }
-
 .delete-btn:hover {
-  background: #dc2626;
+  background: var(--accent-danger-hover);
 }
-
 .view-btn {
-  background: #4f46e5;
-  color: white;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
   text-decoration: none;
 }
-
 .view-btn:hover {
-  background: #4338ca;
+  background: var(--accent-primary-hover);
 }
 
 .load-more {
@@ -409,68 +374,57 @@
 }
 
 .notifications-help {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
-
 .notifications-help h3 {
   margin: 0 0 16px 0;
-  color: #111827;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
 }
-
 .notifications-help ul {
   margin: 0;
   padding-left: 20px;
 }
-
 .notifications-help li {
   margin-bottom: 8px;
-  color: #374151;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
-
 .notifications-help li strong {
-  color: #111827;
+  color: var(--text-primary);
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .notifications-container {
     padding: 16px;
   }
-  
   .stats-cards {
     grid-template-columns: 1fr;
   }
-  
   .filters {
     grid-template-columns: 1fr;
   }
-  
   .actions {
     flex-direction: column;
     align-items: stretch;
   }
-  
   .bulk-actions {
     flex-direction: column;
   }
-  
   .notification-header {
     flex-direction: column;
     align-items: flex-start;
   }
-  
   .notification-meta {
     width: 100%;
     justify-content: space-between;
   }
-  
   .notification-actions {
     justify-content: center;
   }

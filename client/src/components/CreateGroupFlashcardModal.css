@@ -1,12 +1,10 @@
-/* client\src\components\CreateGroupFlashcardModal.css */
-
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--modal-overlay);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,17 +12,18 @@
 }
 
 .modal-content {
-  background: white;
+  background: var(--modal-bg);
   border-radius: 12px;
   padding: 0;
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
   position: relative;
+  border: 1px solid var(--modal-border);
 }
 
 .close-button {
@@ -35,7 +34,7 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--text-secondary);
   width: 30px;
   height: 30px;
   display: flex;
@@ -47,14 +46,14 @@
 }
 
 .close-button:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .modal-header {
   padding: 24px;
   padding-top: 48px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
   text-align: center;
 }
 
@@ -62,7 +61,7 @@
   margin: 0;
   font-size: 24px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   line-height: 1.2;
 }
 
@@ -83,7 +82,7 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
   line-height: 1.4;
   text-align: left;
 }
@@ -93,7 +92,7 @@
 .form-group input {
   width: 100%;
   padding: 12px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 6px;
   font-size: 16px;
   font-family: inherit;
@@ -101,13 +100,15 @@
   box-sizing: border-box;
   line-height: 1.4;
   resize: vertical;
+  background: var(--input-bg);
+  color: var(--input-text);
 }
 
 .form-group textarea:focus,
 .form-group select:focus,
 .form-group input:focus {
   outline: none;
-  border-color: #4f46e5;
+  border-color: var(--input-focus);
 }
 
 .form-group textarea {
@@ -115,7 +116,7 @@
 }
 
 .error-message {
-  background: #fef2f2;
+  background: #fee2e2;
   border: 1px solid #fecaca;
   color: #dc2626;
   padding: 12px;
@@ -131,7 +132,7 @@
   justify-content: flex-end;
   align-items: center;
   margin-top: 24px;
-  padding: 0 0 0;
+  padding: 0;
   flex-shrink: 0;
 }
 
@@ -147,32 +148,27 @@
   text-decoration: none !important;
   transition: all 0.3s ease !important;
   margin: 0 !important;
-  box-shadow: none !important;
+  box-shadow: var(--shadow-sm) !important;
   transform: none !important;
 }
 
 .form-actions .btn-secondary {
-  background: #6b7280 !important;
-  color: white !important;
-  box-shadow: 0 4px 14px rgba(107, 114, 128, 0.3) !important;
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
 }
 
 .form-actions .btn-primary {
-  background: #4f46e5 !important;
-  color: white !important;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3) !important;
+  background: var(--accent-primary) !important;
+  color: var(--text-inverse) !important;
 }
 
-/* Hover effects matching site */
 .form-actions .btn-secondary:hover:not(:disabled) {
-  background: #4b5563 !important;
-  box-shadow: 0 8px 25px rgba(75, 85, 99, 0.4) !important;
+  background: var(--bg-hover) !important;
   transform: translateY(-1px) !important;
 }
 
 .form-actions .btn-primary:hover:not(:disabled) {
-  background: #4338ca !important;
-  box-shadow: 0 8px 25px rgba(67, 56, 202, 0.4) !important;
+  background: var(--accent-primary-hover) !important;
   transform: translateY(-1px) !important;
 }
 
@@ -197,12 +193,4 @@
     padding: 16px;
     padding-top: 32px;
   }
-}
-
-.group-card {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.group-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
 }

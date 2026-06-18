@@ -1,25 +1,21 @@
 /* client/src/pages/SubjectsPage.css */
 
-/* Принудительно сбрасываем любые ограничения ширины на странице предметов */
 .subjects-page,
 .subjects-page .page-with-header,
 .subjects-page .subjects-container {
   width: 100% !important;
-  max-width: none !important;    /* убираем возможный max-width */
+  max-width: none !important;
 }
-
 .subjects-page {
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--bg-primary);
 }
-
 .subjects-container {
-  max-width: 1200px !important;  /* возвращаем желаемый максимум */
+  max-width: 1200px !important;
   margin: 0 auto;
   padding: 40px 20px;
 }
 
-/* Заголовки строго друг под другом */
 .page-header {
   text-align: center;
   margin-bottom: 48px;
@@ -27,25 +23,22 @@
   flex-direction: column !important;
   gap: 0 !important;
 }
-
 .page-header h1 {
   font-size: 36px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0 0 12px 0 !important;
   display: block !important;
   width: 100% !important;
 }
-
 .page-header p {
   font-size: 18px;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0 !important;
   display: block !important;
   width: 100% !important;
 }
 
-/* Адаптивная сетка – горизонтальные ряды */
 .subjects-grid {
   display: grid !important;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
@@ -54,19 +47,18 @@
 }
 
 .subject-card {
-  background: white;
+  background: var(--bg-card);
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e5e7eb;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
   transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
   flex-direction: column;
 }
-
 .subject-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .subject-header {
@@ -75,49 +67,46 @@
   align-items: center;
   margin-bottom: 12px;
 }
-
 .subject-title {
   font-size: 22px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0;
 }
-
-.subject-title.green  { color: #10b981; }
-.subject-title.blue   { color: #3b82f6; }
+.subject-title.green  { color: var(--accent-success); }
+.subject-title.blue   { color: var(--accent-primary); }
 .subject-title.purple { color: #8b5cf6; }
-.subject-title.red    { color: #ef4444; }
-.subject-title.yellow { color: #f59e0b; }
-
+.subject-title.red    { color: var(--accent-danger); }
+.subject-title.yellow { color: var(--accent-warning); }
 .subject-title:not(.green):not(.blue):not(.purple):not(.red):not(.yellow) {
-  color: #1f2937 !important;
+  color: var(--text-primary) !important;
 }
 
 .progress-percent {
   font-size: 18px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .subject-description {
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 16px;
   line-height: 1.5;
   flex: 1;
 }
 
-/* Прогресс-бар */
+/* ===== ПРОГРЕСС-БАР — фон использует --progress-bg ===== */
 .progress-container {
-  background: #f3f4f6;
-  border-radius: 20px;
-  height: 24px;
-  margin-bottom: 20px;
   position: relative;
+  margin-bottom: 16px;
+  height: 24px;
+  background: var(--progress-bg) !important;
+  border-radius: 20px;
   overflow: hidden;
 }
 
 .progress-bar {
-  height: 100% !important;
+  height: 100%;
   border-radius: 20px;
   transition: width 0.3s ease;
   position: absolute;
@@ -125,17 +114,15 @@
   left: 0;
   right: auto;
   bottom: 0;
-  background: #3b82f6;
+  background: var(--accent-primary);
 }
-
-.progress-bar.green  { background: #10b981; }
-.progress-bar.blue   { background: #3b82f6; }
+.progress-bar.green  { background: var(--accent-success); }
+.progress-bar.blue   { background: var(--accent-primary); }
 .progress-bar.purple { background: #8b5cf6; }
-.progress-bar.red    { background: #ef4444; }
-.progress-bar.yellow { background: #f59e0b; }
-
+.progress-bar.red    { background: var(--accent-danger); }
+.progress-bar.yellow { background: var(--accent-warning); }
 .progress-bar:not(.green):not(.blue):not(.purple):not(.red):not(.yellow) {
-  background: #3b82f6 !important;
+  background: var(--accent-primary) !important;
 }
 
 .progress-text {
@@ -145,17 +132,16 @@
   transform: translate(-50%, -50%);
   font-size: 12px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   z-index: 1;
+  white-space: nowrap;
 }
 
-/* Кнопки */
 .subject-actions {
   display: flex;
   gap: 12px;
   margin-top: auto;
 }
-
 .subject-actions .btn {
   flex: 1;
   text-align: center;
@@ -171,74 +157,62 @@
   align-items: center !important;
   justify-content: center !important;
 }
-
 .subject-actions .btn-outline {
   background: #fbbf24 !important;
   color: #92400e !important;
   border: 2px solid #fbbf24 !important;
 }
-
 .subject-actions .btn-outline:hover {
   background: #d97706 !important;
   border-color: #d97706 !important;
-  color: white !important;
+  color: var(--text-inverse) !important;
 }
-
 .subject-actions .btn-primary {
-  background: #4f46e5 !important;
-  color: white !important;
+  background: var(--accent-primary) !important;
+  color: var(--text-inverse) !important;
 }
-
 .subject-actions .btn-primary:hover {
-  background: #4338ca !important;
+  background: var(--accent-primary-hover) !important;
 }
 
-/* Пустое состояние */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   margin: 20px auto;
   max-width: 400px;
+  border: 1px solid var(--border-color);
 }
-
 .empty-icon {
   font-size: 64px;
   margin-bottom: 20px;
 }
-
 .empty-state h3 {
   font-size: 24px;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 10px;
 }
-
 .empty-state p {
   font-size: 16px;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 20px;
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .subjects-container {
     padding: 30px 15px;
   }
-
   .page-header h1 {
     font-size: 28px;
   }
-
   .page-header p {
     font-size: 16px;
   }
-
   .subjects-grid {
     grid-template-columns: 1fr !important;
   }
-
   .subject-actions {
     flex-direction: column;
   }

@@ -1,10 +1,9 @@
-/* client/src/components/SpecialAbilities.css */
 .special-abilities {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 25px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e5e7eb;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
 .abilities-header {
@@ -17,7 +16,7 @@
 .abilities-header h3 {
   font-size: 24px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -27,12 +26,12 @@
 }
 
 .abilities-stats .stat {
-  background: #f3f4f6;
+  background: var(--bg-secondary);
   padding: 8px 16px;
   border-radius: 20px;
   font-size: 14px;
   font-weight: 500;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .abilities-grid {
@@ -43,34 +42,34 @@
 
 .ability-card {
   position: relative;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 12px;
   padding: 20px;
-  background: white;
+  background: var(--bg-card);
   transition: all 0.3s ease;
   overflow: hidden;
 }
 
 .ability-card.unlocked {
-  border-color: #8b5cf6;
-  background: linear-gradient(135deg, #f8fafc 0%, #f5f3ff 100%);
+  border-color: var(--accent-primary);
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-active) 100%);
 }
 
 .ability-card.active {
-  border-color: #10b981;
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-color: var(--accent-success);
+  background: linear-gradient(135deg, var(--bg-card) 0%, #dcfce7 100%);
   transform: translateY(-5px);
   box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
 }
 
 .ability-card.locked {
-  background: #f9fafb;
+  background: var(--bg-secondary);
   opacity: 0.8;
 }
 
 .ability-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .ability-card.locked:hover {
@@ -90,20 +89,20 @@
   width: 60px;
   height: 60px;
   border-radius: 12px;
-  background: white;
+  background: var(--bg-card);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
 }
 
 .ability-card.unlocked .ability-icon {
-  border-color: #8b5cf6;
-  background: #f5f3ff;
+  border-color: var(--accent-primary);
+  background: var(--bg-active);
 }
 
 .ability-card.active .ability-icon {
-  border-color: #10b981;
+  border-color: var(--accent-success);
   background: #dcfce7;
 }
 
@@ -112,7 +111,7 @@
   font-weight: 600;
   padding: 4px 12px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--bg-card);
   border: 1px solid currentColor;
 }
 
@@ -123,13 +122,13 @@
 .ability-name {
   font-size: 18px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0 0 10px 0;
 }
 
 .ability-description {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-secondary);
   line-height: 1.5;
   margin: 0 0 15px 0;
 }
@@ -138,20 +137,20 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--bg-secondary);
   padding: 12px;
   border-radius: 8px;
-  border-left: 4px solid #8b5cf6;
+  border-left: 4px solid var(--accent-primary);
 }
 
 .ability-card.active .ability-benefit {
-  border-left-color: #10b981;
+  border-left-color: var(--accent-success);
 }
 
 .benefit-label {
   font-size: 12px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -159,7 +158,7 @@
 .benefit-text {
   font-size: 14px;
   font-weight: 500;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .ability-footer {
@@ -174,16 +173,16 @@
 }
 
 .ability-actions .btn-outline.active {
-  background: #10b981;
-  color: white;
-  border-color: #10b981;
+  background: var(--accent-success);
+  color: var(--text-inverse);
+  border-color: var(--accent-success);
 }
 
 .ability-requirements {
-  background: white;
+  background: var(--bg-card);
   padding: 15px;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
 }
 
 .level-requirement {
@@ -200,7 +199,7 @@
 .requirement-text {
   font-size: 14px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .progress-indicator {
@@ -212,14 +211,14 @@
 .progress-bar {
   flex: 1;
   height: 6px;
-  background: #e5e7eb;
+  background: var(--bg-secondary);
   border-radius: 3px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #8b5cf6, #6366f1);
+  background: linear-gradient(90deg, var(--accent-primary), #6366f1);
   border-radius: 3px;
   transition: width 0.5s ease;
 }
@@ -227,7 +226,7 @@
 .progress-text {
   font-size: 12px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--text-secondary);
   min-width: 40px;
   text-align: right;
 }
@@ -238,7 +237,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(0,0,0,0.6);
   backdrop-filter: blur(2px);
   display: flex;
   flex-direction: column;
@@ -255,13 +254,13 @@
 
 .lock-icon {
   font-size: 32px;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .lock-text {
   font-size: 14px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--text-inverse);
   text-align: center;
   max-width: 80%;
 }
@@ -272,12 +271,10 @@
     align-items: flex-start;
     gap: 15px;
   }
-  
   .abilities-stats {
     width: 100%;
     justify-content: space-between;
   }
-  
   .abilities-grid {
     grid-template-columns: 1fr;
   }

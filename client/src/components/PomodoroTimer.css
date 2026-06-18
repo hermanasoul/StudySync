@@ -1,8 +1,9 @@
 .pomodoro-timer {
-  background: white;
+  background: var(--bg-card);
   border-radius: 20px;
   padding: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
 .timer-header {
@@ -15,7 +16,7 @@
 .timer-type {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -30,8 +31,8 @@
   height: 40px;
   border-radius: 50%;
   border: none;
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -41,7 +42,7 @@
 }
 
 .timer-btn:hover:not(:disabled) {
-  background: #e2e8f0;
+  background: var(--bg-hover);
   transform: scale(1.05);
 }
 
@@ -51,39 +52,39 @@
 }
 
 .timer-btn-start {
-  background: #10b981;
-  color: white;
+  background: var(--accent-success);
+  color: var(--text-inverse);
 }
 
 .timer-btn-start:hover:not(:disabled) {
-  background: #059669;
+  background: var(--accent-success-hover);
 }
 
 .timer-btn-pause {
-  background: #f59e0b;
-  color: white;
+  background: var(--accent-warning);
+  color: var(--text-inverse);
 }
 
 .timer-btn-pause:hover:not(:disabled) {
-  background: #d97706;
+  background: var(--accent-warning-hover);
 }
 
 .timer-btn-reset {
-  background: #ef4444;
-  color: white;
+  background: var(--accent-danger);
+  color: var(--text-inverse);
 }
 
 .timer-btn-reset:hover:not(:disabled) {
-  background: #dc2626;
+  background: var(--accent-danger-hover);
 }
 
 .timer-btn-switch {
-  background: #6366f1;
-  color: white;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
 }
 
 .timer-btn-switch:hover:not(:disabled) {
-  background: #4f46e5;
+  background: var(--accent-primary-hover);
 }
 
 .timer-circle {
@@ -100,7 +101,7 @@
 }
 
 .timer-bg {
-  stroke: #e2e8f0;
+  stroke: var(--bg-secondary);
   stroke-width: 8;
 }
 
@@ -113,7 +114,7 @@
 }
 
 .timer-progress.break {
-  stroke: #10b981;
+  stroke: var(--accent-success);
 }
 
 .timer-time {
@@ -123,7 +124,7 @@
   transform: translate(-50%, -50%);
   font-size: 2.5rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   font-family: monospace;
   white-space: nowrap;
 }
@@ -134,7 +135,7 @@
   gap: 24px;
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-color);
 }
 
 .setting {
@@ -144,12 +145,12 @@
 }
 
 .setting-label {
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .setting-value {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 @media (max-width: 768px) {
@@ -157,11 +158,9 @@
     width: 160px;
     height: 160px;
   }
-  
   .timer-time {
     font-size: 2rem;
   }
-  
   .timer-settings-info {
     gap: 16px;
     flex-wrap: wrap;

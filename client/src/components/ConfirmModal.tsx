@@ -1,5 +1,3 @@
-// client/src/components/ConfirmModal.tsx
-
 import React from 'react';
 import './ConfirmModal.css';
 
@@ -11,7 +9,7 @@ interface ConfirmModalProps {
   message: string;
   confirmText?: string;
   cancelText?: string;
-  error?: string | null;
+  loading?: boolean;
 }
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -20,26 +18,36 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onConfirm,
   title,
   message,
-  confirmText = 'Подтвердить',
+  confirmText = 'Удалить',
   cancelText = 'Отмена',
-  error
+  loading = false,
 }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>{title}</h2>
-          <button className="close-button" onClick={onClose}>×</button>
+    <div className="confirm-modal-overlay" onClick={onClose}>
+      <div className="confirm-modal-content" onClick={e => e.stopPropagation()}>
+        <div className="confirm-modal-header">
+          <h3>{title}</h3>
         </div>
-        <div className="modal-body">
-          {error && <div className="error-message"><strong>Ошибка:</strong> {error}</div>}
+        <div className="confirm-modal-body">
           <p>{message}</p>
         </div>
-        <div className="modal-actions">
-          <button className="btn-outline" onClick={onClose}>{cancelText}</button>
-          <button className="btn-danger" onClick={onConfirm}>{confirmText}</button>
+        <div className="confirm-modal-actions">
+          <button 
+            className="confirm-cancel-btn" 
+            onClick={onClose} 
+            disabled={loading}
+          >
+            {cancelText}
+          </button>
+          <button 
+            className="confirm-confirm-btn" 
+            onClick={onConfirm} 
+            disabled={loading}
+          >
+            {loading ? '...' : confirmText}
+          </button>
         </div>
       </div>
     </div>

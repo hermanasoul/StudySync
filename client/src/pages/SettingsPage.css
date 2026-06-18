@@ -1,6 +1,6 @@
 .settings-page {
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--bg-primary);
 }
 
 .settings-container {
@@ -13,72 +13,67 @@
   text-align: center;
   margin-bottom: 50px;
 }
-
 .settings-header h1 {
   font-size: 36px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 10px;
 }
-
 .settings-header p {
   font-size: 18px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .settings-content {
-  background: white;
+  background: var(--bg-card);
   padding: 40px;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
 .settings-section {
   margin-bottom: 40px;
   padding-bottom: 40px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
-
 .settings-section:last-child {
   margin-bottom: 0;
   padding-bottom: 0;
   border-bottom: none;
 }
-
 .settings-section h2 {
   font-size: 24px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 25px;
 }
 
 .settings-form {
   max-width: 400px;
 }
-
 .form-group {
   margin-bottom: 20px;
 }
-
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  color: #374151;
+  color: var(--text-primary);
   font-weight: 500;
 }
-
 .form-group input {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 0.2s;
+  background: var(--input-bg);
+  color: var(--input-text);
 }
-
 .form-group input:focus {
   outline: none;
-  border-color: #4f46e5;
+  border-color: var(--input-focus);
 }
 
 .account-info {
@@ -86,27 +81,23 @@
   flex-direction: column;
   gap: 15px;
 }
-
 .info-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-light);
 }
-
 .info-label {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-weight: 500;
 }
-
 .info-value {
-  color: #1f2937;
+  color: var(--text-primary);
   font-weight: 600;
 }
-
 .status-active {
-  color: #10b981;
+  color: var(--accent-success);
   font-weight: 600;
 }
 
@@ -126,19 +117,16 @@
   line-height: 1.5 !important;
   outline: none !important;
 }
-
 .btn:focus,
 .btn:active {
   outline: none !important;
   box-shadow: none !important;
 }
-
 .btn-primary {
   background: #fbbf24 !important;
   color: #1f2937 !important;
   box-shadow: 0 4px 14px rgba(251, 191, 36, 0.3) !important;
 }
-
 .btn-primary:hover {
   background: #f59e0b !important;
   transform: translateY(-3px) !important;

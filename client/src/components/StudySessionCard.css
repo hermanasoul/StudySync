@@ -1,13 +1,13 @@
 .study-session-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
+  /* граница убрана */
 }
 
-/* Шапка – бейджи горизонтально с переносом */
 .session-header {
   display: flex;
   flex-wrap: wrap;
@@ -15,11 +15,10 @@
   gap: 6px;
   padding: 10px 14px;
   min-height: 60px;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
 }
 
-/* Компактные бейджи */
 .session-status-badge,
 .session-access-badge,
 .host-badge,
@@ -28,7 +27,7 @@
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: white;
+  color: var(--text-inverse);
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
@@ -40,8 +39,8 @@
 }
 
 .session-access-badge {
-  background: #f0f0ff;
-  color: #4f46e5;
+  background: var(--bg-active);
+  color: var(--accent-primary);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -53,14 +52,13 @@
 }
 
 .group-badge {
-  background: #f0f0ff;
-  color: #4f46e5;
+  background: var(--bg-active);
+  color: var(--accent-primary);
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 
-/* Содержимое карточки */
 .session-content {
   padding: 16px;
   flex: 1;
@@ -71,11 +69,12 @@
 .session-title {
   margin: 0 0 8px;
   font-size: 1.1rem;
+  color: var(--text-primary);
 }
 
 .session-description {
   margin: 0 0 12px;
-  color: #475569;
+  color: var(--text-secondary);
   font-size: 0.85rem;
 }
 
@@ -90,10 +89,9 @@
   align-items: center;
   gap: 4px;
   font-size: 0.85rem;
-  color: #1e293b;
+  color: var(--text-secondary);
 }
 
-/* Блок создателя и участников – колонкой */
 .session-host-section {
   display: flex;
   flex-direction: column;
@@ -122,8 +120,8 @@
 }
 
 .avatar-fallback {
-  background: #4f46e5;
-  color: white;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -134,8 +132,8 @@
   position: absolute;
   bottom: -4px;
   right: -6px;
-  background: #1e293b;
-  color: white;
+  background: var(--text-primary);
+  color: var(--bg-card);
   font-size: 0.6rem;
   padding: 1px 4px;
   border-radius: 8px;
@@ -149,16 +147,15 @@
 
 .host-name {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   font-size: 0.95rem;
 }
 
 .host-role {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
-/* Участники – иконки */
 .participants-preview {
   display: flex;
   align-items: center;
@@ -168,7 +165,7 @@
   width: 28px;
   height: 28px;
   margin-left: -6px;
-  border: 2px solid white;
+  border: 2px solid var(--bg-card);
   border-radius: 50%;
   overflow: hidden;
   position: relative;
@@ -182,8 +179,8 @@
 }
 
 .participant-avatar .avatar-fallback {
-  background: #10b981;
-  color: white;
+  background: var(--accent-success);
+  color: var(--text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -195,33 +192,32 @@
   width: 28px;
   height: 28px;
   margin-left: -6px;
-  border: 2px solid white;
+  border: 2px solid var(--bg-card);
   border-radius: 50%;
-  background: #e5e7eb;
-  color: #475569;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.7rem;
 }
 
-/* Нижняя часть – кнопки */
 .session-footer {
   margin-top: auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
 }
 
 .session-meta {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .live-indicator {
-  color: #ef4444;
+  color: var(--accent-danger);
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -231,7 +227,7 @@
 .live-dot {
   width: 8px;
   height: 8px;
-  background: #ef4444;
+  background: var(--accent-danger);
   border-radius: 50%;
   display: inline-block;
   animation: pulse 1.5s infinite;
@@ -243,7 +239,6 @@
   100% { opacity: 1; }
 }
 
-/* ===== КНОПКА В КАРТОЧКЕ – ПЕРЕОПРЕДЕЛЕНИЕ ГЛОБАЛЬНЫХ СТИЛЕЙ ===== */
 .session-actions .btn {
   padding: 6px 16px !important;
   height: 36px !important;
@@ -257,8 +252,8 @@
   cursor: pointer !important;
   border-radius: 10px !important;
   font-weight: 600 !important;
-  color: white !important;
-  background: #4f46e5 !important;
+  color: var(--text-inverse) !important;
+  background: var(--accent-primary) !important;
   width: auto !important;
   min-width: auto !important;
   flex-shrink: 0 !important;
@@ -267,5 +262,5 @@
 }
 
 .session-actions .btn:hover {
-  background: #4338ca !important;
+  background: var(--accent-primary-hover) !important;
 }

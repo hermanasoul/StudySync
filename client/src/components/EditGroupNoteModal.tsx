@@ -1,5 +1,3 @@
-// client/src/components/EditGroupNoteModal.tsx
-
 import React, { useState, useEffect } from 'react';
 import { notesAPI } from '../services/api';
 import './EditGroupNoteModal.css';
@@ -21,25 +19,22 @@ interface EditGroupNoteModalProps {
   note: Note | null;
   groupId: string;
   onNoteUpdated: () => void;
-  onNoteDeleted: () => void;
+  onNoteDeleted: () => void; // для совместимости, но не используется
 }
 
 const EditGroupNoteModal: React.FC<EditGroupNoteModalProps> = ({
-  isOpen, onClose, note, onNoteUpdated, onNoteDeleted
+  isOpen, onClose, note, onNoteUpdated
 }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Заполняем поля при открытии модалки и изменении note
   useEffect(() => {
     if (note) {
       setTitle(note.title || '');
       setContent(note.content || '');
       setError('');
-      setShowDeleteConfirm(false);
     }
   }, [note, isOpen]);
 
@@ -81,28 +76,6 @@ const EditGroupNoteModal: React.FC<EditGroupNoteModalProps> = ({
     }
   };
 
-  const handleDeleteClick = () => {
-    setShowDeleteConfirm(true);
-  };
-
-  const confirmDelete = async () => {
-    setLoading(true);
-    try {
-      await notesAPI.delete(note._id);
-      onNoteDeleted();
-      onClose();
-    } catch (err: any) {
-      setError(extractError(err.response?.data));
-    } finally {
-      setLoading(false);
-      setShowDeleteConfirm(false);
-    }
-  };
-
-  const cancelDelete = () => {
-    setShowDeleteConfirm(false);
-  };
-
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -110,34 +83,36 @@ const EditGroupNoteModal: React.FC<EditGroupNoteModalProps> = ({
           <h2>Редактировать заметку группы</h2>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
-        <form onSubmit={handleUpdate}>
+        <form onSubmit={handleUpdate} className="note-form" style={{ padding: '25px' }}>
           {error && <div className="error-message"><strong>Ошибка:</strong> {error}</div>}
           <div className="form-group">
             <label>Заголовок</label>
-            <input value={title} onChange={e => setTitle(e.target.value)} required maxLength={100} />
+            <input value={title} onChange={e => setTitle(e.target.value)} required maxLength={100} disabled={loading} />
           </div>
           <div className="form-group">
             <label>Содержание</label>
-            <textarea value={content} onChange={e => setContent(e.target.value)} required rows={5} maxLength={10000} />
+            <textarea value={content} onChange={e => setContent(e.target.value)} required rows={5} maxLength={10000} disabled={loading} />
           </div>
-          <div className="form-actions">
-            <button type="button" onClick={handleDeleteClick} className="btn-danger" disabled={loading}>Удалить</button>
-            <button type="submit" className="btn-primary" disabled={loading}>Сохранить</button>
+          <div className="form-actions" style={{ justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              className="editgroupnote-cancel-btn"
+              onClick={onClose}
+              disabled={loading}
+              style={{ height: '34px', padding: '0 14px', fontSize: '13px', minWidth: 'auto', width: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '6px' }}
+            >
+              Отмена
+            </button>
+            <button
+              type="submit"
+              className="editgroupnote-save-btn"
+              disabled={loading}
+              style={{ height: '34px', padding: '0 14px', fontSize: '13px', minWidth: 'auto', width: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '6px' }}
+            >
+              {loading ? 'Сохранение...' : 'Сохранить'}
+            </button>
           </div>
         </form>
-
-        {/* Кастомное подтверждение удаления */}
-        {showDeleteConfirm && (
-          <div className="delete-confirm-overlay" onClick={cancelDelete}>
-            <div className="delete-confirm-dialog" onClick={e => e.stopPropagation()}>
-              <p>Удалить эту заметку?</p>
-              <div className="delete-confirm-actions">
-                <button className="btn btn-danger btn-sm" onClick={confirmDelete} disabled={loading}>Удалить</button>
-                <button className="btn btn-outline btn-sm" onClick={cancelDelete}>Отмена</button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

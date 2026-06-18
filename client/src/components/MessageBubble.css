@@ -31,8 +31,8 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  color: white;
+  background: linear-gradient(135deg, var(--accent-primary), #764ba2);
+  color: var(--text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,14 +47,14 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #10b981;
-  color: white;
+  background: var(--accent-success);
+  color: var(--text-inverse);
   font-size: 8px;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid white;
+  border: 2px solid var(--bg-card);
 }
 
 .message-content-wrapper {
@@ -69,14 +69,14 @@
 
 .message-sender {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 4px;
   padding-left: 4px;
 }
 
 .message-reply {
-  background: #f3f4f6;
-  border-left: 3px solid #3b82f6;
+  background: var(--bg-secondary);
+  border-left: 3px solid var(--accent-primary);
   border-radius: 4px;
   padding: 8px 12px;
   margin-bottom: 8px;
@@ -86,12 +86,12 @@
 
 .reply-sender {
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   margin-bottom: 2px;
 }
 
 .reply-content {
-  color: #6b7280;
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -111,14 +111,14 @@
 }
 
 .message-bubble.own {
-  background: #3b82f6;
-  color: white;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
   border-bottom-right-radius: 4px;
 }
 
 .message-bubble.other {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   border-bottom-left-radius: 4px;
 }
 
@@ -140,7 +140,7 @@
   margin-top: 4px;
   padding: 0 4px;
   font-size: 11px;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .own-message .message-meta {
@@ -152,7 +152,7 @@
 }
 
 .message-read {
-  color: #10b981;
+  color: var(--accent-success);
   font-size: 10px;
   font-weight: 500;
 }
@@ -164,8 +164,8 @@
 }
 
 .system-content {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
   padding: 8px 16px;
   border-radius: 16px;
   font-size: 12px;
@@ -177,10 +177,10 @@
   position: absolute;
   top: 100%;
   right: 0;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   z-index: 100;
   min-width: 160px;
   overflow: hidden;
@@ -194,17 +194,17 @@
   border: none;
   text-align: left;
   font-size: 14px;
-  color: #374151;
+  color: var(--text-primary);
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .context-menu-item:hover {
-  background: #f3f4f6;
+  background: var(--bg-hover);
 }
 
 .context-menu-item.delete {
-  color: #ef4444;
+  color: var(--accent-danger);
 }
 
 .context-menu-overlay {
@@ -217,25 +217,27 @@
 }
 
 .message-edit-container {
-  background: white;
-  border: 1px solid #3b82f6;
+  background: var(--bg-card);
+  border: 1px solid var(--accent-primary);
   border-radius: 12px;
   padding: 8px;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+  box-shadow: var(--shadow-md);
 }
 
 .message-edit-input {
   width: 100%;
   padding: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 14px;
   margin-bottom: 8px;
+  background: var(--input-bg);
+  color: var(--input-text);
 }
 
 .message-edit-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--input-focus);
 }
 
 .message-edit-actions {
@@ -255,19 +257,19 @@
 }
 
 .edit-btn.save {
-  background: #10b981;
-  color: white;
+  background: var(--accent-success);
+  color: var(--text-inverse);
 }
 
 .edit-btn.save:hover {
-  background: #059669;
+  background: var(--accent-success-hover);
 }
 
 .edit-btn.cancel {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .edit-btn.cancel:hover {
-  background: #e5e7eb;
+  background: var(--bg-hover);
 }

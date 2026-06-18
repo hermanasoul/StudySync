@@ -1,5 +1,5 @@
 .session-stats-modal {
-  background: white;
+  background: var(--modal-bg);
   border-radius: 20px;
   padding: 24px;
   max-width: 900px;
@@ -7,6 +7,7 @@
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
+  border: 1px solid var(--modal-border);
 }
 
 .stats-header {
@@ -15,12 +16,12 @@
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--border-color);
 }
 
 .stats-header h2 {
   font-size: 1.5rem;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -29,7 +30,7 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #94a3b8;
+  color: var(--text-muted);
   width: 32px;
   height: 32px;
   display: flex;
@@ -40,8 +41,8 @@
 }
 
 .close-stats:hover {
-  background: #f1f5f9;
-  color: #1e293b;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .stats-grid {
@@ -52,29 +53,29 @@
 }
 
 .stats-card {
-  background: linear-gradient(135deg, #f8fafc, #ffffff);
+  background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
   border-radius: 16px;
   padding: 20px;
   text-align: center;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   transition: transform 0.2s ease;
 }
 
 .stats-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .stats-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #667eea;
+  color: var(--accent-primary);
   margin-bottom: 8px;
 }
 
 .stats-label {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
@@ -84,7 +85,7 @@
 
 .stats-section h3 {
   font-size: 1.2rem;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 20px;
   display: flex;
   align-items: center;
@@ -98,30 +99,30 @@
 .participants-table table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .participants-table th,
 .participants-table td {
   padding: 12px 16px;
   text-align: left;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .participants-table th {
-  background: #f8fafc;
+  background: var(--bg-secondary);
   font-weight: 600;
-  color: #475569;
+  color: var(--text-primary);
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .participants-table tr:hover {
-  background: #f8fafc;
+  background: var(--bg-hover);
 }
 
 .participant-cell {
@@ -140,8 +141,8 @@
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  background: linear-gradient(135deg, var(--accent-primary), #764ba2);
+  color: var(--text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -150,13 +151,13 @@
 
 .participant-name {
   font-weight: 500;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .participant-level {
   font-size: 0.75rem;
-  color: #94a3b8;
-  background: #f1f5f9;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
   padding: 2px 6px;
   border-radius: 12px;
 }
@@ -166,15 +167,13 @@
 }
 
 .success-rate.high {
-  color: #10b981;
+  color: var(--accent-success);
 }
-
 .success-rate.medium {
-  color: #f59e0b;
+  color: var(--accent-warning);
 }
-
 .success-rate.low {
-  color: #ef4444;
+  color: var(--accent-danger);
 }
 
 .streak-badge {
@@ -182,7 +181,7 @@
   align-items: center;
   gap: 4px;
   background: #fef3c7;
-  color: #b45309;
+  color: #92400e;
   padding: 4px 8px;
   border-radius: 20px;
   font-size: 0.8rem;
@@ -199,15 +198,16 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  background: #f8fafc;
+  background: var(--bg-secondary);
   padding: 16px;
   border-radius: 12px;
   transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
 }
 
 .leaderboard-entry:hover {
   transform: translateX(4px);
-  background: #f1f5f9;
+  background: var(--bg-hover);
 }
 
 .leaderboard-rank {
@@ -219,8 +219,9 @@
   justify-content: center;
   font-weight: 700;
   font-size: 1.2rem;
-  color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-sm);
+  background: var(--accent-primary);
 }
 
 .leaderboard-user {
@@ -241,8 +242,8 @@
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  background: linear-gradient(135deg, var(--accent-primary), #764ba2);
+  color: var(--text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -256,13 +257,13 @@
 
 .user-name {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .user-level {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .leaderboard-stats {
@@ -277,7 +278,7 @@
 .stat-item .stat-value {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   display: block;
 }
 
@@ -292,7 +293,7 @@
   justify-content: center;
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-color);
 }
 
 .btn {
@@ -305,8 +306,8 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--accent-primary), #764ba2);
+  color: var(--text-inverse);
   box-shadow: 0 4px 14px rgba(102, 126, 234, 0.25);
 }
 
@@ -319,22 +320,18 @@
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
   .participants-table th,
   .participants-table td {
     padding: 8px 12px;
     font-size: 0.85rem;
   }
-  
   .leaderboard-entry {
     flex-direction: column;
     text-align: center;
   }
-  
   .leaderboard-stats {
     justify-content: center;
   }
-  
   .participant-info {
     flex-direction: column;
     text-align: center;

@@ -1,8 +1,9 @@
 .user-search-container {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
 .user-search-header {
@@ -15,12 +16,12 @@
 .user-search-header h2 {
   margin: 0;
   font-size: 24px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .search-tabs {
   display: flex;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -30,18 +31,18 @@
   background: none;
   border: none;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.3s;
 }
 
 .search-tabs .tab:hover {
-  background-color: #f3f4f6;
+  background-color: var(--bg-hover);
 }
 
 .search-tabs .tab.active {
-  background-color: #3b82f6;
-  color: white;
+  background-color: var(--accent-primary);
+  color: var(--text-inverse);
 }
 
 .search-section {
@@ -56,16 +57,18 @@
 .search-input {
   width: 100%;
   padding: 12px 16px 12px 44px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 0.3s;
+  background: var(--input-bg);
+  color: var(--input-text);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
 .search-icon {
@@ -73,7 +76,7 @@
   left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .loading {
@@ -81,21 +84,21 @@
   justify-content: center;
   align-items: center;
   height: 100px;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 16px;
 }
 
 .search-hint {
   text-align: center;
   padding: 40px 20px;
-  color: #9ca3af;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
 .search-results h3 {
   margin: 0 0 16px 0;
   font-size: 18px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .users-grid {
@@ -105,15 +108,16 @@
 }
 
 .user-card {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 20px;
   transition: transform 0.3s, box-shadow 0.3s;
+  background: var(--bg-card);
 }
 
 .user-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .user-header {
@@ -138,11 +142,11 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(135deg, var(--accent-primary), #764ba2);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--text-inverse);
   font-size: 24px;
   font-weight: bold;
 }
@@ -154,14 +158,14 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #3b82f6;
-  color: white;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   font-weight: bold;
-  border: 2px solid white;
+  border: 2px solid var(--bg-card);
 }
 
 .user-info {
@@ -171,13 +175,13 @@
 .user-name {
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .user-email {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 12px;
 }
 
@@ -193,14 +197,14 @@
 
 .stat-label {
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 2px;
 }
 
 .stat-value {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .user-actions {
@@ -233,7 +237,9 @@
   gap: 8px;
 }
 
-.btn-primary, .btn-outline, .btn-success {
+.btn-primary,
+.btn-outline,
+.btn-success {
   padding: 8px 16px;
   border-radius: 6px;
   font-size: 14px;
@@ -245,35 +251,36 @@
 }
 
 .btn-primary {
-  background-color: #3b82f6;
-  color: white;
+  background-color: var(--accent-primary);
+  color: var(--text-inverse);
 }
 
 .btn-primary:hover {
-  background-color: #2563eb;
+  background-color: var(--accent-primary-hover);
 }
 
 .btn-outline {
   background-color: transparent;
-  color: #666;
-  border: 1px solid #d1d5db;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
 }
 
 .btn-outline:hover {
-  background-color: #f3f4f6;
-  border-color: #9ca3af;
+  background-color: var(--bg-hover);
+  border-color: var(--border-dark);
 }
 
 .btn-success {
-  background-color: #10b981;
-  color: white;
+  background-color: var(--accent-success);
+  color: var(--text-inverse);
 }
 
 .btn-success:hover {
-  background-color: #059669;
+  background-color: var(--accent-success-hover);
 }
 
-.empty-results, .empty-recommendations {
+.empty-results,
+.empty-recommendations {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -288,14 +295,16 @@
   opacity: 0.5;
 }
 
-.empty-results h4, .empty-recommendations h4 {
+.empty-results h4,
+.empty-recommendations h4 {
   margin: 0 0 8px 0;
-  color: #333;
+  color: var(--text-primary);
 }
 
-.empty-results p, .empty-recommendations p {
+.empty-results p,
+.empty-recommendations p {
   margin: 0;
-  color: #666;
+  color: var(--text-secondary);
   max-width: 400px;
 }
 
@@ -309,7 +318,7 @@
 .recommendations-section .section-header h3 {
   margin: 0;
   font-size: 20px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .recommendations-grid {
@@ -319,7 +328,7 @@
 }
 
 .recommendation-card {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 20px;
   display: flex;
@@ -327,11 +336,12 @@
   align-items: center;
   text-align: center;
   transition: transform 0.3s;
+  background: var(--bg-card);
 }
 
 .recommendation-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .recommendation-avatar {
@@ -359,13 +369,13 @@
 .recommendation-name {
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .recommendation-email {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 16px;
 }
 
@@ -381,7 +391,7 @@
   align-items: center;
   gap: 4px;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .stat-icon {

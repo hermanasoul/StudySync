@@ -1,7 +1,5 @@
-/* client\src\components\CollaborativeFlashcardViewer.css */
-
 .collaborative-flashcard-viewer {
-  background: #f8fafc;
+  background: var(--bg-secondary);
   border-radius: 20px;
   padding: 24px;
 }
@@ -18,29 +16,30 @@
   display: flex;
   align-items: baseline;
   gap: 6px;
-  background: white;
+  background: var(--bg-card);
   padding: 8px 16px;
   border-radius: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
 .stat-value {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .stat-label {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .stat.success .stat-value {
-  color: #10b981;
+  color: var(--accent-success);
 }
 
 .stat.error .stat-value {
-  color: #ef4444;
+  color: var(--accent-danger);
 }
 
 .flashcard-container {
@@ -72,14 +71,15 @@
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
-  background: white;
+  background: var(--bg-card);
   border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 32px;
   text-align: center;
+  border: 1px solid var(--border-color);
 }
 
 .flashcard-front {
@@ -102,7 +102,7 @@
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 2px;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin-bottom: 20px;
   font-weight: 600;
 }
@@ -110,7 +110,7 @@
 .flashcard-text {
   font-size: 1.5rem;
   line-height: 1.4;
-  color: #1e293b;
+  color: var(--text-primary);
   font-weight: 500;
   word-wrap: break-word;
   overflow-y: auto;
@@ -120,8 +120,8 @@
 .flashcard-hint {
   margin-top: 20px;
   font-size: 0.9rem;
-  color: #f59e0b;
-  background: #fef3c7;
+  color: var(--accent-warning);
+  background: var(--bg-secondary);
   padding: 8px 16px;
   border-radius: 12px;
   display: inline-block;
@@ -138,18 +138,18 @@
 
 .control-btn {
   padding: 10px 24px;
-  background: white;
-  border: 2px solid #e2e8f0;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
   border-radius: 12px;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .control-btn:hover:not(:disabled) {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: var(--bg-hover);
+  border-color: var(--border-dark);
   transform: translateY(-2px);
 }
 
@@ -176,24 +176,24 @@
 }
 
 .answer-btn.correct {
-  background: #10b981;
-  color: white;
+  background: var(--accent-success);
+  color: var(--text-inverse);
   box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
 }
 
 .answer-btn.correct:hover:not(:disabled) {
-  background: #059669;
+  background: var(--accent-success-hover);
   transform: translateY(-2px);
 }
 
 .answer-btn.incorrect {
-  background: #ef4444;
-  color: white;
+  background: var(--accent-danger);
+  color: var(--text-inverse);
   box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
 }
 
 .answer-btn.incorrect:hover:not(:disabled) {
-  background: #dc2626;
+  background: var(--accent-danger-hover);
   transform: translateY(-2px);
 }
 
@@ -204,8 +204,8 @@
 
 .answered-badge {
   padding: 12px 24px;
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
   border-radius: 40px;
   font-weight: 600;
 }
@@ -214,9 +214,9 @@
   text-align: center;
   margin-top: 20px;
   padding: 12px;
-  background: #f1f5f9;
+  background: var(--bg-secondary);
   border-radius: 12px;
-  color: #475569;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -235,27 +235,27 @@
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: #e2e8f0;
+  background: var(--bg-secondary);
   border: 2px solid transparent;
-  color: #475569;
+  color: var(--text-secondary);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .thumbnail.active {
-  background: #667eea;
-  color: white;
-  border-color: white;
-  box-shadow: 0 0 0 2px #667eea;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--border-color);
+  box-shadow: 0 0 0 2px var(--accent-primary);
 }
 
 .thumbnail.reviewed {
-  background: #cbd5e1;
+  background: var(--bg-secondary);
 }
 
 .thumbnail:hover:not(:disabled) {
-  background: #cbd5e1;
+  background: var(--bg-hover);
   transform: scale(1.05);
 }
 
@@ -277,37 +277,32 @@
 
 .flashcard-empty h3 {
   font-size: 1.3rem;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .flashcard-empty p {
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 768px) {
   .flashcard {
     height: 300px;
   }
-  
   .flashcard-text {
     font-size: 1.2rem;
   }
-  
   .control-btn {
     padding: 8px 16px;
     font-size: 0.9rem;
   }
-  
   .answer-btn {
     padding: 10px 20px;
     font-size: 0.9rem;
   }
-  
   .flashcard-thumbnails {
     max-height: 60px;
   }
-  
   .thumbnail {
     width: 30px;
     height: 30px;

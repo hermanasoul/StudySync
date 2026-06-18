@@ -1,8 +1,6 @@
-/* client/src/pages/StudySessionsPage.css */
-
 .study-sessions-page {
   min-height: 100vh;
-  background: #f1f5f9;
+  background: var(--bg-primary);
   padding-top: 140px;
 }
 
@@ -19,20 +17,17 @@
   margin-bottom: 24px;
   gap: 16px;
 }
-
 .page-heading h1 {
   margin: 0 0 6px 0;
   font-size: 1.6rem;
-  color: #1e293b;
+  color: var(--text-primary);
 }
-
 .page-subtitle {
   margin: 0;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
-/* ===== Кнопки страницы – ПЕРЕОПРЕДЕЛЕНИЕ ГЛОБАЛЬНЫХ СТИЛЕЙ ===== */
 .page-actions,
 .filter-checkboxes {
   display: flex;
@@ -41,13 +36,9 @@
   flex-shrink: 0;
 }
 
-/* Общие сбросы для кнопок на странице (с добавлением body для повышения веса) */
 body .page-actions .btn,
 body .page-actions .btn-primary,
-body .page-actions .btn-outline,
-body .filter-checkboxes .btn,
-body .filter-checkboxes .btn-outline,
-body .filter-checkboxes .btn-sm {
+body .page-actions .btn-outline {
   padding: 8px 18px !important;
   border-radius: 10px !important;
   font-weight: 600 !important;
@@ -65,37 +56,74 @@ body .filter-checkboxes .btn-sm {
   margin: 0 !important;
   flex-shrink: 0 !important;
 }
-
-/* Кнопка "Создать сессию" */
 body .page-actions .create-btn {
-  background: #4f46e5 !important;
-  color: white !important;
+  background: var(--accent-primary) !important;
+  color: var(--text-inverse) !important;
 }
-
 body .page-actions .create-btn:hover {
-  background: #4338ca !important;
+  background: var(--accent-primary-hover) !important;
 }
-
-/* Кнопка "Обновить" – синяя с белым текстом */
 body .page-actions .refresh-btn {
-  background: #4f46e5 !important;
-  color: white !important;
-  border: none !important;
+  background: var(--accent-primary) !important;
+  color: var(--text-inverse) !important;
 }
-
 body .page-actions .refresh-btn:hover {
-  background: #4338ca !important;
+  background: var(--accent-primary-hover) !important;
 }
 
-/* Кнопка «Сбросить» – компактная, синяя, без растягивания */
-body .filter-checkboxes .reset-btn {
+/* ===== Кнопки-фильтры ===== */
+.filter-toggle-btn {
   height: 32px !important;
   padding: 0 14px !important;
   font-size: 0.85rem !important;
-  background: #4f46e5 !important;
-  color: white !important;
+  font-weight: 600 !important;
   border: none !important;
-  line-height: 32px !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
+  min-width: auto !important;
+  width: auto !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+  transition: all 0.2s ease !important;
+}
+
+.filter-toggle-btn {
+  background: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+}
+
+.filter-toggle-btn.active {
+  background: #fbbf24 !important;
+  color: #92400e !important;
+  box-shadow: 0 4px 14px rgba(252, 211, 77, 0.3) !important;
+}
+
+.filter-toggle-btn.active:hover {
+  background: #d97706 !important;
+  color: var(--text-inverse) !important;
+}
+
+.filter-toggle-btn:not(.active):hover {
+  background: var(--bg-hover) !important;
+}
+
+.filter-checkboxes .reset-btn {
+  height: 32px !important;
+  padding: 0 14px !important;
+  font-size: 0.85rem !important;
+  background: var(--accent-primary) !important;
+  color: var(--text-inverse) !important;
+  border: none !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
   min-width: auto !important;
   width: auto !important;
   display: inline-flex !important;
@@ -106,77 +134,80 @@ body .filter-checkboxes .reset-btn {
   white-space: nowrap !important;
   box-sizing: border-box !important;
   flex-shrink: 0 !important;
+  transition: background 0.2s ease !important;
+}
+.filter-checkboxes .reset-btn:hover {
+  background: var(--accent-primary-hover) !important;
 }
 
-body .filter-checkboxes .reset-btn:hover {
-  background: #4338ca !important;
-}
-
-/* Статистика */
+/* ===== Карточки статистики — исправление конфликта стилей ===== */
 .stats-row {
   display: flex;
   gap: 12px;
   margin-bottom: 20px;
 }
 
-.stat-card {
-  flex: 1;
-  background: white;
-  padding: 14px;
+/* Усиленный селектор для переопределения глобальных стилей */
+.study-sessions-page .stats-row .stat-card {
+  flex: 1 1 0;
+  background: var(--bg-card);
+  padding: 16px 12px;
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-  text-align: center;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  display: block !important;          /* отменяем flex из глобального стиля */
+  text-align: center !important;      /* центрируем текст */
+  min-width: 0;
+  box-sizing: border-box;
 }
 
-.stat-value {
+.study-sessions-page .stats-row .stat-value {
   font-size: 1.6rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   display: block;
+  margin-bottom: 0;
 }
 
-.stat-label {
+.study-sessions-page .stats-row .stat-label {
   font-size: 0.8rem;
-  color: #64748b;
-  margin-top: 2px;
+  color: var(--text-secondary);
+  display: block;
+  margin-top: 8px !important;         /* гарантированный отступ */
+  line-height: 1.4;
 }
 
-/* Фильтры */
 .filters-row {
   display: flex;
   align-items: flex-end;
   gap: 12px;
   margin-bottom: 20px;
-  background: white;
+  background: var(--bg-card);
   padding: 14px 16px;
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
   flex-wrap: wrap;
 }
-
 .filter-group {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-
 .filter-group label {
   font-size: 0.8rem;
-  color: #475569;
+  color: var(--text-secondary);
   font-weight: 500;
 }
-
 .filter-group select {
   padding: 6px 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: white;
+  background: var(--input-bg);
   font-size: 0.85rem;
-  color: #1e293b;
+  color: var(--input-text);
   outline: none;
 }
-
-/* Контейнер для чекбоксов и кнопки сброса */
 .filter-checkboxes {
   display: flex;
   flex-wrap: wrap;
@@ -187,61 +218,44 @@ body .filter-checkboxes .reset-btn:hover {
   margin-top: 8px;
 }
 
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.85rem;
-  color: #475569;
-  cursor: pointer;
-}
-
-/* Сетка сессий – две колонки */
 .sessions-content {
   margin-top: 8px;
 }
-
 .sessions-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
-/* Загрузка и пустое состояние */
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 40px;
-  color: #64748b;
+  color: var(--text-secondary);
 }
-
 .spinner {
   width: 36px;
   height: 36px;
-  border: 4px solid #e2e8f0;
-  border-top-color: #4f46e5;
+  border: 4px solid var(--bg-secondary);
+  border-top-color: var(--accent-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 12px;
 }
-
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-
 .empty-state {
   text-align: center;
   padding: 40px 20px;
-  color: #64748b;
+  color: var(--text-secondary);
 }
-
 .empty-icon {
   font-size: 2.5rem;
   margin-bottom: 10px;
 }
 
-/* Адаптация */
 @media (max-width: 768px) {
   .page-content {
     padding: 16px;
@@ -252,6 +266,9 @@ body .filter-checkboxes .reset-btn:hover {
   }
   .stats-row {
     flex-wrap: wrap;
+  }
+  .study-sessions-page .stats-row .stat-card {
+    flex: 1 1 calc(50% - 12px);
   }
   .filters-row {
     flex-direction: column;

@@ -1,10 +1,9 @@
-// client/src/pages/FlashcardsPage.tsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import CreateFlashcardModal from '../components/CreateFlashcardModal';
 import EditFlashcardModal from '../components/EditFlashcardModal';
+import ConfirmModal from '../components/ConfirmModal';
 import StudyCompleteModal from '../components/StudyCompleteModal';
 import webSocketService from '../services/websocket';
 import { flashcardsAPI } from '../services/api';
@@ -28,12 +27,14 @@ const FlashcardsPage: React.FC = () => {
   const [mode, setMode] = useState<'view' | 'study'>('view');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showStudyComplete, setShowStudyComplete] = useState(false);
   const [editingFlashcard, setEditingFlashcard] = useState<Flashcard | null>(null);
   const [currentCard, setCurrentCard] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [studiedCards, setStudiedCards] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
 
   const loadFlashcards = useCallback(async () => {
     if (!validSubjectId) return;
@@ -101,14 +102,13 @@ const FlashcardsPage: React.FC = () => {
     setEditingFlashcard(null);
   };
 
-  const handleDeleteCard = async (cardId: string) => {
+  const handleDeleteCard = async () => {
+    if (!deletingCardId) return;
     try {
-      await flashcardsAPI.delete(cardId);
-      setFlashcards(prev => prev.filter(c => c._id !== cardId));
-      if (editingFlashcard?._id === cardId) {
-        setShowEditModal(false);
-        setEditingFlashcard(null);
-      }
+      await flashcardsAPI.delete(deletingCardId);
+      setFlashcards(prev => prev.filter(c => c._id !== deletingCardId));
+      setShowDeleteConfirm(false);
+      setDeletingCardId(null);
     } catch (err) {
       console.error('Delete error:', err);
       setError('Ошибка при удалении карточки');
@@ -177,14 +177,20 @@ const FlashcardsPage: React.FC = () => {
           <div className="flashcards-actions">
             {mode === 'view' && (
               <>
-                <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>+ Создать карточку</button>
+                <button className="flashcard-create-btn" onClick={() => setShowCreateModal(true)}>
+                  + Создать карточку
+                </button>
                 {flashcards.length > 0 && (
-                  <button className="btn btn-success" onClick={startStudy}>🎯 Начать изучение</button>
+                  <button className="flashcard-study-btn" onClick={startStudy}>
+                    🎯 Начать изучение
+                  </button>
                 )}
               </>
             )}
             {mode === 'study' && (
-              <button className="btn btn-outline" onClick={exitStudy}>← Вернуться к просмотру</button>
+              <button className="flashcard-back-btn" onClick={exitStudy}>
+                ← Вернуться к просмотру
+              </button>
             )}
           </div>
         </div>
@@ -196,7 +202,9 @@ const FlashcardsPage: React.FC = () => {
                 <div className="empty-icon">📚</div>
                 <h3>Пока нет карточек</h3>
                 <p>Создайте первую карточку для изучения</p>
-                <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>Создать карточку</button>
+                <button className="flashcard-create-btn-empty" onClick={() => setShowCreateModal(true)}>
+                  Создать карточку
+                </button>
               </div>
             ) : (
               <div className="flashcards-grid">
@@ -208,7 +216,7 @@ const FlashcardsPage: React.FC = () => {
                     </div>
                     <div className="flashcard-actions">
                       <button className="btn btn-sm btn-outline" onClick={() => { setEditingFlashcard(card); setShowEditModal(true); }}>Редактировать</button>
-                      <button className="btn btn-sm btn-danger" onClick={() => handleDeleteCard(card._id)}>Удалить</button>
+                      <button className="btn btn-sm btn-danger" onClick={() => { setDeletingCardId(card._id); setShowDeleteConfirm(true); }}>Удалить</button>
                     </div>
                   </div>
                 ))}
@@ -245,7 +253,7 @@ const FlashcardsPage: React.FC = () => {
         )}
 
         <div className="page-actions">
-          <Link to="/subjects" className="btn btn-outline">← Назад к предметам</Link>
+          <Link to="/subjects" className="flashcard-back-link">← Назад к предметам</Link>
         </div>
       </div>
 
@@ -263,7 +271,7 @@ const FlashcardsPage: React.FC = () => {
           onClose={() => { setShowEditModal(false); setEditingFlashcard(null); }}
           flashcard={editingFlashcard}
           onFlashcardUpdated={handleEditFlashcard}
-          onFlashcardDeleted={() => handleDeleteCard(editingFlashcard._id)}
+          onFlashcardDeleted={() => { setDeletingCardId(editingFlashcard._id); setShowDeleteConfirm(true); }}
         />
       )}
       {showStudyComplete && (
@@ -276,6 +284,15 @@ const FlashcardsPage: React.FC = () => {
           mode="flashcards"
         />
       )}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => { setShowDeleteConfirm(false); setDeletingCardId(null); }}
+        onConfirm={handleDeleteCard}
+        title="Удаление карточки"
+        message="Вы уверены, что хотите удалить эту карточку? Это действие нельзя отменить."
+        confirmText="Удалить"
+        cancelText="Отмена"
+      />
     </div>
   );
 };

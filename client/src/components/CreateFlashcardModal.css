@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--modal-overlay);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -12,15 +12,16 @@
 }
 
 .modal-content {
-  background: white;
+  background: var(--modal-bg);
   border-radius: 12px;
   padding: 0;
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-lg);
   animation: scaleIn 0.25s ease-out;
+  border: 1px solid var(--modal-border);
 }
 
 .modal-header {
@@ -28,14 +29,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h2 {
   margin: 0;
   font-size: 24px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .close-button {
@@ -43,7 +44,7 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--text-secondary);
   padding: 0;
   width: 30px;
   height: 30px;
@@ -55,8 +56,8 @@
 }
 
 .close-button:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .flashcard-form {
@@ -71,25 +72,27 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .form-group textarea,
 .form-group select {
   width: 100%;
   padding: 12px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 6px;
   font-size: 16px;
   font-family: inherit;
   transition: border-color 0.2s;
   resize: vertical;
+  background: var(--input-bg);
+  color: var(--input-text);
 }
 
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #4f46e5;
+  border-color: var(--input-focus);
 }
 
 .form-group textarea {
@@ -97,7 +100,7 @@
 }
 
 .error-message {
-  background: #fef2f2;
+  background: #fee2e2;
   border: 1px solid #fecaca;
   color: #dc2626;
   padding: 12px;

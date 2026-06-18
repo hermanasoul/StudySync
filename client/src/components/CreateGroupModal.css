@@ -1,12 +1,10 @@
-/* client\src\components\CreateGroupModal.css */
-
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--modal-overlay);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,14 +12,15 @@
 }
 
 .modal-content {
-  background: white;
+  background: var(--modal-bg);
   border-radius: 12px;
   padding: 0;
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--modal-border);
 }
 
 .modal-header {
@@ -29,14 +28,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h2 {
   margin: 0;
   font-size: 24px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .close-button {
@@ -44,7 +43,7 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--text-secondary);
   padding: 0;
   width: 30px;
   height: 30px;
@@ -56,8 +55,8 @@
 }
 
 .close-button:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .group-form {
@@ -72,7 +71,7 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .form-group input,
@@ -80,19 +79,21 @@
 .form-group select {
   width: 100%;
   padding: 12px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 6px;
   font-size: 16px;
   font-family: inherit;
   transition: border-color 0.2s;
   resize: vertical;
+  background: var(--input-bg);
+  color: var(--input-text);
 }
 
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #4f46e5;
+  border-color: var(--input-focus);
 }
 
 .form-group textarea {
@@ -103,6 +104,10 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding: 20px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 2px solid var(--border-color);
 }
 
 .checkbox-label {
@@ -110,31 +115,49 @@
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  font-weight: 500;
-  color: #374151;
+  font-weight: 600;
+  color: var(--text-primary);
   margin-bottom: 0;
+  padding: 0;
+  font-size: 16px;
 }
 
-.checkbox-label input {
-  width: auto;
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
   margin: 0;
+  cursor: pointer;
+  accent-color: var(--accent-primary);
+  flex-shrink: 0;
 }
 
 .checkbox-description {
   font-size: 14px;
-  color: #6b7280;
-  margin: 0;
-  line-height: 1.4;
+  color: var(--text-secondary);
+  margin: 8px 0 0 0;
+  line-height: 1.5;
+  padding-left: 0;
+}
+
+.input-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
 }
 
 .error-message {
-  background: #fef2f2;
+  background: #fee2e2;
   border: 1px solid #fecaca;
   color: #dc2626;
   padding: 12px;
   border-radius: 6px;
   margin-bottom: 20px;
   font-size: 14px;
+}
+
+.error-message strong {
+  display: block;
+  margin-bottom: 4px;
 }
 
 .form-actions {
@@ -144,7 +167,8 @@
   margin-top: 24px;
 }
 
-.btn-primary, .btn-outline {
+.btn-primary,
+.btn-outline {
   padding: 12px 24px !important;
   border-radius: 6px !important;
   font-weight: 500 !important;
@@ -156,33 +180,33 @@
 }
 
 .btn-primary {
-  background: #4f46e5 !important;
-  color: white !important;
+  background: var(--accent-primary) !important;
+  color: var(--text-inverse) !important;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #4338ca !important;
+  background: var(--accent-primary-hover) !important;
   transform: translateY(-1px) !important;
 }
 
 .btn-primary:disabled {
-  background: #9ca3af !important;
+  background: var(--text-muted) !important;
   cursor: not-allowed !important;
   transform: none !important;
 }
 
 .btn-outline {
-  background: #6b7280 !important;
-  color: white !important;
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
 }
 
 .btn-outline:hover:not(:disabled) {
-  background: #4b5563 !important;
+  background: var(--bg-hover) !important;
   transform: translateY(-1px) !important;
 }
 
 .btn-outline:disabled {
-  background: #d1d5db !important;
+  background: var(--border-color) !important;
   cursor: not-allowed !important;
   transform: none !important;
 }
@@ -192,63 +216,12 @@
     width: 95%;
     margin: 20px;
   }
-  
   .form-actions {
     flex-direction: column;
   }
-  
-  .btn-primary, .btn-outline {
+  .btn-primary,
+  .btn-outline {
     min-width: auto !important;
     width: 100%;
   }
-}
-
-.input-hint {
-  font-size: 12px;
-  color: #6b7280;
-  margin-top: 4px;
-}
-
-.error-message strong {
-  display: block;
-  margin-bottom: 4px;
-}
-
-.checkbox-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 20px;
-  background: #f8fafc;
-  border-radius: 8px;
-  border: 2px solid #e5e7eb;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 0;
-  padding: 0;
-  font-size: 16px;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  cursor: pointer;
-  accent-color: #4f46e5;
-  flex-shrink: 0;
-}
-
-.checkbox-description {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 8px 0 0 0;
-  line-height: 1.5;
-  padding-left: 0;
 }

@@ -1,13 +1,13 @@
 /* client/src/pages/AchievementsPage.css */
 .achievements-page {
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--bg-primary);
 }
 
 .achievements-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 140px 20px 40px;   /* увеличен верхний отступ */
+  padding: 140px 20px 40px;
 }
 
 .achievements-header {
@@ -18,7 +18,7 @@
 .achievements-header h1 {
   font-size: 42px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 12px;
   display: flex;
   align-items: center;
@@ -28,7 +28,7 @@
 
 .achievements-header p {
   font-size: 18px;
-  color: #6b7280;
+  color: var(--text-secondary);
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.5;
@@ -38,19 +38,19 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  background: white;
+  background: var(--bg-card);
   padding: 20px;
   border-radius: 12px;
   margin-bottom: 30px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e5e7eb;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
 .tab-btn {
   padding: 12px 24px;
   border: 2px solid transparent;
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
@@ -62,14 +62,14 @@
 }
 
 .tab-btn:hover {
-  background: #e5e7eb;
-  color: #1f2937;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .tab-btn.active {
-  background: #8b5cf6;
-  color: white;
-  border-color: #8b5cf6;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
 }
 
 .achievements-content {
@@ -77,11 +77,11 @@
 }
 
 .achievements-section {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 30px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e5e7eb;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
 .section-header {
@@ -92,28 +92,27 @@
 .section-header h2 {
   font-size: 28px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0 0 8px 0;
 }
 
 .section-header p {
   font-size: 16px;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0 auto;
   max-width: 500px;
 }
 
-/* Карточка позиции – гарантированно белый текст */
 .my-position-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--accent-primary), #764ba2);
   border-radius: 12px;
   padding: 24px;
-  color: white;
+  color: var(--text-inverse);
   margin-bottom: 30px;
 }
 
 .my-position-card * {
-  color: white !important;    /* весь текст внутри белый */
+  color: var(--text-inverse) !important;
 }
 
 .my-position-header {
@@ -132,7 +131,7 @@
 .position-rank {
   font-size: 32px;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255,255,255,0.2);
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -162,25 +161,24 @@
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  opacity: 1;               /* убрано затемнение */
+  opacity: 0.9;
 }
 
-/* Лидерборд и остальные стили без изменений */
 .leaderboard-container {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
 }
 
 .leaderboard-header {
   display: grid;
   grid-template-columns: 80px 1fr 120px 120px 150px;
-  background: #f9fafb;
+  background: var(--bg-secondary);
   padding: 16px 20px;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--border-color);
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
@@ -201,13 +199,13 @@
   display: grid;
   grid-template-columns: 80px 1fr 120px 120px 150px;
   padding: 16px 20px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-light);
   align-items: center;
   transition: background 0.2s;
 }
 
 .leaderboard-row:hover {
-  background: #f9fafb;
+  background: var(--bg-hover);
 }
 
 .rank-badge {
@@ -226,26 +224,17 @@
   background: #ffd700;
   color: #000;
 }
-
 .rank-2 {
   background: #c0c0c0;
   color: #000;
 }
-
 .rank-3 {
   background: #cd7f32;
   color: #fff;
 }
-
-.rank-4,
-.rank-5,
-.rank-6,
-.rank-7,
-.rank-8,
-.rank-9,
-.rank-10 {
-  background: #f3f4f6;
-  color: #374151;
+.rank-4, .rank-5, .rank-6, .rank-7, .rank-8, .rank-9, .rank-10 {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
 }
 
 .user-info {
@@ -258,8 +247,8 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #8b5cf6;
-  color: white;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -275,25 +264,25 @@
 
 .user-name {
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .points-value {
   font-weight: 600;
-  color: #8b5cf6;
+  color: var(--accent-primary);
 }
 
 .no-leaderboard {
   text-align: center;
   padding: 40px 20px;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 16px;
 }
 
 .loading {
   text-align: center;
   padding: 60px 20px;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 16px;
 }
 
@@ -301,31 +290,25 @@
   .achievements-container {
     padding: 120px 15px 30px;
   }
-  
   .achievements-tabs {
     flex-direction: column;
   }
-  
   .tab-btn {
     min-width: 100%;
   }
-  
   .my-position-stats {
     grid-template-columns: 1fr;
     gap: 12px;
   }
-  
   .leaderboard-header,
   .leaderboard-row {
     grid-template-columns: 50px 1fr 80px;
     font-size: 12px;
   }
-  
   .leaderboard-col:nth-child(4),
   .leaderboard-col:nth-child(5) {
     display: none;
   }
-  
   .user-avatar {
     width: 32px;
     height: 32px;

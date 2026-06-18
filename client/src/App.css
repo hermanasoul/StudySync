@@ -1,10 +1,14 @@
 .App {
   min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .page-with-header {
   padding-top: 120px;
   min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .page-transition-enter {
@@ -33,25 +37,26 @@
   font-weight: 500;
   font-size: 0.9rem;
   transition: background 0.2s, opacity 0.2s;
-  color: #fff;
-  background: #5b4d8c;
+  color: var(--text-inverse);
+  background: var(--accent-primary);
 }
 
 .btn-danger {
-  background: #852c3a;
+  background: var(--accent-danger);
+  color: var(--text-inverse);
 }
 .btn-danger:hover {
-  background: #a33648;
+  background: var(--accent-danger-hover);
 }
 
 .btn-outline {
-  background: transparent;
-  border: 1px solid #3f3f55;
-  color: #ccc;
+  background: var(--btn-outline-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
 }
 .btn-outline:hover {
-  border-color: #5b4d8c;
-  color: #fff;
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
 }
 
 .btn-small {
@@ -59,13 +64,14 @@
   font-size: 0.85rem;
 }
 
+/* Модальное окно подтверждения удаления */
 .delete-confirm-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: var(--modal-overlay);
   z-index: 100;
   display: flex;
   align-items: center;
@@ -73,12 +79,12 @@
 }
 
 .delete-confirm-dialog {
-  background: #2a2a3c;
-  border: 1px solid #3f3f55;
+  background: var(--modal-bg);
+  border: 1px solid var(--modal-border);
   border-radius: 12px;
   padding: 20px;
-  color: #eee;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
   text-align: center;
 }
 
@@ -91,4 +97,34 @@
   display: flex;
   gap: 8px;
   justify-content: center;
+}
+
+/* Адаптивность для модалок (если нужно) */
+@media (max-width: 768px) {
+  .delete-confirm-dialog {
+    width: 90%;
+    margin: 0 20px;
+  }
+}
+
+/* Глобальное исправление для всех модальных окон: скругление нижних углов */
+.modal-content {
+  overflow: hidden !important;
+  border-radius: 12px !important;
+}
+
+/* ===== ГЛОБАЛЬНОЕ СКРУГЛЕНИЕ ДЛЯ ВСЕХ МОДАЛОК ===== */
+.modal-content,
+.note-modal,
+.create-session-modal,
+.invite-modal,
+.join-modal {
+  overflow: hidden !important;
+  border-radius: 12px !important;
+}
+
+/* Белый заголовок для всех модалок */
+.modal-header h2,
+.modal-header h3 {
+  color: white !important;
 }

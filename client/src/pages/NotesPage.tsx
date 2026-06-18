@@ -1,5 +1,3 @@
-// client/src/pages/NotesPage.tsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Header from '../components/Header';
@@ -200,7 +198,10 @@ const NotesPage: React.FC = () => {
           </div>
         )}
         <div className="notes-actions">
-          <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+          <button 
+            className="notes-create-btn" 
+            onClick={() => setShowCreateModal(true)}
+          >
             + Создать заметку
           </button>
         </div>
@@ -210,7 +211,12 @@ const NotesPage: React.FC = () => {
               <div className="empty-icon">📝</div>
               <h3>Заметок пока нет</h3>
               <p>Создайте свою первую заметку для этого предмета</p>
-              <button className="btn-primary" onClick={() => setShowCreateModal(true)}>Создать заметку</button>
+              <button 
+                className="notes-create-btn-empty" 
+                onClick={() => setShowCreateModal(true)}
+              >
+                Создать заметку
+              </button>
             </div>
           ) : (
             <div className="notes-grid">
@@ -241,7 +247,7 @@ const NotesPage: React.FC = () => {
           )}
         </div>
         <div className="page-actions">
-          <Link to="/subjects" className="btn-outline">← Назад к предметам</Link>
+          <Link to="/subjects" className="notes-back-btn">← Назад к предметам</Link>
         </div>
       </div>
 

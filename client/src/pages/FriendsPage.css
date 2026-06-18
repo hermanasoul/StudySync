@@ -1,51 +1,36 @@
-/* client/src/pages/FriendsPage.css */
-
 .friends-page {
   min-height: 100vh;
-  background: #f8fafc;
-}
-
-.friends-page .page-with-header {
-  padding: 140px 20px 40px;
-  max-width: 1200px;
-  margin: 0 auto;
+  background: var(--bg-primary);
 }
 
 .friends-container {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
+  max-width: 1200px;
   margin: 0 auto;
-  max-width: 100%;
+  padding: 80px 20px 40px;
+  color: var(--text-primary);
 }
 
 .page-header {
-  text-align: center;
+  margin-bottom: 30px;
 }
 
 .page-header h1 {
-  font-size: 36px;
-  font-weight: 700;
-  color: #1f2937;
-  margin-bottom: 10px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 28px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
 }
 
 .page-header p {
-  font-size: 18px;
-  color: #6b7280;
-  margin: 0;
+  color: var(--text-secondary);
+  font-size: 16px;
 }
 
 .error-message {
   background: #fee2e2;
-  border: 1px solid #fecaca;
   color: #dc2626;
   padding: 12px 16px;
   border-radius: 8px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -54,422 +39,365 @@
 .error-close {
   background: none;
   border: none;
-  color: #dc2626;
   font-size: 20px;
   cursor: pointer;
+  color: #dc2626;
 }
 
-/* Вкладки */
 .friends-tabs {
   display: flex;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+  padding: 0;
+  margin-left: 0;
+  margin-right: 0;
 }
 
-.tab {
-  padding: 12px 24px;
-  background: white;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 500;
-  color: #374151;
+.friends-tabs .tab {
+  padding: 10px 20px;
+  background: none;
+  border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  font-size: 15px;
+  color: var(--text-secondary);
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  font-weight: 500;
+  margin: 0;
 }
 
-.tab:hover {
-  border-color: #3b82f6;
-  background: #f0f4ff;
+.friends-tabs .tab:hover {
+  color: var(--accent-primary);
 }
 
-.tab.active {
-  background: #3b82f6;
-  color: white;
-  border-color: #3b82f6;
+.friends-tabs .tab.active {
+  color: var(--accent-primary);
+  border-bottom-color: var(--accent-primary);
 }
 
-/* Контент: основная область + сайдбар */
 .friends-content {
   display: flex;
-  justify-content: center;
   gap: 30px;
-  align-items: stretch;
-  min-height: 500px;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
 }
 
-/* Основная область */
 .friends-main {
-  width: 400px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-/* Каждая вкладка – обёртка */
-.tab-panel {
-  flex: 1;
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.subsection-title {
-  margin: 0 0 16px;
-  font-size: 18px;
-  color: #1f2937;
-}
-
-/* Карточки друзей/запросов/пользователей */
-.friend-card,
-.request-card,
-.user-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #f3f4f6;
-  transition: background 0.2s;
-}
-
-.friend-card:last-child,
-.request-card:last-child,
-.user-card:last-child {
-  border-bottom: none;
-}
-
-.friend-card:hover,
-.request-card:hover,
-.user-card:hover {
-  background: #f9fafb;
-}
-
-.friend-info {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.friend-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.friend-details {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.friend-name {
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 16px;
-}
-
-.friend-email {
-  font-size: 14px;
-  color: #6b7280;
-}
-
-.friend-level {
-  font-size: 13px;
-  color: #8b5cf6;
-  background: #f5f3ff;
-  padding: 2px 8px;
-  border-radius: 10px;
-  display: inline-block;
-  width: fit-content;
-}
-
-/* Кнопки */
-.btn {
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 14px;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 40px;
-  white-space: nowrap;
-}
-
-.btn-primary {
-  background: #3b82f6;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #2563eb;
-}
-
-.btn-success {
-  background: #10b981;
-  color: white;
-}
-
-.btn-success:hover {
-  background: #059669;
-}
-
-.btn-danger {
-  background: #ef4444;
-  color: white;
-}
-
-.btn-danger:hover {
-  background: #dc2626;
-}
-
-.btn-outline {
-  background: transparent;
-  color: #374151;
-  border: 1px solid #d1d5db;
-}
-
-.btn-outline:hover {
-  background: #f3f4f6;
-}
-
-.request-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.pending-badge {
-  background: #fbbf24;
-  color: #92400e;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-/* Поиск – абсолютное выравнивание поля и кнопки */
-.search-bar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.search-bar input {
-  flex: 1;
-  padding: 10px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 16px;
-  height: 40px;
-  box-sizing: border-box;
+  flex: 0 1 58%;
+  min-width: 0;
+  max-width: 58%;
   margin: 0;
-  vertical-align: middle;
+  padding: 0;
 }
 
-.search-bar input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
-/* Кнопка «Найти» – строго на одной линии */
-.search-bar .btn {
-  height: 40px;
-  padding: 0 20px;
-  line-height: 40px;
-  flex-shrink: 0;
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
-}
-
-.search-results {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-/* Пустые состояния */
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-}
-
-.empty-icon {
-  font-size: 48px;
-  margin-bottom: 15px;
-}
-
-.empty-state h3 {
-  font-size: 20px;
-  margin-bottom: 10px;
-  color: #1f2937;
-}
-
-.empty-state p {
-  color: #6b7280;
-}
-
-.empty-message {
-  text-align: center;
-  color: #9ca3af;
-  padding: 30px 0;
-}
-
-/* Сайдбар */
 .friends-sidebar {
-  width: 400px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  flex: 0 0 380px;
+  min-width: 340px;
+  margin: 0;
+  padding: 0;
 }
 
 .sidebar-card {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  margin-bottom: 16px;
 }
 
 .sidebar-card h3 {
-  margin: 0 0 20px;
-  font-size: 18px;
-  color: #1f2937;
+  font-size: 16px;
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
 }
 
 .stats-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
 }
 
 .stat-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.stat-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+  text-align: center;
 }
 
 .stat-value {
-  font-size: 20px;
+  display: block;
+  font-size: 24px;
   font-weight: 700;
-  color: #3b82f6;
+  color: var(--text-primary);
+  line-height: 1.2;
 }
 
 .stat-label {
-  font-size: 14px;
-  color: #6b7280;
+  font-size: 13px;
+  color: var(--text-secondary);
 }
 
 .tips-list {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
 }
 
 .tips-list li {
-  padding: 8px 0;
-  border-bottom: 1px solid #f3f4f6;
-  color: #374151;
+  padding: 6px 0;
+  color: var(--text-secondary);
   font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.tips-list li::before {
-  content: '✓';
-  color: #10b981;
-  font-weight: bold;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .tips-list li:last-child {
   border-bottom: none;
 }
 
-/* Адаптивность */
-@media (max-width: 900px) {
+.friend-card,
+.request-card,
+.user-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card);
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  transition: background 0.15s;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.friend-card:hover,
+.request-card:hover,
+.user-card:hover {
+  background: var(--bg-hover);
+}
+
+.friend-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 150px;
+}
+
+.friend-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-primary), #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-inverse);
+  font-weight: 600;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.friend-details {
+  flex: 1;
+}
+
+.friend-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 15px;
+}
+
+.friend-email {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.friend-level {
+  font-size: 12px;
+  color: var(--accent-primary);
+  background: var(--bg-active);
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: inline-block;
+  margin-top: 2px;
+}
+
+.request-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pending-badge {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.search-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: stretch;
+}
+
+.search-bar input {
+  flex: 1;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  background: var(--input-bg);
+  color: var(--input-text);
+  margin: 0;
+  line-height: normal;
+}
+
+.search-bar input:focus {
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.search-bar .btn {
+  flex: 0 0 auto;
+  height: 34px;
+  min-width: 70px;
+  width: auto;
+  padding: 0 12px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  transition: background 0.2s;
+  box-sizing: border-box;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  line-height: 1 !important;
+  white-space: nowrap;
+}
+
+.search-bar .btn:hover:not(:disabled) {
+  background: var(--accent-primary-hover);
+}
+
+.search-bar .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.friend-card .btn,
+.request-card .btn,
+.user-card .btn {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  min-width: 80px;
+  width: auto;
+  height: 32px;
+  padding: 0 12px;
+  margin: 0;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  box-sizing: border-box;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  line-height: 1 !important;
+  white-space: nowrap;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.empty-state p {
+  color: var(--text-secondary);
+}
+
+.empty-message {
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 20px;
+}
+
+@media (max-width: 992px) {
+  .friends-main {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+  .friends-sidebar {
+    flex: 0 0 100%;
+    min-width: auto;
+  }
   .friends-content {
     flex-direction: column;
-    align-items: center;
-    min-height: auto;
-  }
-
-  .friends-main,
-  .friends-sidebar {
-    width: 100%;
-    max-width: 500px;
   }
 }
 
-@media (max-width: 600px) {
-  .friends-page .page-with-header {
-    padding: 120px 15px 30px;
+@media (max-width: 768px) {
+  .friends-content {
+    flex-direction: column;
   }
-
+  .friends-sidebar {
+    width: 100%;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
   .friend-card,
   .request-card,
   .user-card {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: stretch;
   }
-
-  .friend-card .btn,
-  .request-card .btn,
-  .user-card .btn {
-    align-self: flex-end;
+  .friend-info {
+    min-width: auto;
   }
-
+  .request-actions {
+    justify-content: center;
+  }
   .search-bar {
-    flex-direction: column;
+    flex-wrap: wrap;
   }
-
+  .search-bar input {
+    flex: 1 1 100%;
+    height: 34px;
+  }
   .search-bar .btn {
     width: 100%;
+    height: 34px;
   }
-}
-
-/* Центровка текста в кнопках */
-.search-bar .btn,
-.friend-card .btn,
-.request-card .btn,
-.user-card .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
 }

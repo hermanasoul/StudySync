@@ -1,8 +1,6 @@
-// client/src/components/EditFlashcardModal.tsx
-
 import React, { useState, useEffect } from 'react';
-import { flashcardsAPI } from '../services/api';
 import './EditFlashcardModal.css';
+import { flashcardsAPI } from '../services/api';
 
 interface Flashcard {
   _id: string;
@@ -10,15 +8,14 @@ interface Flashcard {
   answer: string;
   hint?: string;
   subjectId: string;
-  groupId?: string; // для совместимости с GroupPage
 }
 
 interface EditFlashcardModalProps {
   isOpen: boolean;
   onClose: () => void;
   flashcard: Flashcard | null;
-  onFlashcardUpdated: (flashcard?: Flashcard) => void;
-  onFlashcardDeleted: () => void;
+  onFlashcardUpdated: (updated?: Flashcard) => void;
+  onFlashcardDeleted: () => void; // больше не используется, но оставляем для совместимости
 }
 
 const EditFlashcardModal: React.FC<EditFlashcardModalProps> = ({
@@ -26,97 +23,48 @@ const EditFlashcardModal: React.FC<EditFlashcardModalProps> = ({
   onClose,
   flashcard,
   onFlashcardUpdated,
-  onFlashcardDeleted
 }) => {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
   const [hint, setHint] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Заполняем поля при открытии модалки
   useEffect(() => {
     if (flashcard) {
       setQuestion(flashcard.question || '');
       setAnswer(flashcard.answer || '');
       setHint(flashcard.hint || '');
-      setError('');
-      setShowDeleteConfirm(false);
     }
-  }, [flashcard, isOpen]);
+  }, [flashcard]);
 
   if (!isOpen || !flashcard) return null;
 
-  const extractError = (data: any): string => {
-    if (typeof data === 'string') return data;
-    if (data?.error) {
-      if (typeof data.error === 'string') return data.error;
-      if (data.error.message) return data.error.message;
-      if (data.error.errors) {
-        return Object.values(data.error.errors).map((e: any) => e.message).join('; ');
-      }
-      return JSON.stringify(data.error);
-    }
-    if (data?.message) return data.message;
-    return 'Неизвестная ошибка';
-  };
-
-  const handleUpdate = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!question.trim() || !answer.trim()) {
       setError('Заполните вопрос и ответ');
       return;
     }
-
     setLoading(true);
     setError('');
     try {
-      const response = await flashcardsAPI.update(flashcard._id, {
+      const updated = await flashcardsAPI.update(flashcard._id, {
         question: question.trim(),
         answer: answer.trim(),
-        hint: hint.trim()
+        hint: hint.trim() || undefined,
       });
-
-      if (response.data.success && response.data.flashcard) {
-        onFlashcardUpdated({
-          ...flashcard,
-          question: response.data.flashcard.question || question.trim(),
-          answer: response.data.flashcard.answer || answer.trim(),
-          hint: response.data.flashcard.hint || hint.trim()
-        });
+      if (updated.data.success) {
+        onFlashcardUpdated(updated.data.flashcard);
+        onClose();
       } else {
-        onFlashcardUpdated();
+        setError(updated.data.message || 'Ошибка обновления');
       }
-      onClose();
     } catch (err: any) {
-      const msg = extractError(err.response?.data);
-      setError(msg);
+      setError(err.response?.data?.message || 'Ошибка сети');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleDelete = async () => {
-    setShowDeleteConfirm(true);
-  };
-
-  const confirmDelete = async () => {
-    setLoading(true);
-    try {
-      await flashcardsAPI.delete(flashcard._id);
-      onFlashcardDeleted();
-      onClose();
-    } catch (err: any) {
-      setError(extractError(err.response?.data));
-    } finally {
-      setLoading(false);
-      setShowDeleteConfirm(false);
-    }
-  };
-
-  const cancelDelete = () => {
-    setShowDeleteConfirm(false);
   };
 
   return (
@@ -126,38 +74,73 @@ const EditFlashcardModal: React.FC<EditFlashcardModalProps> = ({
           <h2>Редактировать карточку</h2>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
-        <form onSubmit={handleUpdate}>
-          {error && <div className="error-message"><strong>Ошибка:</strong> {error}</div>}
-          <div className="form-group">
-            <label>Вопрос</label>
-            <textarea value={question} onChange={e => setQuestion(e.target.value)} required rows={3} maxLength={500} />
+        <form onSubmit={handleSubmit} className="flashcard-form" style={{ padding: '25px' }}>
+          {error && <div className="error-message">{error}</div>}
+          <div className="stats-info">
+            <div className="stat-item">
+              <span className="stat-label">Вопрос</span>
+              <span className="stat-value">{question.length > 0 ? question.length : '0'}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Ответ</span>
+              <span className="stat-value">{answer.length > 0 ? answer.length : '0'}</span>
+            </div>
           </div>
           <div className="form-group">
-            <label>Ответ</label>
-            <textarea value={answer} onChange={e => setAnswer(e.target.value)} required rows={3} maxLength={1000} />
+            <label>Вопрос *</label>
+            <textarea
+              value={question}
+              onChange={e => setQuestion(e.target.value)}
+              required
+              rows={3}
+              disabled={loading}
+              maxLength={500}
+            />
+          </div>
+          <div className="form-group">
+            <label>Ответ *</label>
+            <textarea
+              value={answer}
+              onChange={e => setAnswer(e.target.value)}
+              required
+              rows={3}
+              disabled={loading}
+              maxLength={500}
+            />
           </div>
           <div className="form-group">
             <label>Подсказка</label>
-            <input value={hint} onChange={e => setHint(e.target.value)} maxLength={200} />
+            <input
+              type="text"
+              value={hint}
+              onChange={e => setHint(e.target.value)}
+              placeholder="Необязательная подсказка"
+              disabled={loading}
+              maxLength={100}
+            />
           </div>
           <div className="form-actions">
-            <button type="button" onClick={handleDelete} className="btn-danger" disabled={loading}>Удалить</button>
-            <button type="submit" className="btn-primary" disabled={loading}>Сохранить</button>
-          </div>
-        </form>
-
-        {/* Кастомное подтверждение удаления */}
-        {showDeleteConfirm && (
-          <div className="delete-confirm-overlay" onClick={cancelDelete}>
-            <div className="delete-confirm-dialog" onClick={e => e.stopPropagation()}>
-              <p>Удалить эту карточку?</p>
-              <div className="delete-confirm-actions">
-                <button className="btn btn-danger btn-sm" onClick={confirmDelete} disabled={loading}>Удалить</button>
-                <button className="btn btn-outline btn-sm" onClick={cancelDelete}>Отмена</button>
-              </div>
+            <div className="actions-right">
+              <button
+                type="button"
+                className="editflashcard-cancel-btn"
+                onClick={onClose}
+                disabled={loading}
+                style={{ height: '34px', padding: '0 14px', fontSize: '13px', minWidth: 'auto', width: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '6px' }}
+              >
+                Отмена
+              </button>
+              <button
+                type="submit"
+                className="editflashcard-save-btn"
+                disabled={loading}
+                style={{ height: '34px', padding: '0 14px', fontSize: '13px', minWidth: 'auto', width: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '6px' }}
+              >
+                {loading ? 'Сохранение...' : 'Сохранить'}
+              </button>
             </div>
           </div>
-        )}
+        </form>
       </div>
     </div>
   );
