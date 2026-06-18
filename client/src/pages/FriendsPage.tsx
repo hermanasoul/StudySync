@@ -1,5 +1,3 @@
-// client/src/pages/FriendsPage.tsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from '../components/Header';
 import { friendsAPI } from '../services/api';
@@ -44,6 +42,7 @@ const FriendsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'friends' | 'requests' | 'search'>('friends');
   const [error, setError] = useState<string | null>(null);
   const [requestLoading, setRequestLoading] = useState<Record<string, boolean>>({});
+  const [searchLoading, setSearchLoading] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -87,14 +86,56 @@ const FriendsPage: React.FC = () => {
     loadData();
   }, [loadData]);
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
+  // Загрузка всех пользователей при активации вкладки "Поиск"
+  const loadAllUsers = useCallback(async () => {
+    setSearchLoading(true);
     try {
-      const res = await friendsAPI.searchUsers(searchQuery, { limit: 10 });
-      if (res.data.success) setSearchResults(res.data.users);
-      else setError('Пользователи не найдены');
+      const res = await friendsAPI.searchUsers('', { limit: 20, excludeFriends: true });
+      if (res.data.success) {
+        setSearchResults(res.data.users);
+      } else {
+        setError('Не удалось загрузить пользователей');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Ошибка загрузки пользователей');
+    } finally {
+      setSearchLoading(false);
+    }
+  }, []);
+
+  // При смене вкладки на "поиск" – загружаем всех пользователей
+  useEffect(() => {
+    if (activeTab === 'search') {
+      loadAllUsers();
+    }
+  }, [activeTab, loadAllUsers]);
+
+  // Поиск с debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (activeTab === 'search') {
+        handleSearch();
+      }
+    }, 300); // 300ms задержка
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSearch = async () => {
+    if (searchLoading) return;
+    setSearchLoading(true);
+    try {
+      const res = await friendsAPI.searchUsers(searchQuery, { limit: 20, excludeFriends: true });
+      if (res.data.success) {
+        setSearchResults(res.data.users);
+      } else {
+        setError('Пользователи не найдены');
+      }
     } catch (err) {
       setError('Ошибка поиска');
+    } finally {
+      setSearchLoading(false);
     }
   };
 
@@ -107,6 +148,7 @@ const FriendsPage: React.FC = () => {
     setLoadingState(userId, true);
     try {
       await friendsAPI.sendRequest(userId);
+      // Обновляем список после отправки
       setSearchResults(prev => prev.filter(u => u._id !== userId));
       loadData();
     } catch (err: any) {
@@ -228,7 +270,7 @@ const FriendsPage: React.FC = () => {
                           </div>
                         </div>
                         <button
-                          className="btn btn-danger"
+                          className="btn btn-danger btn-sm"  // Добавлен btn-sm
                           disabled={!!requestLoading[friend.friendshipId || friend._id]}
                           onClick={() => handleRemoveFriend(friend.friendshipId || friend._id)}
                         >
@@ -241,7 +283,7 @@ const FriendsPage: React.FC = () => {
               )}
 
               {activeTab === 'requests' && (
-                <div className="tab-panel requests-panel">   {/* обёртка добавлена */}
+                <div className="tab-panel requests-panel">
                   <h3 className="subsection-title">Входящие заявки</h3>
                   {incoming.length === 0 ? (
                     <p className="empty-message">Нет входящих заявок.</p>
@@ -259,14 +301,14 @@ const FriendsPage: React.FC = () => {
                         </div>
                         <div className="request-actions">
                           <button
-                            className="btn btn-success"
+                            className="btn btn-success btn-sm"
                             disabled={!!requestLoading[request._id]}
                             onClick={() => handleAccept(request._id)}
                           >
                             Принять
                           </button>
                           <button
-                            className="btn btn-outline"
+                            className="btn btn-outline btn-sm"
                             disabled={!!requestLoading[request._id]}
                             onClick={() => handleReject(request._id)}
                           >
@@ -300,7 +342,7 @@ const FriendsPage: React.FC = () => {
               )}
 
               {activeTab === 'search' && (
-                <div className="tab-panel search-panel">   {/* обёртка добавлена */}
+                <div className="tab-panel search-panel">
                   <div className="search-bar">
                     <input
                       type="text"
@@ -309,33 +351,40 @@ const FriendsPage: React.FC = () => {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                     />
-                    <button className="btn btn-primary" onClick={handleSearch}>
-                      Найти
+                    <button className="btn btn-primary btn-sm" onClick={handleSearch} disabled={searchLoading}>
+                      {searchLoading ? 'Поиск...' : 'Найти'}
                     </button>
                   </div>
                   <div className="search-results">
-                    {searchResults.map(user => (
-                      <div key={user._id} className="user-card">
-                        <div className="friend-info">
-                          <div className="friend-avatar">
-                            {user.name?.charAt(0)?.toUpperCase() || '?'}
-                          </div>
-                          <div className="friend-details">
-                            <div className="friend-name">{user.name}</div>
-                            <div className="friend-email">{user.email}</div>
-                          </div>
-                        </div>
-                        <button
-                          className="btn btn-primary"
-                          disabled={!!requestLoading[user._id]}
-                          onClick={() => handleSendRequest(user._id)}
-                        >
-                          Добавить
-                        </button>
-                      </div>
-                    ))}
-                    {searchResults.length === 0 && searchQuery && (
-                      <p className="empty-message">Пользователи не найдены.</p>
+                    {searchLoading ? (
+                      <p>Загрузка...</p>
+                    ) : (
+                      <>
+                        {searchResults.length === 0 ? (
+                          <p className="empty-message">Пользователи не найдены</p>
+                        ) : (
+                          searchResults.map(user => (
+                            <div key={user._id} className="user-card">
+                              <div className="friend-info">
+                                <div className="friend-avatar">
+                                  {user.name?.charAt(0)?.toUpperCase() || '?'}
+                                </div>
+                                <div className="friend-details">
+                                  <div className="friend-name">{user.name}</div>
+                                  <div className="friend-email">{user.email}</div>
+                                </div>
+                              </div>
+                              <button
+                                className="btn btn-primary btn-sm"
+                                disabled={!!requestLoading[user._id]}
+                                onClick={() => handleSendRequest(user._id)}
+                              >
+                                Добавить
+                              </button>
+                            </div>
+                          ))
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

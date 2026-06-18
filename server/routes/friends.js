@@ -1,5 +1,3 @@
-// server/routes/friends.js
-
 const express = require('express');
 const Friendship = require('../models/Friendship');
 const User = require('../models/User');
@@ -8,9 +6,40 @@ const { catchAsync, AppError } = require('../middleware/errorHandler');
 
 const router = express.Router();
 
-// Получить список друзей (гарантированно без дубликатов)
+// ===================== СТАТИСТИКА =====================
+router.get('/stats', auth, catchAsync(async (req, res) => {
+  const userId = req.user.id.toString();
+
+  const totalFriends = await Friendship.countDocuments({
+    status: 'accepted',
+    $or: [
+      { requester: userId },
+      { recipient: userId }
+    ]
+  });
+
+  const incomingRequests = await Friendship.countDocuments({
+    recipient: userId,
+    status: 'pending'
+  });
+
+  const outgoingRequests = await Friendship.countDocuments({
+    requester: userId,
+    status: 'pending'
+  });
+
+  res.json({
+    success: true,
+    stats: {
+      totalFriends,
+      incomingRequests,
+      outgoingRequests
+    }
+  });
+}));
+
+// ===================== СПИСОК ДРУЗЕЙ =====================
 router.get('/', auth, catchAsync(async (req, res) => {
-  // Приводим ID пользователя к строке – это ОБЯЗАТЕЛЬНО
   const userId = req.user.id.toString();
 
   const friendships = await Friendship.find({
@@ -29,7 +58,6 @@ router.get('/', auth, catchAsync(async (req, res) => {
     const friend = isRequester ? f.recipient : f.requester;
     const friendId = friend._id.toString();
 
-    // Пропускаем себя и дубликаты
     if (friendId === userId || seen.has(friendId)) continue;
     seen.add(friendId);
 
@@ -46,29 +74,29 @@ router.get('/', auth, catchAsync(async (req, res) => {
   res.json({ success: true, friends });
 }));
 
-// Входящие заявки (без себя)
+// ===================== ВХОДЯЩИЕ ЗАЯВКИ =====================
 router.get('/requests/incoming', auth, catchAsync(async (req, res) => {
   const userId = req.user.id.toString();
   const requests = await Friendship.find({
     recipient: userId,
     status: 'pending',
-    $expr: { $ne: ["$requester", "$recipient"] }   // исключаем ошибочные связи "сам с собой"
+    $expr: { $ne: ['$requester', '$recipient'] }
   }).populate('requester', 'name email avatarUrl level');
   res.json({ success: true, requests });
 }));
 
-// Исходящие заявки (без себя)
+// ===================== ИСХОДЯЩИЕ ЗАЯВКИ =====================
 router.get('/requests/outgoing', auth, catchAsync(async (req, res) => {
   const userId = req.user.id.toString();
   const requests = await Friendship.find({
     requester: userId,
     status: 'pending',
-    $expr: { $ne: ["$requester", "$recipient"] }
+    $expr: { $ne: ['$requester', '$recipient'] }
   }).populate('recipient', 'name email avatarUrl level');
   res.json({ success: true, requests });
 }));
 
-// Отправить запрос
+// ===================== ОТПРАВИТЬ ЗАПРОС =====================
 router.post('/request/:userId', auth, catchAsync(async (req, res) => {
   if (req.user.id.toString() === req.params.userId) {
     throw new AppError('Нельзя отправить запрос самому себе', 400);
@@ -77,24 +105,25 @@ router.post('/request/:userId', auth, catchAsync(async (req, res) => {
   res.status(201).json({ success: true, friendship });
 }));
 
-// Принять запрос
+// ===================== ПРИНЯТЬ ЗАПРОС =====================
 router.post('/accept/:friendshipId', auth, catchAsync(async (req, res) => {
   const friendship = await Friendship.acceptFriendRequest(req.params.friendshipId, req.user.id.toString());
   res.json({ success: true, friendship });
 }));
 
-// Отклонить запрос
+// ===================== ОТКЛОНИТЬ ЗАПРОС =====================
 router.post('/reject/:friendshipId', auth, catchAsync(async (req, res) => {
   const userId = req.user.id.toString();
   const friendship = await Friendship.findOneAndUpdate(
     { _id: req.params.friendshipId, recipient: userId, status: 'pending' },
-    { status: 'rejected' }
+    { status: 'rejected' },
+    { new: true }
   );
   if (!friendship) throw new AppError('Заявка не найдена', 404);
   res.json({ success: true, message: 'Заявка отклонена' });
 }));
 
-// Удалить друга
+// ===================== УДАЛИТЬ ДРУГА =====================
 router.delete('/:friendshipId', auth, catchAsync(async (req, res) => {
   const userId = req.user.id.toString();
   const friendship = await Friendship.findOneAndDelete({
@@ -114,24 +143,41 @@ router.delete('/:friendshipId', auth, catchAsync(async (req, res) => {
   res.json({ success: true, message: 'Друг удалён' });
 }));
 
-// Поиск пользователей
+// ===================== ПОИСК ПОЛЬЗОВАТЕЛЕЙ (исправлен) =====================
 router.get('/search', auth, catchAsync(async (req, res) => {
-  const { query: searchQuery, limit = 10 } = req.query;
-  if (!searchQuery) throw new AppError('Введите запрос', 400);
-  const users = await User.find({
-    _id: { $ne: req.user.id },
-    $or: [
+  const { query: searchQuery, limit = 20, excludeFriends = 'true' } = req.query;
+  const userId = req.user.id.toString();
+
+  // Получаем ID друзей (если исключаем)
+  let excludeIds = [userId];
+  if (excludeFriends === 'true') {
+    const friendships = await Friendship.find({
+      status: 'accepted',
+      $or: [{ requester: userId }, { recipient: userId }]
+    }).select('requester recipient');
+    const friendIds = friendships.flatMap(f =>
+      [f.requester.toString(), f.recipient.toString()]
+    ).filter(id => id !== userId);
+    excludeIds = [...excludeIds, ...friendIds];
+  }
+
+  // Если запрос пустой или состоит из пробелов — возвращаем всех (кроме исключённых)
+  const filter = { _id: { $nin: excludeIds } };
+  if (searchQuery && searchQuery.trim().length > 0) {
+    filter.$or = [
       { name: { $regex: searchQuery, $options: 'i' } },
       { email: { $regex: searchQuery, $options: 'i' } }
-    ]
-  })
+    ];
+  }
+
+  const users = await User.find(filter)
     .select('name email avatarUrl level')
     .limit(parseInt(limit));
 
   res.json({ success: true, users });
 }));
 
-// Статус дружбы
+// ===================== СТАТУС ДРУЖБЫ =====================
 router.get('/status/:userId', auth, catchAsync(async (req, res) => {
   const userId = req.user.id.toString();
   const friendship = await Friendship.findOne({

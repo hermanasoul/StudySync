@@ -1,5 +1,3 @@
-// client/src/context/AuthContext.tsx
-
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import webSocketService from '../services/websocket';
 import { achievementsAPI } from '../services/api';
@@ -8,6 +6,7 @@ interface User {
   id: string;
   name: string;
   email: string;
+  avatarUrl?: string; // Добавляем поле для аватара
 }
 
 interface LoginResult {
@@ -22,6 +21,7 @@ interface AuthContextType {
   logout: () => void;
   loading: boolean;
   webSocketConnected: boolean;
+  updateUser: (userData: Partial<User>) => void; // Добавляем функцию обновления
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,6 +45,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       console.error('Error checking daily login achievement:', error);
     }
+  };
+
+  // Функция обновления данных пользователя (для редактирования профиля)
+  const updateUser = (userData: Partial<User>) => {
+    setUser(prev => {
+      if (!prev) return null;
+      const updated = { ...prev, ...userData };
+      localStorage.setItem('studysync_user', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   useEffect(() => {
@@ -83,16 +93,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     webSocketService.on('connected', handleConnected);
     webSocketService.on('disconnected', handleDisconnected);
 
-    // !!! ВАЖНО: НЕ отключаем WebSocket при размонтировании,
-    // чтобы соединение оставалось стабильным при переходах между страницами.
-    // Отключение произойдёт только при явном вызове logout().
-
     return () => {
-      // Убираем только обработчики событий, но не сам WebSocket
       webSocketService.off('connected', handleConnected);
       webSocketService.off('disconnected', handleDisconnected);
     };
-  }, []); // Пустой массив зависимостей – эффект выполняется один раз при монтировании
+  }, []);
 
   const login = async (email: string, password: string): Promise<LoginResult> => {
     try {
@@ -110,16 +115,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const loggedUser: User = { 
           id: data.user.id || data.user._id, 
           name: data.user.name, 
-          email: data.user.email 
+          email: data.user.email,
+          avatarUrl: data.user.avatarUrl
         };
         setUser(loggedUser);
         localStorage.setItem('studysync_user', JSON.stringify(loggedUser));
         localStorage.setItem('studysync_token', data.token);
         
-        // Подключаем WebSocket после успешного входа
         webSocketService.connect(data.token);
-        
-        // Проверяем достижения при входе
         await checkDailyLoginAchievement(loggedUser.id);
         
         return { success: true };
@@ -129,7 +132,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       console.error('Login error:', error);
       
-      // Fallback для демо
       if (email === 'demo@example.com' && password === '123') {
         const demoUser: User = { 
           id: '1', 
@@ -139,10 +141,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser(demoUser);
         localStorage.setItem('studysync_user', JSON.stringify(demoUser));
         localStorage.setItem('studysync_token', 'demo_token');
-        
-        // Подключаем WebSocket для демо
         webSocketService.connect('demo_token');
-        
         return { success: true };
       }
       
@@ -166,15 +165,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const newUser: User = { 
           id: data.user.id || data.user._id, 
           name: data.user.name, 
-          email: data.user.email 
+          email: data.user.email,
+          avatarUrl: data.user.avatarUrl
         };
         setUser(newUser);
         localStorage.setItem('studysync_user', JSON.stringify(newUser));
         localStorage.setItem('studysync_token', data.token);
-        
-        // Подключаем WebSocket после успешной регистрации
         webSocketService.connect(data.token);
-        
         return true;
       } else {
         console.error('Registration failed:', data.error);
@@ -183,7 +180,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       console.error('Registration error:', error);
       
-      // Fallback для демо
       const demoUser: User = { 
         id: Date.now().toString(), 
         name: name, 
@@ -192,10 +188,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(demoUser);
       localStorage.setItem('studysync_user', JSON.stringify(demoUser));
       localStorage.setItem('studysync_token', 'demo_token');
-      
-      // Подключаем WebSocket для демо
       webSocketService.connect('demo_token');
-      
       return true;
     }
   };
@@ -205,8 +198,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setWebSocketConnected(false);
     localStorage.removeItem('studysync_user');
     localStorage.removeItem('studysync_token');
-    
-    // Отключаем WebSocket только при выходе
     webSocketService.disconnect();
   };
 
@@ -217,7 +208,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       register, 
       logout, 
       loading,
-      webSocketConnected 
+      webSocketConnected,
+      updateUser
     }}>
       {children}
     </AuthContext.Provider>

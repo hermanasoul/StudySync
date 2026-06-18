@@ -25,6 +25,10 @@ import ChatsPage from './pages/ChatsPage';
 import StudySessionsPage from './pages/StudySessionsPage';
 import StudySessionRoom from './pages/StudySessionRoom';
 import StudyHistoryPage from './pages/StudyHistoryPage';
+// ========== ДОБАВЛЕНЫ ИМПОРТЫ НОВЫХ СТРАНИЦ ==========
+import ProfileEditPage from './pages/ProfileEditPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
+// ======================================================
 import './App.css';
 import './styles/buttons.css';
 import webSocketService from './services/websocket';
@@ -103,6 +107,18 @@ function App() {
                 <ProfilePage />
               </ProtectedRoute>
             } />
+            {/* ========== ДОБАВЛЕНЫ МАРШРУТЫ ДЛЯ РЕДАКТИРОВАНИЯ ПРОФИЛЯ И СМЕНЫ ПАРОЛЯ ========== */}
+            <Route path="/profile/edit" element={
+              <ProtectedRoute>
+                <ProfileEditPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile/change-password" element={
+              <ProtectedRoute>
+                <ChangePasswordPage />
+              </ProtectedRoute>
+            } />
+            {/* ================================================================================= */}
             <Route path="/public-groups" element={
               <ProtectedRoute>
                 <PublicGroupsPage />

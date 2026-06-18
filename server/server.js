@@ -20,9 +20,6 @@ const wsServer = new WebSocketServer(server);
 app.set('ws', wsServer);
 app.set('achievementTriggers', new AchievementTriggers(wsServer));
 
-// Временно отключаем Helmet для теста (если хотите, можно закомментировать)
-// app.use(helmet({ ... }));
-
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:3000',
   credentials: true
@@ -41,7 +38,7 @@ app.use('/api/', (req, res, next) => {
       (req.path.startsWith('/flashcards/subject') ||
        req.path.startsWith('/notes/subject') ||
        req.path.startsWith('/friends') ||
-       req.path.startsWith('/groups'))) {   // <-- исключаем группы
+       req.path.startsWith('/groups'))) {
     return next();
   }
   cacheMiddleware(300)(req, res, next);
@@ -69,6 +66,10 @@ app.use('/api/rewards', require('./routes/rewards'));
 app.use('/api/friends', require('./routes/friends'));
 app.use('/api/follows', require('./routes/follows'));
 app.use('/api/leaderboards', require('./routes/leaderboards'));
+
+// ========== ДОБАВЛЕН НОВЫЙ РОУТ ДЛЯ ПОЛЬЗОВАТЕЛЕЙ ==========
+app.use('/api/users', require('./routes/users'));
+// ===========================================================
 
 const chatsModule = require('./routes/chats');
 app.use('/api/chats', chatsModule.router);

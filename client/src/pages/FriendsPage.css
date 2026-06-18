@@ -462,3 +462,14 @@
     width: 100%;
   }
 }
+
+/* Центровка текста в кнопках */
+.search-bar .btn,
+.friend-card .btn,
+.request-card .btn,
+.user-card .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}

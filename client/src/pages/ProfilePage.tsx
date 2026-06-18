@@ -1,6 +1,5 @@
-// client/src/pages/ProfilePage.tsx
-
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Импортируем useNavigate
 import { useAuth } from '../context/AuthContext';
 import { levelsAPI, achievementsAPI, badgesAPI, questsAPI, rewardsAPI } from '../services/api';
 import Header from '../components/Header';
@@ -10,6 +9,7 @@ import './ProfilePage.css';
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate(); // Добавляем навигацию
   const [progress, setProgress] = useState<any>(null);
   const [recentAchievements, setRecentAchievements] = useState<any[]>([]);
   const [badges, setBadges] = useState<any>(null);
@@ -671,7 +671,11 @@ const ProfilePage: React.FC = () => {
           <div className="profile-card">
             <div className="profile-info">
               <div className="profile-avatar">
-                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="Аватар" className="avatar-img" />
+                ) : (
+                  user?.name?.charAt(0)?.toUpperCase() || 'U'
+                )}
               </div>
               <div className="profile-details">
                 <h2>{user.name}</h2>
@@ -712,8 +716,12 @@ const ProfilePage: React.FC = () => {
             </div>
             
             <div className="profile-actions">
-              <button className="btn-primary">Редактировать профиль</button>
-              <button className="btn-outline">Сменить пароль</button>
+              <button className="btn-primary" onClick={() => navigate('/profile/edit')}>
+                Редактировать профиль
+              </button>
+              <button className="btn-outline" onClick={() => navigate('/profile/change-password')}>
+                Сменить пароль
+              </button>
             </div>
           </div>
           
